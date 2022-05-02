@@ -1,168 +1,168 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-	<link type="text/css" href="style.css" rel="stylesheet">
-   </head>
-  <body>
-    <h1>sta.js</h1>
-    <table id="table1">
-      <colgroup>
-        <col style="border:3px solid rgb(128,0,0)">
-      </colgroup>
-      <tr>
-        <th>Engine load</th>
-        <th colspan="2" contenteditable='true'>65%</th>
-        <th colspan="2" contenteditable='true'>75%</th>
-        <th colspan="2" contenteditable='true'>75%</th>
-        <th colspan="2" contenteditable='true'>100%</th>
-      </tr>
-      <tr>
-        <th>Run number</th>
-        <th id="1">1</th>
-        <th id="2">2</th>
-        <th id="3">3</th>
-        <th id="4">4</th>
-        <th id="5">5</th>
-        <th id="6">6</th>
-        <th id="7">7</th>
-        <th id="8">8</th>
-      </tr>
-      <tr>
-        <th id="hdg">Heading (°)</th>
-        <td contenteditable='true'>20</td>
-        <td contenteditable='true'>200</td>
-        <td contenteditable='true'>20</td>
-        <td contenteditable='true'>200</td>
-        <td contenteditable='true'>20</td>
-        <td contenteditable='true'>200</td>
-        <td contenteditable='true'>20</td>
-        <td contenteditable='true'>200</td>
-      </tr>
-      <tr>
-        <th id="sog">Speed over ground (knots)</th>
-        <td>17.9</td>
-        <td>17.08</td>
-        <td>18.01</td>
-        <td>17.0</td>
-        <td>17.96</td>
-        <td>17.07</td>
-        <td>18.19</td>
-        <td>16.81</td>
-      </tr>
-      <tr>
-        <th id="rpm">Shaft speed (rpm)</th>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-        <td contenteditable='true'>66.0</td>
-      </tr>
-      <tr>
-        <th id="power">Shaft power (kW)</th>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-        <td contenteditable='true'>12850</td>
-      </tr>
-      <tr>
-        <th id="vwr">Wind velocity (m/s)</th>
-        <td contenteditable='true'>12.43</td>
-        <td contenteditable='true'>12.39</td>
-        <td contenteditable='true'>11.79</td>
-        <td contenteditable='true'>13.15</td>
-        <td contenteditable='true'>11.68</td>
-        <td contenteditable='true'>13.67</td>
-        <td contenteditable='true'>11.77</td>
-        <td contenteditable='true'>13.88</td>
-      </tr>
-      <tr>
-        <th id="dwr">Wind direction (°)</th>
-        <td contenteditable='true'>16.4</td>
-        <td contenteditable='true'>346.8</td>
-        <td contenteditable='true'>17.1</td>
-        <td contenteditable='true'>351.3</td>
-        <td contenteditable='true'>16.2</td>
-        <td contenteditable='true'>353.6</td>
-        <td contenteditable='true'>15.0</td>
-        <td contenteditable='true'>355.8</td>
-      </tr>
-	  <tr>
-        <th id="hWave">Wave height (m)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
-	  <tr>
-        <th id="dWave">Wave direction (°)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
-	  <tr>
-        <th id="pWave">Wave period (sec)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
-	  <tr>
-        <th id="hSwell">Swell height (m)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
-	  <tr>
-        <th id="dSwell">Swell direction (°)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
-	  <tr>
-        <th id="pSwell">Swell period (sec)</th>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-        <td contenteditable='true'></td>
-      </tr>
+<head>
+	<meta charset='utf-8'>
+	<link type='text/css' href='style.css' rel='stylesheet'>
+</head>
+<body>
+	<h1>sta.js</h1>
+	<table id='table1'>
+	<colgroup>
+		<col style='border:3px solid rgb(128,0,0)'>
+	</colgroup>
+	<tr>
+		<th>Engine load</th>
+		<th colspan='2' contenteditable='true'>65%</th>
+		<th colspan='2' contenteditable='true'>75%</th>
+		<th colspan='2' contenteditable='true'>75%</th>
+		<th colspan='2' contenteditable='true'>100%</th>
+	</tr>
+	<tr>
+		<th>Run number</th>
+		<th id='1'>1</th>
+		<th id='2'>2</th>
+		<th id='3'>3</th>
+		<th id='4'>4</th>
+		<th id='5'>5</th>
+		<th id='6'>6</th>
+		<th id='7'>7</th>
+		<th id='8'>8</th>
+	</tr>
+	<tr>
+		<th id='hdg'>Heading (°)</th>
+		<td contenteditable='true'>20</td>
+		<td contenteditable='true'>200</td>
+		<td contenteditable='true'>20</td>
+		<td contenteditable='true'>200</td>
+		<td contenteditable='true'>20</td>
+		<td contenteditable='true'>200</td>
+		<td contenteditable='true'>20</td>
+		<td contenteditable='true'>200</td>
+	</tr>
+	<tr>
+		<th id='sog'>Speed over ground (knots)</th>
+		<td contenteditable='true'>17.9</td>
+		<td contenteditable='true'>18.01</td>
+		<td contenteditable='true'>17.0</td>
+		<td contenteditable='true'>17.96</td>
+		<td contenteditable='true'>17.08</td>
+		<td contenteditable='true'>17.07</td>
+		<td contenteditable='true'>18.19</td>
+		<td contenteditable='true'>16.81</td>
+	</tr>
+	<tr>
+		<th id='rpm'>Shaft speed (rpm)</th>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+		<td contenteditable='true'>66.0</td>
+	</tr>
+	<tr>
+		<th id='power'>Shaft power (kW)</th>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+		<td contenteditable='true'>12850</td>
+	</tr>
+	<tr>
+		<th id='vwr'>Wind velocity (m/s)</th>
+		<td contenteditable='true'>12.43</td>
+		<td contenteditable='true'>12.39</td>
+		<td contenteditable='true'>11.79</td>
+		<td contenteditable='true'>13.15</td>
+		<td contenteditable='true'>11.68</td>
+		<td contenteditable='true'>13.67</td>
+		<td contenteditable='true'>11.77</td>
+		<td contenteditable='true'>13.88</td>
+	</tr>
+	<tr>
+		<th id='dwr'>Wind direction (°)</th>
+		<td contenteditable='true'>16.4</td>
+		<td contenteditable='true'>346.8</td>
+		<td contenteditable='true'>17.1</td>
+		<td contenteditable='true'>351.3</td>
+		<td contenteditable='true'>16.2</td>
+		<td contenteditable='true'>353.6</td>
+		<td contenteditable='true'>15.0</td>
+		<td contenteditable='true'>355.8</td>
+	</tr>
+	<tr>
+		<th id='hWave'>Wave height (m)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
+	<tr>
+		<th id='dWave'>Wave direction (°)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
+	<tr>
+		<th id='pWave'>Wave period (sec)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
+	<tr>
+		<th id='hSwell'>Swell height (m)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
+	<tr>
+		<th id='dSwell'>Swell direction (°)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
+	<tr>
+		<th id='pSwell'>Swell period (sec)</th>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+		<td contenteditable='true'></td>
+	</tr>
 	</table>
 
-	<script src="index.js"></script>
+	<script src='index.js'></script>
 
-  </body>
+</body>
 </html>

@@ -1,0 +1,21 @@
+{
+  "name": "sta.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Johann426/sta.js.git"
+  },
+  "author": "Johann426",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Johann426/sta.js/issues"
+  },
+  "homepage": "https://github.com/Johann426/sta.js#readme",
+  "devDependencies": {
+  }
+}
