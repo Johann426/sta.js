@@ -3,6 +3,8 @@ class Ship {
 	constructor() {
 		
 		this.initialize();
+    this.table = document.getElementById("table1");
+  
 	}
 
 	initialize() {
@@ -28,11 +30,16 @@ class Ship {
 	
 	RAA() {
 		
+    const table = this.table;
 		const ave = true;
 		const nm1 = this.hdg.length - 1;
 		const vwt = [];
 		const dwt = [];
-		
+		let row1, row2, row3;
+    
+    row1 = table.insertRow();
+    row2 = table.insertRow();
+
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
@@ -43,13 +50,19 @@ class Ship {
 			const y = vwr * Math.sin( dwr + hdg ) - sog * Math.sin( hdg);
 			const x = vwr * Math.cos( dwr + hdg ) - sog * Math.cos( hdg);
 			dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
+      
+      row1.insertCell(i).innerHTML = vwt[ i ];
+      row2.insertCell(i).innerHTML = dwt[ i ] * 180.0 / Math.PI;
 			
 		}
-		
-		console.log( vwt );
-		console.log( dwt.map( e => e * 180.0 / Math.PI) );
+    
+    row1.insertCell(0).innerHTML = "True wind velocity at anemometer height";
+    row2.insertCell(0).innerHTML = "True wind direction at anemometer height";
 		
 		// Averaging process for the true wind velocity and direction
+    row1 = table.insertRow();
+    row2 = table.insertRow();
+
 		for ( let i = 0; i <= nm1; i ++ ) {
 			
 			if( i % 2 === 0 ) {
@@ -65,12 +78,19 @@ class Ship {
 				dwt[ i ] = dwt[ i - 1 ]
 
 			}
+      
+      row1.insertCell(i).innerHTML = vwt[ i ];
+      row2.insertCell(i).innerHTML = dwt[ i ] * 180.0 / Math.PI;
 			
 		}
+    
+    row1.insertCell(0).innerHTML = "True wind velocity at anemometer height (double run average)";
+    row2.insertCell(0).innerHTML = "True wind direction at anemometer height (double run average)";
 		
-		console.log( vwt );
-		console.log( dwt.map( e => e * 180.0 / Math.PI) );
-			    
+    row1 = table.insertRow();
+    row2 = table.insertRow();
+    row3 = table.insertRow();
+    
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
@@ -87,10 +107,15 @@ class Ship {
 			const x = sog + vwtRef * cos
 			const dwrRef = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 			
-			console.log( vwrRef );
-			console.log( dwrRef * 180.0 / Math.PI );
+      row1.insertCell(i).innerHTML = vwtRef;
+      row2.insertCell(i).innerHTML = vwrRef;
+      row3.insertCell(i).innerHTML = dwrRef * 180.0 / Math.PI;
 			
 		}
+    
+    row1.insertCell(0).innerHTML = "True wind velocity at reference height";
+    row2.insertCell(0).innerHTML = "Relative wind velocity at reference height";
+    row3.insertCell(0).innerHTML = "Relative wind direction at reference height";
 
 	}
 
@@ -103,5 +128,7 @@ function init() {
 	
 	const ship = new Ship();
 	ship.RAA();
+  
+  
 	
 }
