@@ -3,18 +3,17 @@ init();
 
 function init() {
 	
-	const ship = Ship();
-	ship.initialize();
+	const ship = new Ship();
+	ship.RAA();
 	
 }
 
 class Ship() {
 
 	constructor() {
+		
+		this.initialize();
 	}
-	/*
-	 *
-	*/
 
 	initialize() {
 		
