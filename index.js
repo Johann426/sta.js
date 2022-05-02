@@ -7,6 +7,9 @@ class Ship {
 
 	initialize() {
 		
+		this.Za = 52.4;
+		this.Zref = 10;
+		
 		// loads
 		this.load = [65, 75, 75, 100];
 		// heading
@@ -67,7 +70,29 @@ class Ship {
 		
 		console.log( vwt );
 		console.log( dwt.map( e => e * 180.0 / Math.PI) );
-		
+			    
+		for ( let i = 0; i < nm1; i ++ ) {
+
+			const hdg = this.hdg[ i ] * Math.PI / 180.0;
+			const sin = Math.sin( dwt[ i ] - hdg )
+			const cos = Math.cos( dwt[ i ] - hdg )
+			const sog = this.sog[ i ] * 0.514444444;
+			
+			const Za = this.Za;
+			const Zref = this.Zref;
+			const corr = Math.pow( Zref / Za, 1 / 7 );
+			const vwtRef = vwt[ i ] * corr;
+			const vwrRef = Math.sqrt( vwtRef * vwtRef + sog * sog + 2.0 * vwtRef * sog * cos )
+			const y = vwtRef * sin
+			const x = sog + vwtRef * cos
+			//const dwrRef = x >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + Math.PI;
+			const dwrRef = cos < 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI;
+			
+			console.log( vwrRef );
+			console.log( dwrRef * 180.0 / Math.PI );
+			
+		}
+
 	}
 
 }
