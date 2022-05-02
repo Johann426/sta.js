@@ -1,14 +1,5 @@
 
-init();
-
-function init() {
-	
-	const ship = new Ship();
-	ship.RAA();
-	
-}
-
-class Ship() {
+class Ship {
 
 	constructor() {
 		
@@ -55,4 +46,14 @@ class Ship() {
 		
 	}
 
+}
+
+
+init();
+
+function init() {
+	
+	const ship = new Ship();
+	ship.RAA();
+	
 }
