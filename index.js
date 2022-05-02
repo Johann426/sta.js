@@ -1,3 +1,13 @@
+
+init();
+
+function init() {
+	
+	const ship = Ship();
+	ship.initialize();
+	
+}
+
 class Ship() {
 
 	constructor() {
