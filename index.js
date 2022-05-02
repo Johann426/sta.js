@@ -33,7 +33,7 @@ class Ship {
 		const vwt = [];
 		const dwt = [];
 		
-		for ( let i = 0; i < nm1; i ++ ) {
+		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
 			const sog = this.sog[ i ] * 0.514444444;
@@ -42,7 +42,7 @@ class Ship {
 			vwt[ i ] = Math.sqrt( vwr * vwr + sog * sog - 2.0 * vwr * sog * Math.cos( dwr ) );
 			const y = vwr * Math.sin( dwr + hdg ) - sog * Math.sin( hdg);
 			const x = vwr * Math.cos( dwr + hdg ) - sog * Math.cos( hdg);
-			dwt[ i ] = x >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + Math.PI;
+			dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 			
 		}
 		
@@ -50,14 +50,14 @@ class Ship {
 		console.log( dwt.map( e => e * 180.0 / Math.PI) );
 		
 		// Averaging process for the true wind velocity and direction
-		for ( let i = 0; i < nm1; i ++ ) {
+		for ( let i = 0; i <= nm1; i ++ ) {
 			
 			if( i % 2 === 0 ) {
 				
 				const y = 0.5 * ( vwt[ i ] * Math.sin( dwt[ i ] ) + vwt[ i + 1 ] * Math.sin( dwt[ i + 1 ] ) )
 				const x = 0.5 * ( vwt[ i ] * Math.cos( dwt[ i ] ) + vwt[ i + 1 ] * Math.cos( dwt[ i + 1 ] ) )
 				vwt[ i ] = Math.sqrt( x * x + y * y );
-				dwt[ i ] = x >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + Math.PI;
+				dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 				
 			} else {
 				
@@ -71,7 +71,7 @@ class Ship {
 		console.log( vwt );
 		console.log( dwt.map( e => e * 180.0 / Math.PI) );
 			    
-		for ( let i = 0; i < nm1; i ++ ) {
+		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
 			const sin = Math.sin( dwt[ i ] - hdg )
@@ -85,8 +85,7 @@ class Ship {
 			const vwrRef = Math.sqrt( vwtRef * vwtRef + sog * sog + 2.0 * vwtRef * sog * cos )
 			const y = vwtRef * sin
 			const x = sog + vwtRef * cos
-			//const dwrRef = x >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + Math.PI;
-			const dwrRef = cos < 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI;
+			const dwrRef = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 			
 			console.log( vwrRef );
 			console.log( dwrRef * 180.0 / Math.PI );
