@@ -24,7 +24,12 @@ class Ship {
 		this.power = [ 12850, 12850, 12850, 12850, 12850, 12850, 12850, 12850 ];
 		this.wind_v = [ 12.43, 12.39, 11.79, 13.15, 11.68, 13.67, 11.77, 13.88 ];
 		this.wind_d = [ 16.4, 346.8, 17.1, 351.3, 16.2, 353.6, 15.0, 355.8 ];
-		this.wave_ = [];
+		this.wave_h = [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ];
+    this.wave_d = [ 0, 180, 0, 180, 0, 180, 0, 180];
+    this.wave_p = [ 4, 4, 4, 4, 4, 4, 4, 4 ];
+    this.swell_h = [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ];
+    this.swell_d = [ 0, 180, 0, 180, 0, 180, 0, 180];
+    this.swell_p = [ 4, 4, 4, 4, 4, 4, 4, 4 ];
 
 	}
 
@@ -39,7 +44,9 @@ class Ship {
 
 		row1 = table.insertRow();
 		row2 = table.insertRow();
-
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height";
+		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height";
+    
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
@@ -51,18 +58,17 @@ class Ship {
 			const x = vwr * Math.cos( dwr + hdg ) - sog * Math.cos( hdg );
 			dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 
-			row1.insertCell( i ).innerHTML = vwt[ i ];
-			row2.insertCell( i ).innerHTML = dwt[ i ] * 180.0 / Math.PI;
+			row1.insertCell( -1 ).innerHTML = vwt[ i ].toFixed(2);
+			row2.insertCell( -1 ).innerHTML = ( dwt[ i ] * 180.0 / Math.PI ).toFixed(1);
 
 		}
-
-		row1.insertCell( 0 ).innerHTML = "True wind velocity at anemometer height";
-		row2.insertCell( 0 ).innerHTML = "True wind direction at anemometer height";
 
 		// Averaging process for the true wind velocity and direction
 		row1 = table.insertRow();
 		row2 = table.insertRow();
-
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height (double run average)";
+		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height (double run average)";
+    
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			if ( i % 2 === 0 ) {
@@ -79,18 +85,20 @@ class Ship {
 
 			}
 
-			row1.insertCell( i ).innerHTML = vwt[ i ];
-			row2.insertCell( i ).innerHTML = dwt[ i ] * 180.0 / Math.PI;
+			row1.insertCell( -1 ).innerHTML = vwt[ i ].toFixed(2);
+			row2.insertCell( -1 ).innerHTML = ( dwt[ i ] * 180.0 / Math.PI ).toFixed(1);
 
 		}
 
-		row1.insertCell( 0 ).innerHTML = "True wind velocity at anemometer height (double run average)";
-		row2.insertCell( 0 ).innerHTML = "True wind direction at anemometer height (double run average)";
+		
 
 		row1 = table.insertRow();
 		row2 = table.insertRow();
 		row3 = table.insertRow();
-
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at reference height";
+		row2.insertCell( -1 ).innerHTML = "Relative wind velocity at reference height";
+		row3.insertCell( -1 ).innerHTML = "Relative wind direction at reference height";
+    
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			const hdg = this.hdg[ i ] * Math.PI / 180.0;
@@ -107,15 +115,11 @@ class Ship {
 			const x = sog + vwtRef * cos;
 			const dwrRef = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
 
-			row1.insertCell( i ).innerHTML = vwtRef;
-			row2.insertCell( i ).innerHTML = vwrRef;
-			row3.insertCell( i ).innerHTML = dwrRef * 180.0 / Math.PI;
+			row1.insertCell( -1 ).innerHTML = vwtRef.toFixed(2);
+			row2.insertCell( -1 ).innerHTML = vwrRef.toFixed(2);
+			row3.insertCell( -1 ).innerHTML = ( dwrRef * 180.0 / Math.PI ).toFixed(1);
 
 		}
-
-		row1.insertCell( 0 ).innerHTML = "True wind velocity at reference height";
-		row2.insertCell( 0 ).innerHTML = "Relative wind velocity at reference height";
-		row3.insertCell( 0 ).innerHTML = "Relative wind direction at reference height";
 
 	}
 
@@ -128,7 +132,5 @@ function init() {
 
 	const ship = new Ship();
 	ship.RAA();
-
-
 
 }
