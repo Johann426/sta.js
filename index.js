@@ -1,3 +1,5 @@
+import { besselj, bessely, besseli, besselk } from './bessel.js';
+
 class Ship {
 
 	constructor() {
@@ -139,17 +141,17 @@ class Ship {
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			const hdg = this.hdg[ i ] * Math.PI / 180.0;
+			const hdg = this.hdg[ i ] * pi / 180.0;
 			const sog = this.sog[ i ] * 0.514444444;
 			const vwr = this.wind_v[ i ];
-			const dwr = this.wind_d[ i ] * Math.PI / 180.0;
-			vwt[ i ] = Math.sqrt( vwr * vwr + sog * sog - 2.0 * vwr * sog * Math.cos( dwr ) );
-			const y = vwr * Math.sin( dwr + hdg ) - sog * Math.sin( hdg );
-			const x = vwr * Math.cos( dwr + hdg ) - sog * Math.cos( hdg );
-			dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
+			const dwr = this.wind_d[ i ] * pi / 180.0;
+			vwt[ i ] = M.sqrt( vwr * vwr + sog * sog - 2.0 * vwr * sog * M.cos( dwr ) );
+			const y = vwr * M.sin( dwr + hdg ) - sog * M.sin( hdg );
+			const x = vwr * M.cos( dwr + hdg ) - sog * M.cos( hdg );
+			dwt[ i ] = x >= 0 ? y >= 0 ? M.atan( y / x ) : M.atan( y / x ) + 2.0 * pi : M.atan( y / x ) + pi;
 
 			row1.insertCell( - 1 ).innerHTML = vwt[ i ].toFixed( 2 );
-			row2.insertCell( - 1 ).innerHTML = ( dwt[ i ] * 180.0 / Math.PI ).toFixed( 1 );
+			row2.insertCell( - 1 ).innerHTML = ( dwt[ i ] * 180.0 / pi ).toFixed( 1 );
 
 		}
 
@@ -163,10 +165,10 @@ class Ship {
 
 			if ( i % 2 === 0 ) {
 
-				const y = 0.5 * ( vwt[ i ] * Math.sin( dwt[ i ] ) + vwt[ i + 1 ] * Math.sin( dwt[ i + 1 ] ) );
-				const x = 0.5 * ( vwt[ i ] * Math.cos( dwt[ i ] ) + vwt[ i + 1 ] * Math.cos( dwt[ i + 1 ] ) );
-				vwt[ i ] = Math.sqrt( x * x + y * y );
-				dwt[ i ] = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
+				const y = 0.5 * ( vwt[ i ] * M.sin( dwt[ i ] ) + vwt[ i + 1 ] * M.sin( dwt[ i + 1 ] ) );
+				const x = 0.5 * ( vwt[ i ] * M.cos( dwt[ i ] ) + vwt[ i + 1 ] * M.cos( dwt[ i + 1 ] ) );
+				vwt[ i ] = M.sqrt( x * x + y * y );
+				dwt[ i ] = x >= 0 ? y >= 0 ? M.atan( y / x ) : M.atan( y / x ) + 2.0 * pi : M.atan( y / x ) + pi;
 
 			} else {
 
@@ -176,7 +178,7 @@ class Ship {
 			}
 
 			row1.insertCell( - 1 ).innerHTML = vwt[ i ].toFixed( 2 );
-			row2.insertCell( - 1 ).innerHTML = ( dwt[ i ] * 180.0 / Math.PI ).toFixed( 1 );
+			row2.insertCell( - 1 ).innerHTML = ( dwt[ i ] * 180.0 / pi ).toFixed( 1 );
 
 		}
 
@@ -189,23 +191,23 @@ class Ship {
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			const hdg = this.hdg[ i ] * Math.PI / 180.0;
-			const sin = Math.sin( dwt[ i ] - hdg );
-			const cos = Math.cos( dwt[ i ] - hdg );
+			const hdg = this.hdg[ i ] * pi / 180.0;
+			const sin = M.sin( dwt[ i ] - hdg );
+			const cos = M.cos( dwt[ i ] - hdg );
 			const sog = this.sog[ i ] * 0.514444444;
 
 			const Za = this.Za;
 			const Zref = this.Zref;
-			const corr = Math.pow( Zref / Za, 1 / 7 );
+			const corr = M.pow( Zref / Za, 1 / 7 );
 			const vwtRef = vwt[ i ] * corr;
-			const vwrRef = Math.sqrt( vwtRef * vwtRef + sog * sog + 2.0 * vwtRef * sog * cos );
+			const vwrRef = M.sqrt( vwtRef * vwtRef + sog * sog + 2.0 * vwtRef * sog * cos );
 			const y = vwtRef * sin;
 			const x = sog + vwtRef * cos;
-			const dwrRef = x >= 0 ? y >= 0 ? Math.atan( y / x ) : Math.atan( y / x ) + 2.0 * Math.PI : Math.atan( y / x ) + Math.PI;
+			const dwrRef = x >= 0 ? y >= 0 ? M.atan( y / x ) : M.atan( y / x ) + 2.0 * pi : M.atan( y / x ) + pi;
 
 			row1.insertCell( - 1 ).innerHTML = vwtRef.toFixed( 2 );
 			row2.insertCell( - 1 ).innerHTML = vwrRef.toFixed( 2 );
-			row3.insertCell( - 1 ).innerHTML = ( dwrRef * 180.0 / Math.PI ).toFixed( 1 );
+			row3.insertCell( - 1 ).innerHTML = ( dwrRef * 180.0 / pi ).toFixed( 1 );
 
 		}
 
@@ -213,6 +215,8 @@ class Ship {
 
 }
 
+const M = Math;
+const pi = M.PI;
 
 init();
 
@@ -226,10 +230,10 @@ function init() {
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
-	const td = Math.max( tf, ta );
-	const omega = 2.142 * Math.cbrt( kyy ) * Math.sqrt( l / lamda ) * Math.pow( cb / 0.65, 0.17 ) * ( 1 - 0.111 / cb * ( Math.log( b / td ) - Math.log( 2.75 ) ) ) *
+	const td = M.max( tf, ta );
+	const omega = 2.142 * M.cbrt( kyy ) * M.sqrt( l / lamda ) * M.pow( cb / 0.65, 0.17 ) * ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) ) *
 	(
-		( - 1.377 * Fr ** 2 + 1.157 * Fr ) * Math.abs( Math.cos( angle ) ) + 0.618 * ( 13 + Math.cos( 2 * angle ) ) / 14
+		( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( M.cos( angle ) ) + 0.618 * ( 13 + M.cos( 2 * angle ) ) / 14
 	);
 
 }
@@ -237,20 +241,20 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 
 	const g = 9.80665;
-	const pi = Math.PI;
-	const Fr = vs * 1852 / 3600 / Math.sqrt( g * l );
-	const omega = Math.sqrt( 2 * pi * g / lamda );
+	const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
+	const omega = M.sqrt( 2 * pi * g / lamda );
 
-	const omegaBar = Math.sqrt( l / g ) * Math.cbrt( kyy ) / ( 1.17 * Fr ) * omega;
-	const a1 = 60.3 * Math.pow( cb, 1.34 );
+	const omegaBar = M.sqrt( l / g ) * M.cbrt( kyy ) / ( 1.17 * Fr ) * omega;
+	const a1 = 60.3 * M.pow( cb, 1.34 );
 	const b1 = omegaBar < 1 ? 11.0 : - 8.50;
-	const d1 = omegaBar < 1 ? 14.0 : - 566 * Math.pow( l / b, - 2.66 );
-	const raw = Math.pow( omegaBar, b1 ) * Math.exp( b1 / d1 * ( 1 - Math.pow( omegaBar, d1 ) ) ) * a1 * Math.pow( Fr, 1.50 ) * Math.exp( - 3.5 * Fr );
+	const d1 = omegaBar < 1 ? 14.0 : - 566 * M.pow( l / b, - 2.66 );
+	const raw = M.pow( omegaBar, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omegaBar, d1 ) ) ) * a1 * M.pow( Fr, 1.50 ) * M.exp( - 3.5 * Fr );
 
 	const k = omega ** 2 / g;
-	const I1 = besselI();
-	const K1 = besselK();
-	const f1 = 0.692 * Math.pow( vs * 1852 / 3600 / Math.sqrt( tm * g ), 0.769 ) + 1.81 * Math.pow( cb, 6.95 );
+	const x = 1.5 * k * tm;
+	const I1 = besseli( x, 1 );
+	const K1 = besselk( x, 1 );
+	const f1 = 0.692 * M.pow( vs * 1852 / 3600 / M.sqrt( tm * g ), 0.769 ) + 1.81 * M.pow( cb, 6.95 );
 	const alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
 
 	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
