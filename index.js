@@ -95,7 +95,7 @@ class Ship {
 		
 		for ( let i = 0; i <= nm1; i ++ ) {
     
-			rawm[ i ] = 3859.2 * rhos * g * 
+			//rawm[ i ] = 3859.2 * rhos * g * 
     	    
     		}
     
@@ -223,3 +223,38 @@ function init() {
   ship.RAW();
 
 }
+
+function snnm(l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda) {
+	
+	const td = Math.max( tf, ta );
+	const omega = 2.142 * Math.cbrt( kyy ) * Math.sqrt( l / lamda ) * Math.pow( cb / 0.65, 0.17 ) * ( 1 - 0.111 / cb * ( Math.log( b / td  ) - Math.log( 2.75 ) ) ) * 
+	(
+		(-1.377 * Fr ** 2 + 1.157 * Fr) * Math.abs( Math.cos( angle ) ) + 0.618 * ( 13 + Math.cos( 2 * angle ) ) /14
+	)
+	
+}
+
+function sta2(l, b, tm, cb, kyy, vs, angle, lamda) {
+	
+	const g = 9.80665;
+	const pi = Math.PI;
+	const Fr = vs * 1852/3600 / Math.sqrt( g * l );
+	const omega = Math.sqrt( 2 * pi * g / lamda );
+	
+	const omegaBar = Math.sqrt( l / g ) * Math.cbrt( kyy ) / ( 1.17 * Fr ) * omega;
+	const a1 = 60.3 * Math.pow( cb, 1.34 );
+	const b1 = omegaBar < 1 ? 11.0 : -8.50;
+	const d1 = omegaBar < 1 ? 14.0 : -566 * Math.pow( l / b, -2.66 );
+	const raw = Math.pow( omegaBar, b1 ) * Math.exp( b1 / d1 * ( 1 - Math.pow( omegaBar, d1 ) ) ) * a1 * Math.pow( Fr, 1.50 ) * Math.exp( -3.5 * Fr );
+	
+	const k = omega ** 2 / g;
+	const I1 = besselI();
+	const K1 = besselK();
+	const f1 = 0.692 * Math.pow( vs * 1852 / 3600 / Math.sqrt( tm * g ), 0.769 ) + 1.81 * Math.pow( cb, 6.95);
+	const alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
+	
+	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
+	return raw + alpha1 / 8 * l / b;
+	
+}
+
