@@ -18,6 +18,10 @@ th {
 	background-color: rgb(235,235,235);
 }
 
+td:first-child {
+	font-weight: bold;
+}
+
 td {
 	text-align: center;
 }
