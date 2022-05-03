@@ -11,9 +11,9 @@ class Ship {
 
 		const table = this.table;
 
-		this.Za = 52.4;
-		this.Zref = 10;
-
+		this.Za = Number( document.getElementById( "Za" ).innerHTML );
+		this.Zref = Number( document.getElementById( "Zref" ).innerHTML );
+    
 		// loads
 		this.load = [ 65, 75, 75, 100 ];
 		// heading
@@ -77,9 +77,9 @@ class Ship {
 		row1 = table.insertRow();
 		row2 = table.insertRow();
     row3 = table.insertRow();
-		row1.insertCell( -1 ).innerHTML = 'Wave height';
-    row2.insertCell( -1 ).innerHTML = 'Wave angle';
-    row3.insertCell( -1 ).innerHTML = 'Wave period';
+		row1.insertCell( -1 ).innerHTML = 'Wave height (m)';
+    row2.insertCell( -1 ).innerHTML = 'Wave angle (°)';
+    row3.insertCell( -1 ).innerHTML = 'Wave period (sec)';
     
     for ( let i = 0; i <= nm1; i ++ ) {
     
@@ -111,8 +111,8 @@ class Ship {
 
 		row1 = table.insertRow();
 		row2 = table.insertRow();
-		row1.insertCell( -1 ).innerHTML = "Relative wind velocity at anemometer height";
-		row2.insertCell( -1 ).innerHTML = "Relative wind direction at anemometer height";
+		row1.insertCell( -1 ).innerHTML = "Relative wind velocity at anemometer height (m/s)";
+		row2.insertCell( -1 ).innerHTML = "Relative wind direction at anemometer height (°)";
     
     for ( let i = 0; i <= nm1; i ++ ) {
 
@@ -126,8 +126,8 @@ class Ship {
     
 		row1 = table.insertRow();
 		row2 = table.insertRow();
-		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height";
-		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height";
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height (m/s)";
+		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height (°)";
     
 		for ( let i = 0; i <= nm1; i ++ ) {
 
@@ -148,8 +148,8 @@ class Ship {
 		// Averaging process for the true wind velocity and direction
 		row1 = table.insertRow();
 		row2 = table.insertRow();
-		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height (double run average)";
-		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height (double run average)";
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at anemometer height, double run averaged (m/s)";
+		row2.insertCell( -1 ).innerHTML = "True wind direction at anemometer height, double run averaged (°)";
     
 		for ( let i = 0; i <= nm1; i ++ ) {
 
@@ -175,9 +175,9 @@ class Ship {
 		row1 = table.insertRow();
 		row2 = table.insertRow();
 		row3 = table.insertRow();
-		row1.insertCell( -1 ).innerHTML = "True wind velocity at reference height";
-		row2.insertCell( -1 ).innerHTML = "Relative wind velocity at reference height";
-		row3.insertCell( -1 ).innerHTML = "Relative wind direction at reference height";
+		row1.insertCell( -1 ).innerHTML = "True wind velocity at reference height (m/s)";
+		row2.insertCell( -1 ).innerHTML = "Relative wind velocity at reference height (m/s)";
+		row3.insertCell( -1 ).innerHTML = "Relative wind direction at reference height (°)";
     
 		for ( let i = 0; i <= nm1; i ++ ) {
 
