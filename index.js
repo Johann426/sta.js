@@ -89,7 +89,15 @@ class Ship {
     
     }
     
+		const g = 9.80665;
+    		const rawm = []; //motion induced
+		const rawr =[]; //reflection induced
+		
+		for ( let i = 0; i <= nm1; i ++ ) {
     
+			rawm[ i ] = 3859.2 * rhos * g * 
+    	    
+    		}
     
   }
 
