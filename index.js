@@ -224,7 +224,7 @@ function init() {
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
-	const alpha = angle *= pi / 180.0;
+	const alpha = angle <= 180 ? angle * pi / 180 : ( 360 - angle ) * pi / 180;
 	const cosa = M.cos( alpha );
 	const cos2a = M.cos( 2 * alpha );
 	const td = M.max( tf, ta );
@@ -271,15 +271,22 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
 	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l * cb / b, -2.66 ) * ( 4 - 125 * atan );
+	const krawm;
 	
+	const E1 = M.atan( 0.99 * 0.5 * b / le )
+	const E2 = M.atan( 0.99 * 0.5 * b / lr )
+	const fa = alpha <= E1 ? cosa : 0;
 	const t12 = td;
 	const t34 = cb <= 0.75 ? td * ( 4 + M.sqrt( M.abs( cosa ) ) ) / 5 : td * ( 2 + M.sqrt( M.abs( cosa ) ) ) / 3;
-	
-	const kawr1 = 2.25 / 16;
-	const kawr2 = 2.25 / 16;
-	const kawr3 = 2.25 / 16;
-	const kawr4 = 2.25 / 16;
+	const at12 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t12 / lamda - t12 / ( 2.5 * l ) ) ) : 0;
+	const at34 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t34 / lamda - t34 / ( 2.5 * l ) ) ) : 0;
+	const omega0 = M.sqrt( 2 * pi * g / lamda );
+	const kawr1 = alpha <= pi - E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 + alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
+	const kawr2 = alpha <= E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 - alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
+	const kawr3 = E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
+	const kawr4 = pi - E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 
+	return krawm + kawr1 + kawr2 + kawr3 + kawr4
 }
 
 function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
