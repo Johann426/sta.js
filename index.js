@@ -265,6 +265,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		
 	};
 	
+	const a2
 	const a2 
 	const atan = M.atan( M.abs( ta - tf ) / l );
 	const a3 = 1.0 + 28.7 * atan;
