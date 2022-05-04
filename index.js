@@ -231,9 +231,17 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const omega = 2.142 * M.cbrt( kyy ) * M.sqrt( l / lamda ) * M.pow( cb / 0.65, 0.17 )
 				* ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) )
 				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
+	
+	const a1Beam
+	const a1Stern
 	const a1
-	const a2 = 
+	
+	const a2Beam
+	const a2Stern
+	const a2 
 	const a3 = 1.0 + 28.7 * M.atan( M.abs( ta - tf ) / l );
+	
+	const b1 = omega < 1 ? 11.0 : -8.5;
 
 }
 
