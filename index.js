@@ -232,16 +232,44 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 				* ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) )
 				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
 	
-	const a1Beam
-	const a1Stern
 	const a1
 	
-	const a2Beam
-	const a2Stern
-	const a2 
-	const a3 = 1.0 + 28.7 * M.atan( M.abs( ta - tf ) / l );
+	const cala2 = ( a ) => {
 	
+		if( a >= 0 && a <= pi / 2 ) {
+			
+			const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
+			return Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
+			
+		} else if ( a == pi ) {
+			
+			const vg = g * lamda / ( 2 * pi ); // g/2w? g/w...
+			const Fr = ( vs - vg / 2 ) / M.sqrt( g * l );
+			
+			if( vs <= vg / 2 ) {
+				
+				return 0.0072 * ( 4 * vs / vg - 1 );
+				
+			} else {
+				
+				return Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
+
+			}
+			
+		}
+		else {
+			
+			//linear interpolation
+
+		}
+		
+	};
+	
+	const a2 
+	const atan = M.atan( M.abs( ta - tf ) / l );
+	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
+	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l * cb / b, -2.66 ) * ( 4 - 125 * atan );
 
 }
 
