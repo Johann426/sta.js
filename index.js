@@ -271,6 +271,14 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
 	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l * cb / b, -2.66 ) * ( 4 - 125 * atan );
+	
+	const t12 = td;
+	const t34 = cb <= 0.75 ? td * ( 4 + M.sqrt( M.abs( cosa ) ) ) / 5 : td * ( 2 + M.sqrt( M.abs( cosa ) ) ) / 3;
+	
+	const kawr1 = 2.25 / 16;
+	const kawr2 = 2.25 / 16;
+	const kawr3 = 2.25 / 16;
+	const kawr4 = 2.25 / 16;
 
 }
 
@@ -293,8 +301,7 @@ function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 	const f1 = 0.692 * M.pow( vs * 1852 / 3600 / M.sqrt( tm * g ), 0.769 ) + 1.81 * M.pow( cb, 6.95 );
 	const alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
 
-	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
-	return raw + alpha1 / 8 * l / b;
+	return raw + alpha1 / 8 * l / b; // KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
 
 }
 
