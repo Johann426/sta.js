@@ -44,7 +44,7 @@ class Ship {
 
 		this.wave.map( ( e, i ) => {
 
-   	document.getElementById( "hWave" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
+			document.getElementById( "hWave" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
 			document.getElementById( "aWave" ).cells[ i + 1 ].innerHTML = e.angle.toFixed( 1 );
 			document.getElementById( "pWave" ).cells[ i + 1 ].innerHTML = e.period.toFixed( 1 );
 
@@ -52,7 +52,7 @@ class Ship {
 
 		this.swell.map( ( e, i ) => {
 
-   	document.getElementById( "hSwell" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
+			document.getElementById( "hSwell" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
 			document.getElementById( "aSwell" ).cells[ i + 1 ].innerHTML = e.angle.toFixed( 1 );
 			document.getElementById( "pSwell" ).cells[ i + 1 ].innerHTML = e.period.toFixed( 1 );
 
@@ -62,7 +62,7 @@ class Ship {
 
 	RAW() {
 
-  	const table = document.createElement( 'table' );
+		const table = document.createElement( 'table' );
 		document.body.appendChild( table );
 		const nm1 = this.hdg.length - 1;
 		const header = table.createTHead();
@@ -85,21 +85,15 @@ class Ship {
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-    	row1.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
+			row1.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
 			row2.insertCell( - 1 ).innerHTML = wave[ i ].angle.toFixed( 2 );
 			row3.insertCell( - 1 ).innerHTML = wave[ i ].period.toFixed( 2 );
 
 		}
 
-		const g = 9.80665;
+
 		const rawm = []; //motion induced
 		const rawr = []; //reflection induced
-
-		for ( let i = 0; i <= nm1; i ++ ) {
-
-			//rawm[ i ] = 3859.2 * rhos * g *
-
-    		}
 
 	}
 
@@ -230,11 +224,16 @@ function init() {
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
+	const alpha = angle *= pi / 180.0;
+	const cosa = M.cos( alpha );
+	const cos2a = M.cos( 2 * alpha );
 	const td = M.max( tf, ta );
-	const omega = 2.142 * M.cbrt( kyy ) * M.sqrt( l / lamda ) * M.pow( cb / 0.65, 0.17 ) * ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) ) *
-	(
-		( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( M.cos( angle ) ) + 0.618 * ( 13 + M.cos( 2 * angle ) ) / 14
-	);
+	const omega = 2.142 * M.cbrt( kyy ) * M.sqrt( l / lamda ) * M.pow( cb / 0.65, 0.17 )
+				* ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) )
+				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
+	const a1
+	const a2 = 
+	const a3 = 1.0 + 28.7 * M.atan( M.abs( ta - tf ) / l );
 
 }
 
