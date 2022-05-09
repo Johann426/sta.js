@@ -305,7 +305,9 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const kawr3 = E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	const kawr4 = pi - E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 
-	return krawm + kawr1 + kawr2 + kawr3 + kawr4
+	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
+	return { rawm: krawm,
+		 rawr: kawr1 + kawr2 + kawr3 + kawr4 };
 }
 
 function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
@@ -327,7 +329,8 @@ function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 	const f1 = 0.692 * M.pow( vs * 1852 / 3600 / M.sqrt( tm * g ), 0.769 ) + 1.81 * M.pow( cb, 6.95 );
 	const alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
 
-	return raw + alpha1 / 8 * l / b; // KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
+	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
+	return { rawm: raw,
+		 rawr: alpha1 / 8 * l / b };
 
 }
-
