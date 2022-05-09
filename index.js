@@ -228,72 +228,70 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const cosa = M.cos( alpha );
 	const cos2a = M.cos( 2 * alpha );
 	const td = M.max( tf, ta );
+	const w = M.sqrt( 2 * pi * g / lamda );
+	const u = vs * 1852 / 3600;
+	const Fr = u / M.sqrt( g * l );
 	const omega = 2.142 * M.cbrt( kyy ) * M.sqrt( l / lamda ) * M.pow( cb / 0.65, 0.17 )
 				* ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) )
 				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
-	
-	const vg = g * lamda / ( 2 * pi ); // g/2w? g/w...
-	
+	const vg = 0.5 * g / w;
+	const Fr_rel = ( u - vg ) / M.sqrt( g * l );
 	const cala1 = ( a ) => {
 	
-		const a190 = M.pow( 0.87 / cb, ( 1 + Fr ) * cosa ) / M.log( b / td ) * ( 1 + 2 * cosa ) / 3
-		const a1pi = M.pow( 0.87 / cb, 1 + Fr ) / M.log( b / td )
+		const a90 = M.pow( 0.87 / cb, ( 1 + Fr ) * cosa ) / M.log( b / td ) * ( 1 + 2 * cosa ) / 3;
+		const api = u > vg && Fr_rel >= 0.12 ? M.pow( 0.87 / cb, 1 + Fr_rel ) / M.log( b / td ) : ( 0.87 / cb ) / M.log( b / td );
 			
 		if( a >= 0 && a <= pi / 2 ) {
-			return a190;
+			
+			return a90;
+			
 		} else if ( a == pi ) {
 			
-			return a1pi
+			return api;
 				
 		}
 		else {
 			
-			//linear interpolation
+			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
+			return a90 + (api - a90) * ratio;
 
 		}
 		
 	};
 	
-	const a1 = calca1( alpha );
+	const a1 = cala1( alpha );
 	
 	const cala2 = ( a ) => {
 	
+		const a90 = Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
+		
+		const api = u <= vg ? 0.0072 * ( 2 * u / vg - 1 ) : Fr_rel < 0.12 ? 0.0072 + 0.1676 * Fr_rel : M.pow( Fr_rel, 1.5 ) * M.exp( -3.5 * Fr_rel );
+		
 		if( a >= 0 && a <= pi / 2 ) {
 			
-			const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
-			return Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
+			return a90;
 			
 		} else if ( a == pi ) {
 			
 			
-			const Fr = ( vs - vg / 2 ) / M.sqrt( g * l );
-			
-			if( vs <= vg / 2 ) {
-				
-				return 0.0072 * ( 4 * vs / vg - 1 );
-				
-			} else {
-				
-				return Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
+			return api
 
-			}
-			
 		}
 		else {
 			
-			//linear interpolation
+			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
+			return a90 + (api - a90) * ratio;
 
 		}
 		
 	};
 	
-	const a2
-	const a2 
+	const a2 = cala2( alpha );
 	const atan = M.atan( M.abs( ta - tf ) / l );
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
 	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l * cb / b, -2.66 ) * ( 4 - 125 * atan );
-	const krawm;
+	const krawm = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 	
 	const E1 = M.atan( 0.99 * 0.5 * b / le )
 	const E2 = M.atan( 0.99 * 0.5 * b / lr )
@@ -302,8 +300,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const t34 = cb <= 0.75 ? td * ( 4 + M.sqrt( M.abs( cosa ) ) ) / 5 : td * ( 2 + M.sqrt( M.abs( cosa ) ) ) / 3;
 	const at12 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t12 / lamda - t12 / ( 2.5 * l ) ) ) : 0;
 	const at34 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t34 / lamda - t34 / ( 2.5 * l ) ) ) : 0;
-	const omega0 = M.sqrt( 2 * pi * g / lamda );
-	const kawr1 = alpha <= pi - E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 + alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
+	const kawr1 = alpha <= pi - E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 + alpha ) ** 2 + w * u / g * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	const kawr2 = alpha <= E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 - alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	const kawr3 = E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	const kawr4 = pi - E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + omega0 * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
