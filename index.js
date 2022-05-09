@@ -228,6 +228,7 @@ class Ship {
 
 const M = Math;
 const pi = M.PI;
+const g = 9.80665;
 
 init();
 
@@ -329,7 +330,6 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
 function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 
-	const g = 9.80665;
 	const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
 	const omega = M.sqrt( 2 * pi * g / lamda );
 
