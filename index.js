@@ -94,6 +94,21 @@ class Ship {
 
 		const rawm = []; //motion induced
 		const rawr = []; //reflection induced
+		
+		const l = document.getElementById( "lpp" );
+		const b = document.getElementById( "beam" );
+		const tf = document.getElementById( "tf" );
+		const ta = document.getElementById( "ta" );
+		const cb = document.getElementById( "cb" );
+		const kyy = document.getElementById( "kyy" );
+		const le = document.getElementById( "le" );
+		const lr = document.getElementById( "lr" );
+		const vs = 14.8;
+		const angle = 0;
+		const lamda = 0.2 * l;
+
+		const snnm = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
+		const sta2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, lamda );
 
 	}
 
