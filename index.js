@@ -232,7 +232,29 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 				* ( 1 - 0.111 / cb * ( M.log( b / td ) - M.log( 2.75 ) ) )
 				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
 	
-	const a1
+	const vg = g * lamda / ( 2 * pi ); // g/2w? g/w...
+	
+	const cala1 = ( a ) => {
+	
+		const a190 = M.pow( 0.87 / cb, ( 1 + Fr ) * cosa ) / M.log( b / td ) * ( 1 + 2 * cosa ) / 3
+		const a1pi = M.pow( 0.87 / cb, 1 + Fr ) / M.log( b / td )
+			
+		if( a >= 0 && a <= pi / 2 ) {
+			return a190;
+		} else if ( a == pi ) {
+			
+			return a1pi
+				
+		}
+		else {
+			
+			//linear interpolation
+
+		}
+		
+	};
+	
+	const a1 = calca1( alpha );
 	
 	const cala2 = ( a ) => {
 	
@@ -243,7 +265,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 			
 		} else if ( a == pi ) {
 			
-			const vg = g * lamda / ( 2 * pi ); // g/2w? g/w...
+			
 			const Fr = ( vs - vg / 2 ) / M.sqrt( g * l );
 			
 			if( vs <= vg / 2 ) {
