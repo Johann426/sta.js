@@ -323,6 +323,55 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const kawr3 = E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	const kawr4 = pi - E2 <= alpha && alpha <= pi ? 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 
+	const table = document.createElement( 'table' );
+	document.body.appendChild( table );
+	let row1;
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Fr";
+	row1.insertCell( - 1 ).innerHTML = Fr.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "alpha";
+	row1.insertCell( - 1 ).innerHTML = alpha.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "w'";
+	row1.insertCell( - 1 ).innerHTML = omega.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "b1";
+	row1.insertCell( - 1 ).innerHTML = b1.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "d1";
+	row1.insertCell( - 1 ).innerHTML = d1.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Kawm";
+	row1.insertCell( - 1 ).innerHTML = krawm.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "T12";
+	row1.insertCell( - 1 ).innerHTML = t12.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "T34";
+	row1.insertCell( - 1 ).innerHTML = t34.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "alphaT12";
+	row1.insertCell( - 1 ).innerHTML = at12.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "alphaT34";
+	row1.insertCell( - 1 ).innerHTML = at34.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "f(alpha)";
+	row1.insertCell( - 1 ).innerHTML = fa.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Kawr1";
+	row1.insertCell( - 1 ).innerHTML = kawr1.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Kawr2";
+	row1.insertCell( - 1 ).innerHTML = kawr2.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Kawr3";
+	row1.insertCell( - 1 ).innerHTML = kawr3.toFixed( 4 );
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "Kawr4";
+	row1.insertCell( - 1 ).innerHTML = kawr4.toFixed( 4 );
+	
 	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
 	return { rawm: krawm,
 		 rawr: kawr1 + kawr2 + kawr3 + kawr4 };
