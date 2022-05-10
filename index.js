@@ -128,59 +128,29 @@ class Ship {
     row1.insertCell( - 1 ).innerHTML = "Kawr4";
     row1.insertCell( - 1 ).innerHTML = "Kaw";
 		
-    for ( let i=0; i <= 46; i++ ) {
+	for ( let i=0; i <= 46; i++ ) {
 		        
-		        const lamdaOverL = 0.2 + 0.05 * i;
-		        const lamda = lamdaOverL * l;
-            
-            let kawm;
-            
-            /* if( angle > 90 && angle < 180 ) {
-              const k90 = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, 90, lamda ).kawm;
-              const kpi = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, 180, lamda ).kawm;
-              kawm = k90 + (kpi - k90) * ( angle / 90 - 1 );
-              console.log( k90, kpi, kawm )
-              const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
-              row1 = tb.insertRow();
-              row1.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = kawm.toFixed(4);
-              row1.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = (res.kwave - res.kawm + kawm).toFixed(4);
-            
-            } else { */
-            
-            	const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
-              row1 = tb.insertRow();
-              row1.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawm.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
-              row1.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
-            
-            //}
+		const lamdaOverL = 0.2 + 0.05 * i;
+		const lamda = lamdaOverL * l;
+		const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
+		row1 = tb.insertRow();
+		row1.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kawm.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
 
-		}
+	}
       
 	//const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
 	//console.log( res2 );
