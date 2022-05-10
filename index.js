@@ -308,7 +308,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const atan = M.atan( M.abs( ta - tf ) / l );
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
-	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l * cb / b, -2.66 ) * ( 4 - 125 * atan );
+	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l / b, -2.66 ) * ( 4 - 125 * atan );
 	const krawm = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 	
 	const E1 = M.atan( 0.99 * 0.5 * b / le )
