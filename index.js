@@ -106,14 +106,84 @@ class Ship {
 		const le = Number( document.getElementById( "le" ).innerHTML );
 		const lr = Number( document.getElementById( "lr" ).innerHTML );
 		const vs = 14.8;
-		const angle = 135;
 		
+    const angle = 135;
 		
-    const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, 2.5 * l );
-		console.log( res );
+    let tb = document.createElement( 'table' );
+    document.body.appendChild( tb );
+    row1 = tb.insertRow();
+    row1.insertCell( - 1 ).innerHTML = "lamda / L";
+    row1.insertCell( - 1 ).innerHTML = "w'";
+    row1.insertCell( - 1 ).innerHTML = "b1";
+    row1.insertCell( - 1 ).innerHTML = "d1";
+    row1.insertCell( - 1 ).innerHTML = "Kawm";
+    row1.insertCell( - 1 ).innerHTML = "T12";
+    row1.insertCell( - 1 ).innerHTML = "T34";
+    row1.insertCell( - 1 ).innerHTML = "alphaT12";
+    row1.insertCell( - 1 ).innerHTML = "alphaT34";
+    row1.insertCell( - 1 ).innerHTML = "f(alpha)";
+    row1.insertCell( - 1 ).innerHTML = "Kawr1";
+    row1.insertCell( - 1 ).innerHTML = "Kawr2";
+    row1.insertCell( - 1 ).innerHTML = "Kawr3";
+    row1.insertCell( - 1 ).innerHTML = "Kawr4";
+    row1.insertCell( - 1 ).innerHTML = "Kaw";
+		
+    for ( let i=0; i <= 46; i++ ) {
+		        
+		        const lamdaOverL = 0.2 + 0.05 * i;
+		        const lamda = lamdaOverL * l;
             
-	const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
-	console.log( res2 );
+            let kawm;
+            
+            /* if( angle > 90 && angle < 180 ) {
+              const k90 = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, 90, lamda ).kawm;
+              const kpi = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, 180, lamda ).kawm;
+              kawm = k90 + (kpi - k90) * ( angle / 90 - 1 );
+              console.log( k90, kpi, kawm )
+              const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
+              row1 = tb.insertRow();
+              row1.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = kawm.toFixed(4);
+              row1.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = (res.kwave - res.kawm + kawm).toFixed(4);
+            
+            } else { */
+            
+            	const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
+              row1 = tb.insertRow();
+              row1.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawm.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
+              row1.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
+            
+            //}
+
+		}
+      
+	//const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
+	//console.log( res2 );
 
 	}
 
@@ -245,31 +315,6 @@ function init() {
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		
-    const table = document.createElement( 'table' );
-    document.body.appendChild( table );
-    let row1;
-    row1 = table.insertRow();
-    row1.insertCell( - 1 ).innerHTML = "lamda / L";
-    row1.insertCell( - 1 ).innerHTML = "w'";
-    row1.insertCell( - 1 ).innerHTML = "b1";
-    row1.insertCell( - 1 ).innerHTML = "d1";
-    row1.insertCell( - 1 ).innerHTML = "Kawm";
-    row1.insertCell( - 1 ).innerHTML = "T12";
-    row1.insertCell( - 1 ).innerHTML = "T34";
-    row1.insertCell( - 1 ).innerHTML = "alphaT12";
-    row1.insertCell( - 1 ).innerHTML = "alphaT34";
-    row1.insertCell( - 1 ).innerHTML = "f(alpha)";
-    row1.insertCell( - 1 ).innerHTML = "Kawr1";
-    row1.insertCell( - 1 ).innerHTML = "Kawr2";
-    row1.insertCell( - 1 ).innerHTML = "Kawr3";
-    row1.insertCell( - 1 ).innerHTML = "Kawr4";
-    row1.insertCell( - 1 ).innerHTML = "Kaw";
-
-		for ( let i=0; i <= 46; i++ ) {
-		        
-		        const lamdaOverL = 0.2 + 0.05 * i;
-		        lamda = lamdaOverL * l;
-
 	const alpha = angle <= 180 ? angle * pi / 180 : ( 360 - angle ) * pi / 180;
 	const cosa = M.cos( alpha );
 	const cos2a = M.cos( 2 * alpha );
@@ -284,7 +329,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const Fr_rel = ( u - vg ) / M.sqrt( g * l );
   const cala1 = ( a ) => {
 	
-		const a90 = M.pow( 0.87 / cb, ( 1 + Fr ) * cosa ) / M.log( b / td ) * ( 1 + 2 * cosa ) / 3;
+		const a90 = M.pow( 0.87 / cb, ( 1 + Fr ) * M.cos( a ) ) / M.log( b / td ) * ( 1 + 2 * M.cos( a ) ) / 3; // use M.cos( a ) instead of cosa
 		const api = u > vg && Fr_rel >= 0.12 ? M.pow( 0.87 / cb, 1 + Fr_rel ) / M.log( b / td ) : ( 0.87 / cb ) / M.log( b / td );
 			
 		if( a >= 0 && a <= pi / 2 ) {
@@ -306,7 +351,6 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	};
 	
 	let a1 = cala1( alpha );
-	
 	const cala2 = ( a ) => {
 	
 		const a90 = Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( -3.5 * Fr );
@@ -349,6 +393,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 			a2 = cala2( pi );
 			const kpi = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
+      console.log( k90, kpi )
 			return k90 + (kpi - k90) * ratio;
 			
 		} else {
@@ -358,8 +403,8 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		}
 		
 	};
-			
-	var krawm = calKawm( alpha );
+
+	var kawm = calKawm( alpha );
 	
 	const E1 = M.atan( 0.99 * 0.5 * b / le )
 	const E2 = M.atan( 0.99 * 0.5 * b / lr )
@@ -373,37 +418,27 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	var kawr3 = E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 	var kawr4 = pi - E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa )  : 0;
 
-
-
     
-    
-   
-    row1 = table.insertRow();
-    row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = omega.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = b1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = d1.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = krawm.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = t12.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = t34.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = at12.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = at34.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = fa.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = kawr1.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = kawr2.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = kawr3.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = kawr4.toFixed( 4 );
-    row1.insertCell( - 1 ).innerHTML = ( krawm + kawr1 + kawr2 + kawr3 + kawr4 ).toFixed( 4 );
 
-}
+
 
 	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
-	return { rawm: krawm,
-		 rawr: kawr1 + kawr2 + kawr3 + kawr4 };
-     
-     
-     
-     
+	return {
+  	omega: omega,
+    b1: b1,
+    d1: d1,
+    kawm: kawm,
+  	t12: t12,
+    t34: t34,
+    at12: at12,
+    at34: at34,
+    fa: fa,
+    kawr1: kawr1,
+    kawr2: kawr2,
+    kawr3: kawr3,
+    kawr4: kawr4,
+  	kwave: kawm + kawr1 + kawr2 + kawr3 + kawr4
+  };
      
 }
 
