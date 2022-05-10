@@ -106,15 +106,13 @@ class Ship {
 		const le = Number( document.getElementById( "le" ).innerHTML );
 		const lr = Number( document.getElementById( "lr" ).innerHTML );
 		const vs = 14.8;
-		const angle = 0;
-		
-
+		const angle = 135;
 		
 		
     const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, 2.5 * l );
 		console.log( res );
             
-	const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, lamda );
+	const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
 	console.log( res2 );
 
 	}
@@ -307,7 +305,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		
 	};
 	
-	const a1 = cala1( alpha );
+	let a1 = cala1( alpha );
 	
 	const cala2 = ( a ) => {
 	
@@ -334,12 +332,34 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		
 	};
 	
-	const a2 = cala2( alpha );
+	let a2 = cala2( alpha );
 	const atan = M.atan( M.abs( ta - tf ) / l );
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : -8.5;
 	const d1 = omega < 1 ? 566 * M.pow( l * cb / b, -2.66 ) : -566 * M.pow( l / b, -2.66 ) * ( 4 - 125 * atan );
-	var krawm = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
+			
+	const calKawm = ( a ) => {
+	
+		if( a > pi / 2 && a < pi ) {
+			
+			return 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
+			
+		} else {
+		
+			a1 = cala1( pi / 2 );
+			a2 = cala2( pi / 2 );
+			const k90 = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
+			a1 = cala1( pi );
+			a2 = cala2( pi );
+			const kpi = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy , 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
+			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
+			return k90 + (kpi - k90) * ratio;
+
+		}
+		
+	};
+			
+	var krawm = calKawm( alpha );
 	
 	const E1 = M.atan( 0.99 * 0.5 * b / le )
 	const E2 = M.atan( 0.99 * 0.5 * b / lr )
