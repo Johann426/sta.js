@@ -475,24 +475,43 @@ function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 
 }
 
-function spectrum( h, t, omega ) {
+function spectrum( h, t, type ) {
+	
+	/*
+	h : significant wave height
+	t : mean period
+	type == 0, for wind waves, the modified Pierson-Moskowitz type frequency spectrum of ITTC 1978
+	type == 1, for the narrow band wave spectrum, the JONSWAP frequency spectrum
+	*/
 	
 	const t4 = t ** 4;
-	const w4 = omega ** 4;
-	const w5 = omega ** 5;
+	const w = 2 * pi / t;
+	const w4 = w ** 4;
+	const w5 = w ** 5;
 	
-	// For wind waves, the modified Pierson-Moskowitz type frequency spectrum of ITTC 1978
-	const Af = 173 * h ** 2 / t4;
-	const Bf = 691 / t4;
-	const Sn = Af / w5 * M.exp( - Bf / w4 );
+	if( type === 0 ) {
+		
+		const Af = 173 * h ** 2 / t4
+		const Bf = 691 / t4;
+		const Sn = Af / w5 * M.exp( - Bf / w4 );
+		
+	} else {
+
+		const pi4 = ( 2 * pi ) ** 4
+		const Af = pi4 * 0.072 * h ** 2 / t4;
+		const Bf = pi4 * 0.44 / t4;
+		const sigma = w <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09
+		const exp = M.exp( -0.5 * ( 1.3 * t * w / ( 2 * pi - 1 ) / sigma ) ** 2 );
+		const Sn = Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
+		
+	}
 	
-	// For the narrow band wave spectrum, the JONSWAP frequency spectrum
-	const pi4 = ( 2 * pi ) ** 4
-	const Af = pi4 * 0.072 * h ** 2 / t4;
-	const Bf = pi4 * 0.44 / t4;
-	const sigma = omega <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09
-	const exp = M.exp( -0.5 * ( 1.3 * t * omega / ( 2 * pi - 1 ) / sigma ) ** 2 );
-	const Sn = Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
+	const wp = 0.772 * w; // =(4/5·Bf)^0.25, spectral peak frequency
+	const w001 = 0.652 * wp; // thresholds 0.1 %
+	const w999 = 5.946 * wp; // thresholds 99.9 %
+	// 99.8 % of the energy is within the range w001 < w < w999
+	
+	
 	
 }
 
