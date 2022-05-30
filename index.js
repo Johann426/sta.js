@@ -489,20 +489,22 @@ function spectrum( h, t, type ) {
 	const w4 = w ** 4;
 	const w5 = w ** 5;
 	
-	if( type === 0 ) {
+	function CalcSn( type ) {
+	
+		if( type === 0 ) {
 		
-		const Af = 173 * h ** 2 / t4
-		const Bf = 691 / t4;
-		const Sn = Af / w5 * M.exp( - Bf / w4 );
+			const Af = 173 * h ** 2 / t4
+			const Bf = 691 / t4;
+			return Af / w5 * M.exp( - Bf / w4 );
 		
-	} else {
+		} else {
 
-		const pi4 = ( 2 * pi ) ** 4
-		const Af = pi4 * 0.072 * h ** 2 / t4;
-		const Bf = pi4 * 0.44 / t4;
-		const sigma = w <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09
-		const exp = M.exp( -0.5 * ( 1.3 * t * w / ( 2 * pi - 1 ) / sigma ) ** 2 );
-		const Sn = Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
+			const pi4 = ( 2 * pi ) ** 4
+			const Af = pi4 * 0.072 * h ** 2 / t4;
+			const Bf = pi4 * 0.44 / t4;
+			const sigma = w <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09
+			const exp = M.exp( -0.5 * ( 1.3 * t * w / ( 2 * pi - 1 ) / sigma ) ** 2 );
+			return Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
 		
 	}
 	
