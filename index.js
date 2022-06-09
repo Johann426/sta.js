@@ -84,6 +84,7 @@ class Ship {
 		row1.insertCell( - 1 ).innerHTML = 'Wave height (m)';
 		row2.insertCell( - 1 ).innerHTML = 'Wave angle (°)';
 		row3.insertCell( - 1 ).innerHTML = 'Wave period (sec)';
+		row3.insertCell( - 1 ).innerHTML = 'RAW (kN) ';
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
@@ -101,11 +102,21 @@ class Ship {
 		const b = Number( document.getElementById( "beam" ).innerHTML );
 		const tf = Number( document.getElementById( "tf" ).innerHTML );
 		const ta = Number( document.getElementById( "ta" ).innerHTML );
+		const rho = Number( document.getElementById( "rhos" ).innerHTML );
 		const cb = Number( document.getElementById( "cb" ).innerHTML );
 		const kyy = Number( document.getElementById( "kyy" ).innerHTML );
 		const le = Number( document.getElementById( "le" ).innerHTML );
 		const lr = Number( document.getElementById( "lr" ).innerHTML );
 		const vs = 14.8;
+		
+		//STA1
+		for ( let i = 0; i <= nm1; i ++ ) {
+
+			const rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b /  )
+			row4.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
+
+		}
+		
 		
     const angle = 135;
 		
