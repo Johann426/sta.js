@@ -505,7 +505,9 @@ function spectrum( h, t, type ) {
 			const sigma = w <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09
 			const exp = M.exp( -0.5 * ( 1.3 * t * w / ( 2 * pi - 1 ) / sigma ) ** 2 );
 			return Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
-		
+			
+		}
+
 	}
 	
 	const wp = 0.772 * w; // =(4/5·Bf)^0.25, spectral peak frequency
