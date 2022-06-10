@@ -4,78 +4,113 @@
 
 function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR,AE) {
 
+	const H = new Array( NIN ).fill( 0.0 );
+	const D= new Array( NIN ).fill( 0.0 );
+	const AU = new Array( NIN ).fill( 0.0 );
+	const AM = new Array( NIN ).fill( 0.0 );
+	const S = new Array( NIN ).fill( 0.0 );
+	const AL = new Array( NIN ).fill( 0.0 );
+	const X = new Array( NIN ).fill( 0.0 );
+	const RAD = Math.PI / 180.0;
+	const NM1=NIN-1
+	const NM2=NM1-1
+	const NM3=NM2-1
+	const NM4=NM3-1
+	const NEQ=NM2
+	
+	for ( let N = 0, N < NM1, N ++ ) {
+		
+		H(N) = XIN(N+1)-XIN(N)
+		D(N) = (YIN(N+1)-YIN(N))/H(N)
+		
+	}
+	
+	if(NCL === 2) NEQ = NEQ + 1;
+	if(NCR === 2) NEQ = NEQ + 1;
+	
+	let J = 0
 
-	REAL XIN(*),YIN(*),AE(*),H(200),D(200),AU(200),AM(200),
-	* S(200),AL(200),X(200)
-	DATA HALF/0.5E00/,TWO/2.OEOO/,SIX/6.OEOO/,RAD/1.745329E-02/
-	NM1=NIN-1
-	NM2=NM1-1
-	NM3=NM2-1
-	NEQ=NM2
-	DO 1 N=1,NM1
-	H(N)=XIN(N+1)-XIN(N)
-	1 D(N)=(YIN(N+1)-YIN(N))/H(N)
-	IF(NCL.EQ.2) NEQ=NEq+l
-	IF(NCR.EQ.2) NEQ=NEQ+1
-	NSQ=NEQ**2
-	J=l
-	IF(NCL.LT.2) GO TO 6
-	AM(i)=TWO*H(l)
-	AU(1)=H(1)
-	SLP=ESL*RAD
-	S(1)=(D(1)-TAN(SLP))*SIX
-	J=J+1
-	AL(2)=H(1)
-	6 DO 5 N=1,NM2
-	IF(N.GT.l) AU(J-1)=H(N)
-	AM(J)=TWO*(H(N)+H(N+i))
-	IF(N.LT.NM2) AL(J+1)=H(N+1)
-	IF(N.EQ.2.AND.NCL.Eq.l) AU(J-1)=AU(J-1)-H(N-1)**2/H(N)
-	IF(N.EQ.l.AND.NCL.EQ.l) AM(J)=AM(J)+(1.0+H(N)/H(N+1))*H(N)
-	IF(N.EQ.NM2.AND.NCR.EQ.l) AM(J)=AM(J)+(1.0+H(N+1)/H(N))*H(N+1)
-	IF(N.EQ.NM3.AND.NCR.EQ.l) AL(J+l)=AL(J+l)-H(N+2)**2/H(N+l)
-	S(J)=(D(N+i)-D(N))*SIX
-	J=J+i
-	5 CONTINUE
-	IF(NCR.LT.2) GO TO 7
-	AL(NEQ)=-H(NM1)
-	AM(NEQ)=-TWO*H(NMl)
-	AU(NEQ-l)=H(NMi)
-	SLP=ESR*RAD
-	S(J)=(D(NM1)+TAN(SLP))*SIX
-	7 CONTINUE
-	DO 4 K=2,NEQ
-	AL(K)=AL(K)/AM(K-1)
-	AM(K)=AM(K)-AL(K)*AU(K-1)
-	S(K)=S(K)-AL(K)*S(K-1)
-	4 CONTINUE
-	X(NEQ)=S(NEQ)/AM(NEq)
-	DO 2 L=2,NEQ
-	K=NEQ-L+1
-	X(K)=(S(K)-AU(K)*X(K+i))/AM(K)
-	2 CONTINUE
-	DO 22 N=1,NEQ
-	22 S(N)=X(N)
-	HOLD=S(NEQ)
-	IF(NCL.Eq.2) GO TO 8
-	DO 9 N=1,NM2
-	M=NM2-N+2
-	9 S(M)=S(M-1)
-	IF(NCL.EQ.O) S(1)=0.0
-	BUG=H(i)/H(2)
-	IF(NCL.Eq.l) S(1)=(1.0+BUG)*S(2)-BUG*S(3)
-	8 IF(NCR.Eq.O) S(NIN)=0.0
-	BUG=H(NM1)/H(NM2)
-	IF(NCR.Eq.l) S(NIN)=(i.0+BUG)*S(NMl)-BUG*S(NM2)
-	IF(NCR.Eq.2) S(NIN)=HOLD
-	DO 10 N=1,NM1
-	AE(N)=(S(N+1)-S(N))/(SIX*H(N))
-	M=N+NM1
-	AE(M)=HALF*S(N)
-	M=M+NM1
-	AE(M)=D(N)-H(N)*(TW0*S(N)+S(N+1))/SIX
-	M=M+NM1
-	10 AE(H)=YIN(N)
-	RETURN
+	if( NCL >= 2 ) {
+		
+		AM( 0 ) = 2.0 * H( 0 );
+		AU( 0 ) = H( 0 );
+		const SLP = ESL * RAD;
+		S( 0 ) = ( D( 0 ) - Math.tan( SLP ) ) * 6.0;
+		J ++;
+		AL( 1 ) = H( 0 );
+		
+	}
+
+	for( let N = 0, N < NM2, N ++ ) {
+		if(N > 0) AU( J - 1 ) = H( N );
+		AM( J ) = 2.0 * ( H( N ) + H( N + 1 ) );
+		if(N < NM3) AL( J + 1 ) = H( N + 1 );
+		if(N === 1 && NCL === 1) AU( J - 1 ) -= H( N - 1 ) ** 2 / H( N );
+		if(N === 0 && NCL === 1) AM( J ) += ( 1.0 + H( N ) / H( N + 1 ) ) * H( N );
+		if(N === NM3 && NCR === 1) AM( J ) += ( 1.0 + H( N + 1 ) / H( N ) ) * H( N + 1 );
+		if(N === NM4 && NCR === 1) AL( J + 1 ) -= H( N + 2 ) ** 2 / H( N + 1 );
+		S( J ) = ( D( N + 1 ) - D( N ) ) * 6.0;
+		J ++;
+	}
+
+	if( NCR >= 2) {
+		AL( NEQ ) = -H( NM1 );
+		AM( NEQ ) = -2.0 * H( NM1 );
+		AU( NEQ - 1 ) = H( NM1 );
+		const SLP = ESR * RAD;
+		S( J ) = ( D( NM1 ) + Math.tan( SLP ) ) * 6.0;
+		//7 CONTINUE
+	}
+
+	for ( let K = 1, k < NEQ ) {
+		AL( K ) = AL( K ) / AM( K - 1 );
+		AM( K ) = AM( K ) - AL( K ) * AU( K - 1 );
+		S( K ) = S( K ) - AL( K ) * S( K - 1 );
+		//4 CONTINUE
+	}
+	
+	X( NEQ ) = S( NEQ ) / AM( NEQ );
+	
+	for( let L = 2, L < NEQ ) {
+		K = NEQ - L + 1;
+		X( K ) = ( S( K ) - AU( K ) * X( K + 1 ) ) / AM( K );
+	}
+
+	for( let N = 0, N < NEQ ) {
+		S( N ) = X( N );
+	}
+	
+	const HOLD = S( NEQ );
+	
+	if( NCL !== 2) {
+		//DO 9 N=1,NM2
+		for( let N = 0, N < NM2, N ++ ) {
+			
+			const M = NM2 - N + 2;
+			S( M ) = S( M - 1 );
+			
+		}
+		
+		if( NCL === 0) S(1) = 0.0;
+		const BUG=H(1)/H(2)
+		if( NCL === 1) S(1)=(1.0+BUG)*S(2)-BUG*S(3);
+	}
+
+	if( NCR === 0) S( NIN ) = 0.0;
+	const BUG=H(NM1)/H(NM2)
+	if(NCR === 1) S(NIN)=(1.0+BUG)*S(NM1)-BUG*S(NM2)
+	if(NCR === 2) S(NIN)=HOLD
+
+	for( let N = 0, N < NM1, N ++ ) {
+		AE( N ) = ( S( N + 1 ) - S( N ) ) / ( 6.0 * H( N ) );
+		const M=N+NM1
+		AE( M ) = 0.5 * S( N );
+		M=M+NM1;
+		AE(M)=D(N)-H(N)*(2.0*S(N)+S(N+1))/6.0;
+		M=M+NM1
+		AE(H)=YIN(N);
+	}
+
+	return
 
 }
