@@ -31,6 +31,15 @@
  *     AE  - CUBIC COEFFICIENTS, A'S IN THE FOLLOWING EQUATION.  MUST
  *           BE A ONE DIMENSIONAL ARRAY WITH DIMENSION.GE.4*(NIN-1)
  *
+ *     THE CUBIC FUNCTION IN THE J'TH INTERVAL IS GIVEN BY:
+ * 
+ *     Y = A(X-Xj)3 + B(X-Xj)2 + C(X-Xj) + D
+ * 
+ *     WHERE, A = AE[j]
+ *            B = AE[j+nm1]
+ *            C = AE[j+2nm1]
+ *            D = AE[j+3nm1]
+ * 
  */
 function uglydk (NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 
