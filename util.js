@@ -1,36 +1,66 @@
+// Piecewise Cubic Spline Interpolation
 
-// Originally developed by prof. J. E. Kerwin at MIT
-// Y = Aj(X - Xj)^3 + Aj+N-1(X - Xj)^2 + Aj+2(N-1)(X - Xj) + Aj+3(N-1)
+/**
+ *     THIS SUBROUTINE CALCULATES THE COEFFICIENTS OF CUBIC SPLINE
+ *     PASSING THROUGH A GIVEN SET OF DATA POINTS. SINCE THE TRI-
+ *     DIAGONAL MATRIX SOLVER HAS BEEN BUILT-IN, THERE IS NO NEED
+ *     TO CALL SUBROUTINE SIMQ.  ORIGINAL VERSION OF UGLYDK CALLS
+ *     THE SUBROUTINE SIMQ BECAUSE IT DOES NOT HAVE A MATRIX SOLVER.
+ *     THIS SUBROUTINE WAS DEVELOPED BY PROF. J.E. KERWIN AT MIT.
+ *
+ *     DESCRIPTION OF VARIABLES:
+ *
+ *     NIN - NUMBER OF INPUT POINTS
+ *     NCL - SPECIFICATION OF CURVATURE AT LEFT END
+ *           0 : NO CURVATURE AT LEFT END, I.E. STRAIGHT LINE
+ *           1 : CURVATURE AT LEFT END IS EXTRAPOLATED FROM FIRST
+ *               TWO INTERIOR POINTS
+ *           2 : SLOPE OF CURVE IS GIVEN AT LEFT END, THUS
+ *               DETERMINING THE CURVATURE
+ *               NOTE: UNLESS CURVATURE OR SLOPE IS KNOWN AT LEFT
+ *                     END, NCL=1 IS RECOMMENDED.
+ *     NCR - SPECIFICATION OF CURVATURE AT RIGHT END
+ *           OPTIONS ARE SAME AS FOR NCL
+ *     XIN - INPUT X-VALUES IN ASCENDING ORDER
+ *     YIN - INPUT Y-VALUES AT CORRESPONDING X-VALUES
+ *     ESL - LEFT END SLOPE IN DEGREES.  IF NCL IS NOT EQUAL TO 2,
+ *           THIS INPUT IS DISREGARDED.  (ESL.LT.90.)
+ *     ESR - RIGHT END SLOPE IN DEGREES.  IF NCR IS NOT EQUAL TO 2,
+ *           THIS INPUT IS DISREGARDED.  (ESR.LT.90.)
+ *           SEE SKETCH BELOW FOR POSITIVE SIGN CONVENTION.
+ *     AE  - CUBIC COEFFICIENTS, A'S IN THE FOLLOWING EQUATION.  MUST
+ *           BE A ONE DIMENSIONAL ARRAY WITH DIMENSION.GE.4*(NIN-1)
+ *
+ */
+function uglydk (NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 
-function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
-
-	const H = new Array( NIN ).fill( 0.0 );
-	const D= new Array( NIN ).fill( 0.0 );
-	const AU = new Array( NIN ).fill( 0.0 );
-	const AM = new Array( NIN ).fill( 0.0 );
-	const AL = new Array( NIN ).fill( 0.0 );
-	const S = new Array( NIN ).fill( 0.0 );
-	const X = new Array( NIN ).fill( 0.0 );
-	const AE = new Array( 4 * NIN ).fill( 0.0 );
+	const H = new Array( NIN );
+	const D= new Array( NIN );
+	const AU = new Array( NIN );
+	const AM = new Array( NIN );
+	const AL = new Array( NIN );
+	const S = new Array( NIN );
+	const X = new Array( NIN );
+	const AE = new Array( 4 * NIN );
 	
 	const RAD = Math.PI / 180.0;
 	const NM1=NIN-1
 	const NM2=NM1-1
 	const NM3=NM2-1
-	const NM4=NM3-1
+	const nm4=NM3-1
 	const NEQ=NM2
 	
-	for ( let N = 0, N < NM1, N ++ ) {
+	for ( let i = 0; i < NM1; i ++ ) {
 		
-		H(N) = XIN(N+1)-XIN(N)
-		D(N) = (YIN(N+1)-YIN(N))/H(N)
+		H(i) = XIN(i+1)-XIN(i);
+		D(i) = (YIN(i+1)-YIN(i))/H(i);
 		
 	}
-	
+
 	if(NCL === 2) NEQ = NEQ + 1;
 	if(NCR === 2) NEQ = NEQ + 1;
-	
-	let J = 0
+
+    let J = 0
 
 	if( NCL >= 2 ) {
 		
@@ -43,16 +73,18 @@ function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 		
 	}
 
-	for( let N = 0, N < NM2, N ++ ) {
-		if(N > 0) AU( J - 1 ) = H( N );
-		AM( J ) = 2.0 * ( H( N ) + H( N + 1 ) );
-		if(N < NM3) AL( J + 1 ) = H( N + 1 );
-		if(N === 1 && NCL === 1) AU( J - 1 ) -= H( N - 1 ) ** 2 / H( N );
-		if(N === 0 && NCL === 1) AM( J ) += ( 1.0 + H( N ) / H( N + 1 ) ) * H( N );
-		if(N === NM3 && NCR === 1) AM( J ) += ( 1.0 + H( N + 1 ) / H( N ) ) * H( N + 1 );
-		if(N === NM4 && NCR === 1) AL( J + 1 ) -= H( N + 2 ) ** 2 / H( N + 1 );
-		S( J ) = ( D( N + 1 ) - D( N ) ) * 6.0;
+   	for( let i = 0; i < NM2; i ++ ) {
+
+		if(i > 0) AU( J - 1 ) = H( i );
+		AM( J ) = 2.0 * ( H( i ) + H( i + 1 ) );
+		if(i < NM3) AL( J + 1 ) = H( i + 1 );
+		if(i === 1 && NCL === 1) AU( J - 1 ) -= H( i - 1 ) ** 2 / H( i );
+		if(i === 0 && NCL === 1) AM( J ) += ( 1.0 + H( i ) / H( i + 1 ) ) * H( i );
+		if(i === NM3 && NCR === 1) AM( J ) += ( 1.0 + H( i + 1 ) / H( i ) ) * H( i + 1 );
+		if(i === NM4 && NCR === 1) AL( J + 1 ) -= H( i + 2 ) ** 2 / H( i + 1 );
+		S( J ) = ( D( i + 1 ) - D( i ) ) * 6.0;
 		J ++;
+
 	}
 
 	if( NCR >= 2) {
@@ -64,22 +96,22 @@ function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 		//S( J ) = ( D( NM1 - 1 ) + Math.tan( SLP ) ) * 6.0; by jdy
 	}
 
-	for ( let K = 1, K < NEQ, K ++ ) {
-		AL( K ) = AL( K ) / AM( K - 1 );
-		AM( K ) = AM( K ) - AL( K ) * AU( K - 1 );
-		S( K ) = S( K ) - AL( K ) * S( K - 1 );
+	for ( let i = 1; K < NEQ; K ++ ) {
+		AL( i ) = AL( i ) / AM( i - 1 );
+		AM( i ) = AM( i ) - AL( i ) * AU( i - 1 );
+		S( i ) = S( i ) - AL( i ) * S( i - 1 );
 	}
 	
 	X( NEQ ) = S( NEQ ) / AM( NEQ );
 	//X( NEQ - 1 ) = S( NEQ - 1 ) / AM( NEQ - 1 ); by jdy
 	
-	for( let L = 2, L < NEQ ) {
+	for( let L = 2; L < NEQ; L ++ ) {
 		const K = NEQ - L + 1;
 		//const K = NEQ - L - 1; by jdy
 		X( K ) = ( S( K ) - AU( K ) * X( K + 1 ) ) / AM( K );
 	}
 
-	for( let N = 0, N < NEQ ) {
+	for( let N = 0; N < NEQ; N ++ ) {
 		S( N ) = X( N );
 	}
 	
@@ -87,7 +119,7 @@ function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 	//const HOLD = S( NEQ - 1 ); jdy
 	
 	if( NCL !== 2) {
-		for( let N = 0, N < NM2, N ++ ) {
+		for( let N = 0; N < NM2; N ++ ) {
 			
 			const M = NM2 - N + 2;
 			//const M = NM3 - N + 1; jdy
@@ -105,7 +137,7 @@ function UGLYDK(NIN,NCL,NCR,XIN,YIN,ESL,ESR) {
 	if(NCR === 1) S(NM1)=(1.0+BUG)*S(NM2)-BUG*S(NM3);
 	if(NCR === 2) S(NM1)=HOLD;
 
-	for( let N = 0, N < NM1, N ++ ) {
+	for( let N = 0; N < NM1; N ++ ) {
 		AE( N ) = ( S( N + 1 ) - S( N ) ) / ( 6.0 * H( N ) );
 		let M = N + NM1;
 		AE( M ) = 0.5 * S( N );
