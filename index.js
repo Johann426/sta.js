@@ -331,7 +331,7 @@ class Ship {
 			
 			row1.insertCell( - 1 ).innerHTML = res[ i ].toFixed( 2 );
 			const raa = 0.5 * rho * res[ i ] * Ax * vw[ i ] ** 2 - 0.5 * rho * cx[ 0 ] * Ax * vs[ i ] ** 2;
-			row2.insertCell( - 1 ).innerHTML = raa.toFixed( 2 );
+			row2.insertCell( - 1 ).innerHTML = (0.001 * raa).toFixed( 2 );
 		
 		}
 	}
