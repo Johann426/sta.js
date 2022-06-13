@@ -1,3 +1,43 @@
+//console.log( iydx( x, y, 1, 2 ) );
+
+// function iydx( xin, yin, xl, xu ) {
+
+// 	const nm1 = xin.length - 1;
+// 	const nm2 = nm1 - 1;
+// 	const A = coef( xin, yin );
+// 	const yout = [];
+
+// 	let t, j1, j2, j3, j4, h1, h2, h3, h4;
+// 	t = binarySearch( xin, xl );
+// 	console.log( 't=', t );
+// 	j1 = t < nm1 ? t : nm2;
+// 	j2 = j1 + nm1;
+// 	j3 = j2 + nm1;
+// 	j4 = j3 + nm1;
+// 	h1 = xl - xin[ j1 ];
+// 	h2 = h1 * h1;
+// 	h3 = h2 * h1;
+// 	h4 = h3 * h1;
+// 	const yxl = A[ j1 ] / 4.0 * h4 + A[ j2 ] / 3.0 * h3 + A[ j3 ] / 2.0 * h2 + A[ j4 ] * h1;
+// 	console.log( 'yxl=', yxl );
+
+// 	t = binarySearch( xin, xu );
+// 	console.log( 't=', t );
+// 	j1 = t < nm1 ? t : nm2;
+// 	j2 = j1 + nm1;
+// 	j3 = j2 + nm1;
+// 	j4 = j3 + nm1;
+// 	h1 = xu - xin[ j1 ];
+// 	h2 = h1 * h1;
+// 	h3 = h2 * h1;
+// 	h4 = h3 * h1;
+// 	const yxu = A[ j1 ] / 4.0 * h4 + A[ j2 ] / 3.0 * h3 + A[ j3 ] / 2.0 * h2 + A[ j4 ] * h1;
+// 	console.log( 'yxu=', yxu );
+
+// 	return yxu - yxl;
+
+// }
+
 function dydx( xin, yin, xout ) {
 
 	const nm1 = xin.length - 1;
@@ -75,7 +115,7 @@ function binarySearch( arr, target ) {
 
 	}
 
-	//if ( arr[ low ] !== target ) console.warn( `target between ${low} and ${low + 1}` );
+	if ( arr[ low ] !== target ) console.warn( `target between ${low} and ${low + 1}` );
 
 	return low;
 
@@ -84,29 +124,46 @@ function binarySearch( arr, target ) {
 /**
  *      Piecewise cubic polynomial function at i'th interval(xi < x < xi+1) is given by,
  *
- *      Yi = A(X-Xi)3 + B(X-Xi)2 + C(X-Xi) + D
+ *      fi(X) = A(X-Xi)3 + B(X-Xi)2 + C(X-Xi) + D
+ *
+ *      1. function continuity
  *
  *      Let, h = X[i+1] - X[i]
  *           k = Y[i+1] - Y[i]
  *           d = k / h
  *
- *      Yi = mi/6h(Xi+1-X)^3 + mi+1/6h(X-Xi)^3 + a(X-Xi) + b
+ *      fi(X) = mi/6h(Xi+1-X)^3 + mi+1/6h(X-Xi)^3 + a(X-Xi) + b
  *
- *      x = xi   => b = fi - mihi^2/6
- *      x = xi+1 => a = (fi+1-fi)/hi - hi/6(mi+1-mi)
+ *      X = Xi   => b = Yi - mih^2/6
+ *      X = Xi+1 => a = d - h/6(mi+1-mi)
  *      so, we have formula for all of the ai and bi in terms of m
  *
- *      Y'i = -mi/2h(Xi+1-X)^2 + mi+1/2h(X-Xi)^2 + a
- *      1st derivative continuity, Y'i(xi) = Y'i-1(xi)
+ *      2. 1st derivative, fi'
  *
+ *      fi'(X) = -mi/2h(Xi+1-X)^2 + mi+1/2h(X-Xi)^2 + a
+ *
+ *      1st derivative continuity at xi,
+ *      fi'(Xi) = fi-1'(Xi)
  *      a*m(i-1) + b*mi + c*m(i+1) = r
- *      a =   h[i-1]
- *      b = 2(h[i-1]+h[i])
- *      c =   h[i]
- *      r = 6(d[i]-d[i-1])
  *
- *      Y"i = -mi/h(Xi+1-X) + mi+1/h(X-Xi)
- *      2nd derivative continuity, Y"i(xi) = Y"i-1(xi) = mi
+ *      Where, a =   h[i-1]
+ *             b = 2(h[i-1]+h[i])
+ *             c =   h[i]
+ *             r = 6(d[i]-d[i-1])
+ *
+ *      n - 2 equations with n unknowns
+ *      (need two more conditions)
+ *
+ *      3. 2nd derivative, fi"
+ *
+ *      fi" = -mi/h(Xi+1-X) + mi+1/h(X-Xi)
+ *
+ *      2nd derivative continuity at xi,
+ *      fi"(Xi) = fi-1"(Xi) = mi
+ *
+ *      boundary conditions,
+ *      f"( X[0] ) = 0 => m[ 0 ] = 0
+ *      f"(X[nm1]) = 0 => m[nm1] = 0
  *
  */
 
@@ -127,16 +184,16 @@ function coef( x, y ) {
 
 	}
 
-	const AU = new Array( nm1 );
-	const AM = new Array( nm1 );
 	const AL = new Array( nm1 );
+	const AM = new Array( nm1 );
+	const AU = new Array( nm1 );
 	const RH = new Array( nm1 );
 
    	for ( let i = 1; i < nm1; i ++ ) {
 
-		AU[ i ] = h[ i - 1 ];
+		AL[ i ] = h[ i - 1 ];
 		AM[ i ] = 2.0 * ( h[ i ] + h[ i - 1 ] );
-		AL[ i ] = h[ i ];
+		AU[ i ] = h[ i ];
 		RH[ i ] = ( d[ i ] - d[ i - 1 ] ) * 6.0;
 
 	}
@@ -146,21 +203,27 @@ function coef( x, y ) {
 	 *
 	 * A = L U
 	 *
-	 * | b1 c1               | = | .                  | | .  .                |
-	 * | .  .  .             |   | .  .               | |    .  .             |
-	 * |    ai bi ci         |   |    Ai Bi           | |       1  Ci         |
-	 * |       .  .  .       |   |       .  .         | |          .  .       |
-	 * |          .  .  .    |   |          .  .      | |             .  .    |
-	 * |                     |   |                    | |                     |
+	 * | b1 c1             | = | .                 | | .  .              |
+	 * | .  .  .           |   | .  .              | |    .  .           |
+	 * |    ai bi ci       |   |    Ai Bi          | |       1  Ci       |
+	 * |       .  .  .     |   |       .  .        | |          .  .     |
+	 * |          .  .  .  |   |          .  .     | |             .  .  |
+	 * |             .  .  |   |             .  .  | |                .  |
 	 *
 	 * Ai = ai
-	 * AiCi-1 + Bi = bi
+	 * AiCi-1 + Bi = bi (where, C[0] = 0)
 	 * BiCi = ci
 	 *
-	 * Recursive formula
+	 * Recursive formula,
 	 * Ai = ai
 	 * Bi = bi - AiCi-1
 	 * Ci = ci / Bi
+	 *
+	 * Solve A x = b,
+	 * x*[i] = (Ri - Ai * x*[i-1] ) / Bi
+	 *
+	 * back substitution,
+	 * x[i] = x*[i+1] - Ci x[i+1]
 	 *
 	 */
 
