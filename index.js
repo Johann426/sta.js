@@ -1,5 +1,5 @@
 import { besselj, bessely, besseli, besselk } from './bessel.js';
-import { pcsi } from './Interpolation.js';
+import { f } from './Interpolation.js';
 
 class Ship {
 
@@ -145,8 +145,8 @@ class Ship {
 
 		}
 
+		//SNNM
 		const angle = 135;
-
 		let tb = document.createElement( 'table' );
 		document.body.appendChild( tb );
 		row1 = tb.insertRow();
@@ -190,8 +190,9 @@ class Ship {
 
 		}
 
-		//const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
-		//console.log( res2 );
+		//STA2
+		const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
+		console.log( res2 );
 
 	}
 
@@ -316,7 +317,7 @@ class Ship {
 		const a = this.wind.angle;
 		const cx = this.wind.coef;
 		const d = this.dwrRef;
-		const res = pcsi( a, cx, d );
+		const res = f( a, cx, d );
 
 		const vw = this.vwrRef;
 		const vs = this.sog.map( e => e * 0.51444 );
@@ -428,7 +429,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 			a2 = cala2( pi );
 			const kpi = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy, 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
-			console.log( k90, kpi );
+			//console.log( k90, kpi );
 			return k90 + ( kpi - k90 ) * ratio;
 
 		} else {
