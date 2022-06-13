@@ -300,7 +300,17 @@ class Ship {
 			row3.insertCell( - 1 ).innerHTML = ( dwrRef * 180.0 / pi ).toFixed( 1 );
 
 		}
-
+		
+		row1 = table.insertRow();
+		row2 = table.insertRow();
+		row1.insertCell( - 1 ).innerHTML = "Wind coefficient";
+		row2.insertCell( - 1 ).innerHTML = "RAA (kN)";
+		
+		for ( let i = 0; i <= nm1; i ++ ) {
+			
+			
+		
+		}
 	}
 
 }
