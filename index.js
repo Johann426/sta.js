@@ -126,14 +126,19 @@ class Ship {
 		//STA1
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			let rawl, a
-			rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
-			a = wave[ i ].angle
-			row4.insertCell( - 1 ).innerHTML = a <= 45 || a >= 315 ? rawl.toFixed( 2 ) : 0;
-			rawl = 1 / 16 * rho * 9.807 * swell[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
-			a = swell[ i ].angle
-			row8.insertCell( - 1 ).innerHTML = a <= 45 || a >= 315 ? rawl.toFixed( 2 ) : 0;
-			row9.insertCell( - 1 ).innerHTML = row4.insertCell( - 1 ).innerHTML + row8.insertCell( - 1 ).innerHTML
+			let raw, ras, a
+			
+			raw = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
+			a = wave[ i ].angle;
+			raw = a <= 45 || a >= 315 ? raw : 0;
+			row4.insertCell( - 1 ).innerHTML = raw.toFixed( 2 );
+			
+			ras = 1 / 16 * rho * 9.807 * swell[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
+			a = swell[ i ].angle;
+			ras = a <= 45 || a >= 315 ? ras : 0;
+			row8.insertCell( - 1 ).innerHTML = ras.toFixed( 2 );
+			
+			row9.insertCell( - 1 ).innerHTML = raw.toFixed( 2 ) + ras.toFixed( 2 );
 
 		}
 		
