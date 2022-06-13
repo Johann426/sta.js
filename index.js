@@ -138,7 +138,7 @@ class Ship {
 			ras = a <= 45 || a >= 315 ? ras : 0;
 			row8.insertCell( - 1 ).innerHTML = ras.toFixed( 2 );
 			
-			row9.insertCell( - 1 ).innerHTML = raw.toFixed( 2 ) + ras.toFixed( 2 );
+			row9.insertCell( - 1 ).innerHTML = ( raw + ras ).toFixed( 2 );
 
 		}
 		
