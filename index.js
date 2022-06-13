@@ -27,8 +27,13 @@ class Ship {
 		this.rpm = [ 66, 66, 66, 66, 66, 66, 66, 66 ];
 		// shaft power [kW]
 		this.power = [ 12850, 12850, 12850, 12850, 12850, 12850, 12850, 12850 ];
+		// wind
 		this.wind_v = [ 12.43, 12.39, 11.79, 13.15, 11.68, 13.67, 11.77, 13.88 ];
 		this.wind_d = [ 16.4, 346.8, 17.1, 351.3, 16.2, 353.6, 15.0, 355.8 ];
+		this.wind = {
+			angle: [ 0,   10,    20,    30,    40,   50,   60,   70,   80,   90,   100,  110,  120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360 ];
+			coef: [ 0.847,0.802, 0.836, 0.759, 0.639,0.444,0.387,0.316,0.394,0.420,0.271,0.068,0.372,0.638,0.853,0.994,1.050,0.945,0.838,1.056,1.156,1.151,0.965,0.697,0.368,0.013,0.328,0.501,0.488,0.347,0.407,0.42,0.567,0.718,0.808,0.801,0.847]
+		}
 
 		this.wave = [];
 		[ 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5 ].map( ( e, i ) => this.wave[ i ] = { height: e } );
@@ -294,6 +299,7 @@ class Ship {
 			const y = vwtRef * sin;
 			const x = sog + vwtRef * cos;
 			const dwrRef = x >= 0 ? y >= 0 ? M.atan( y / x ) : M.atan( y / x ) + 2.0 * pi : M.atan( y / x ) + pi;
+			this.dwrRef[ i ] = dwrRef * 180.0 / pi;
 
 			row1.insertCell( - 1 ).innerHTML = vwtRef.toFixed( 2 );
 			row2.insertCell( - 1 ).innerHTML = vwrRef.toFixed( 2 );
@@ -306,9 +312,17 @@ class Ship {
 		row1.insertCell( - 1 ).innerHTML = "Wind coefficient";
 		row2.insertCell( - 1 ).innerHTML = "RAA (kN)";
 		
+		const d = this.dwrRef
+		const a = this.wind.angle;
+		const cx = this.wind.coef;
+		console.log(a, cx);
+		console.log(d);
+		const res = pcsi( a, cx, d );
+		console.log(res);
+		
 		for ( let i = 0; i <= nm1; i ++ ) {
 			
-			
+			row1.insertCell( - 1 ).innerHTML = res[ i ].toFixed( 2 );
 		
 		}
 	}
