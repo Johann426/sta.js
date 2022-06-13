@@ -94,15 +94,15 @@ class Ship {
 		row6.insertCell( - 1 ).innerHTML = 'Swell angle (°)';
 		row7.insertCell( - 1 ).innerHTML = 'Swell period (sec)';
 		row8.insertCell( - 1 ).innerHTML = 'RAW - Swell (kN) ';
-		row8.insertCell( - 1 ).innerHTML = 'RAW - Total (kN) ';
+		row9.insertCell( - 1 ).innerHTML = 'RAW - Total (kN) ';
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			row1.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
 			row2.insertCell( - 1 ).innerHTML = wave[ i ].angle.toFixed( 2 );
 			row3.insertCell( - 1 ).innerHTML = wave[ i ].period.toFixed( 2 );
-			row5.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
-			row6.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
+			row5.insertCell( - 1 ).innerHTML = swell[ i ].height.toFixed( 2 );
+			row6.insertCell( - 1 ).innerHTML = swell[ i ].angle.toFixed( 2 );
 			row7.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
 
 		}
@@ -126,9 +126,14 @@ class Ship {
 		//STA1
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			const rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
-			const a = wave[ i ].angle
+			let rawl, a
+			rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
+			a = wave[ i ].angle
 			row4.insertCell( - 1 ).innerHTML = a <= 45 || a >= 315 ? rawl.toFixed( 2 ) : 0;
+			rawl = 1 / 16 * rho * 9.807 * swell[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
+			a = swell[ i ].angle
+			row8.insertCell( - 1 ).innerHTML = a <= 45 || a >= 315 ? rawl.toFixed( 2 ) : 0;
+			row9.insertCell( - 1 ).innerHTML = row4.insertCell( - 1 ).innerHTML + row8.insertCell( - 1 ).innerHTML
 
 		}
 		
