@@ -283,6 +283,7 @@ class Ship {
 		row1.insertCell( - 1 ).innerHTML = "True wind velocity at reference height (m/s)";
 		row2.insertCell( - 1 ).innerHTML = "Relative wind velocity at reference height (m/s)";
 		row3.insertCell( - 1 ).innerHTML = "Relative wind direction at reference height (°)";
+		this.vwrRef = [];
 		this.dwrRef = [];
 		
 		for ( let i = 0; i <= nm1; i ++ ) {
@@ -297,6 +298,7 @@ class Ship {
 			const corr = M.pow( Zref / Za, 1 / 7 );
 			const vwtRef = vwt[ i ] * corr;
 			const vwrRef = M.sqrt( vwtRef * vwtRef + sog * sog + 2.0 * vwtRef * sog * cos );
+			this.vwrRef[ i ] = vwrRef;
 			const y = vwtRef * sin;
 			const x = sog + vwtRef * cos;
 			const dwrRef = x >= 0 ? y >= 0 ? M.atan( y / x ) : M.atan( y / x ) + 2.0 * pi : M.atan( y / x ) + pi;
@@ -313,17 +315,23 @@ class Ship {
 		row1.insertCell( - 1 ).innerHTML = "Wind coefficient";
 		row2.insertCell( - 1 ).innerHTML = "RAA (kN)";
 		
-		const d = this.dwrRef
+;
 		const a = this.wind.angle;
 		const cx = this.wind.coef;
-		console.log(a, cx);
-		console.log(d);
+		const d = this.dwrRef;
 		const res = pcsi( a, cx, d );
-		console.log(res);
+		
+		const vw = this.vwrRef;
+		const vs = this.sog.map( e => e * 0.51444 );
+		
+		const rho = Number( document.getElementById( "rhoa" ).innerHTML );
+		const Ax = Number( document.getElementById( "Ax" ).innerHTML );
 		
 		for ( let i = 0; i <= nm1; i ++ ) {
 			
 			row1.insertCell( - 1 ).innerHTML = res[ i ].toFixed( 2 );
+			const raa = 0.5 * rho * res[ i ] * Ax * vw[ i ] ** 2 - 0.5 * rho * cx[ 0 ] * Ax * vs[ i ] ** 2;
+			row2.insertCell( - 1 ).innerHTML = raa.toFixed( 2 );
 		
 		}
 	}
