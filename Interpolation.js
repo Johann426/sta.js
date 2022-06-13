@@ -231,7 +231,7 @@ function temp( x, y ) {
 	const AL = new Array( nm1 );
 	const RH = new Array( nm1 );
 
-   	for ( let i = 1; i < nm2; i ++ ) {
+   	for ( let i = 1; i < nm1; i ++ ) {
 
 		AU[ i ] = h[ i - 1 ];
 		AM[ i ] = 2.0 * ( h[ i ] + h[ i - 1 ] );
@@ -240,9 +240,9 @@ function temp( x, y ) {
 
 	}
 
-	// 2nd derivative will be zero at end point
-	RH[ 0 ] = 0.0;
-	RH[ nm2 ] = 0.0;
+	
+	
+	
 
 	/**
 	 * Thomas algorithm (Tri-diagonal matrix solver)
@@ -267,8 +267,10 @@ function temp( x, y ) {
 	 * Ci = ci / Bi
 	 *
 	 */
+	RH[ 0 ] = 0.0; // 2nd derivative will be zero at end point
 	AU[ 0 ] = 0.0;
-	for ( let i = 1; i < nm2; i ++ ) {
+	
+	for ( let i = 1; i < nm1; i ++ ) {
 
 		AM[ i ] -= AL[ i ] * AU[ i - 1 ];
 		AU[ i ] /= AM[ i ];
@@ -277,7 +279,9 @@ function temp( x, y ) {
 
 	}
 
-	for ( let i = nm3; i > 0; i -- ) {
+	RH[ nm1 ] = 0.0; // 2nd derivative will be zero at end point
+
+	for ( let i = nm2; i > 0; i -- ) {
 
 		RH[ i ] -= AU[ i ] * RH[ i + 1 ];
 
