@@ -1,6 +1,5 @@
 import { besselj, bessely, besseli, besselk } from './bessel.js'
-
-
+import { pcsi } from './Interpolation.js'
 
 class Ship {
 
@@ -76,21 +75,35 @@ class Ship {
 		const wave = this.wave;
 		const swell = this.swell;
 
-		let row1, row2, row3;
+		let row1, row2, row3, row4, row5, row6, row7, row8, row9;
 
 		row1 = table.insertRow();
 		row2 = table.insertRow();
 		row3 = table.insertRow();
-		row1.insertCell( - 1 ).innerHTML = 'Wave height (m)';
-		row2.insertCell( - 1 ).innerHTML = 'Wave angle (°)';
-		row3.insertCell( - 1 ).innerHTML = 'Wave period (sec)';
-		row3.insertCell( - 1 ).innerHTML = 'RAW (kN) ';
+		row4 = table.insertRow();
+		row5 = table.insertRow();
+		row6 = table.insertRow();
+		row7 = table.insertRow();
+		row8 = table.insertRow();
+		row9 = table.insertRow();
+		row1.insertCell( - 1 ).innerHTML = 'Wave(Seas) height (m)';
+		row2.insertCell( - 1 ).innerHTML = 'Wave(Seas) angle (°)';
+		row3.insertCell( - 1 ).innerHTML = 'Wave(Seas) period (sec)';
+		row4.insertCell( - 1 ).innerHTML = 'RAW - Seas (kN) ';
+		row5.insertCell( - 1 ).innerHTML = 'Swell height (m)';
+		row6.insertCell( - 1 ).innerHTML = 'Swell angle (°)';
+		row7.insertCell( - 1 ).innerHTML = 'Swell period (sec)';
+		row8.insertCell( - 1 ).innerHTML = 'RAW - Swell (kN) ';
+		row8.insertCell( - 1 ).innerHTML = 'RAW - Total (kN) ';
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			row1.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
 			row2.insertCell( - 1 ).innerHTML = wave[ i ].angle.toFixed( 2 );
 			row3.insertCell( - 1 ).innerHTML = wave[ i ].period.toFixed( 2 );
+			row5.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
+			row6.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
+			row7.insertCell( - 1 ).innerHTML = swell[ i ].period.toFixed( 2 );
 
 		}
 
@@ -107,13 +120,15 @@ class Ship {
 		const kyy = Number( document.getElementById( "kyy" ).innerHTML );
 		const le = Number( document.getElementById( "le" ).innerHTML );
 		const lr = Number( document.getElementById( "lr" ).innerHTML );
+		const lbwl = Number( document.getElementById( "lbwl" ).innerHTML );
 		const vs = 14.8;
 		
 		//STA1
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			const rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b /  )
-			row4.insertCell( - 1 ).innerHTML = wave[ i ].height.toFixed( 2 );
+			const rawl = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl )
+			const a = wave[ i ].angle
+			row4.insertCell( - 1 ).innerHTML = a <= 45 || a >= 315 ? rawl.toFixed( 2 ) : 0;
 
 		}
 		
