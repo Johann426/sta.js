@@ -198,14 +198,14 @@ class Ship {
 
 	RAA() {
 
-		const table = document.createElement( 'table' );
-		document.body.appendChild( table );
+		const table = this.table; //document.createElement( 'table' );
+		//document.body.appendChild( table );
 		const nm1 = this.hdg.length - 1;
-		const header = table.createTHead();
-		header.insertRow( 0 ).insertCell( 0 );
-		header.rows[ 0 ].cells[ 0 ].colSpan = nm1 + 2;
-		header.rows[ 0 ].cells[ 0 ].innerHTML = 'Resistance increase due to wind';
-		header.rows[ 0 ].cells[ 0 ].style.fontWeight = 'bold';
+// 		const header = table.createTHead();
+// 		header.insertRow( 0 ).insertCell( 0 );
+// 		header.rows[ 0 ].cells[ 0 ].colSpan = nm1 + 2;
+// 		header.rows[ 0 ].cells[ 0 ].innerHTML = 'Resistance increase due to wind';
+// 		header.rows[ 0 ].cells[ 0 ].style.fontWeight = 'bold';
 
 		const ave = true;
 		const vwt = [];
