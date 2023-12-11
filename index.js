@@ -15,37 +15,41 @@ class Ship {
 		const table = this.table;
 
 		// loads
-		this.load = [ 65, 75, 75, 100 ];
+		this.load = [ 65, 75, 75, 85, 100 ];
 		// heading
-		this.hdg = [ 20, 200, 20, 200, 20, 200, 20, 200 ];
+		this.hdg = [ 20, 200, 20, 200, 20, 200, 20, 200, 20, 200 ];
 		// speed over ground
-		this.sog = [ 17.9, 17.08, 18.01, 17.0, 17.96, 17.07, 18.19, 16.81 ];
+		this.sog = [ 21.39, 21.29, 22.34, 22.24, 22.34, 22.24, 23.22, 23.12, 24.18, 24.08 ];
 		// shaft speed [rpm]
-		this.rpm = [ 66, 66, 66, 66, 66, 66, 66, 66 ];
+		this.rpm = [ 69.7, 69.7, 73.1, 73.1, 73.1, 73.1, 76.3, 76.3, 79.6, 79.6 ];
 		// shaft power [kW]
-		this.power = [ 12850, 12850, 12850, 12850, 12850, 12850, 12850, 12850 ];
+		this.power = [ 28722, 28722, 33140, 33140, 33140, 33140, 37559, 37559, 42721, 42721 ];
 		// wind
-		this.wind_v = [ 12.43, 12.39, 11.79, 13.15, 11.68, 13.67, 11.77, 13.88 ];
-		this.wind_d = [ 16.4, 346.8, 17.1, 351.3, 16.2, 353.6, 15.0, 355.8 ];
+		this.wind_v = [ 12.0, 10.0, 12.5, 10.5, 12.5, 10.5, 12.9, 10.9, 13.4, 11.4 ];
+		this.wind_d = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
 		this.Za = Number( document.getElementById( "Za" ).innerHTML );
 		this.Zref = Number( document.getElementById( "Zref" ).innerHTML );
 		this.wind = {
 			angle: [ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360 ],
-			coef: [ 0.847, 0.802, 0.836, 0.759, 0.639, 0.444, 0.387, 0.316, 0.394, 0.420, 0.271, 0.068, 0.372, 0.638, 0.853, 0.994, 1.050, 0.945, 0.838, 1.056, 1.156, 1.151, 0.965, 0.697, 0.368, 0.013, 0.328, 0.501, 0.488, 0.347, 0.407, 0.42, 0.567, 0.718, 0.808, 0.801, 0.847 ]
+			coef: [ -1.306,-1.517,-1.691,-1.761,-1.734,-1.595,-1.327,-1.008,-0.665,-0.362,-0.025,0.316,0.763,1.193,1.524,1.776,1.773,1.636,1.445,1.625,1.807,1.813,1.667,1.346,0.937,0.508,0.166,-0.23,-0.571,-0.902,-1.223,-1.453,-1.627,-1.636,-1.589,-1.395,-1.306 ]
 		};
 
 		this.wave = [];
-		[ 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5 ].map( ( e, i ) => this.wave[ i ] = { height: e } );
-		[ 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.wave[ i ].angle = e );
-		[ 4, 4, 4, 4, 4, 4, 4, 4 ].map( ( e, i ) => this.wave[ i ].period = e );
+		[ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ].map( ( e, i ) => this.wave[ i ] = { height: e } );
+		[ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.wave[ i ].angle = e );
+		[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ].map( ( e, i ) => this.wave[ i ].period = e );
 
 		this.swell = [];
-		[ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ].map( ( e, i ) => this.swell[ i ] = { height: e } );
-		[ 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.swell[ i ].angle = e );
-		[ 8, 8, 8, 8, 8, 8, 8, 8 ].map( ( e, i ) => this.swell[ i ].period = e );
+		[ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ].map( ( e, i ) => this.swell[ i ] = { height: e } );
+		[ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.swell[ i ].angle = e );
+		[ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ].map( ( e, i ) => this.swell[ i ].period = e );
 
-		this.hWave = document.getElementById( "hWave" );
-		console.log( 'aaaa', hWave.rowIndex );
+		this.hdg.map( ( e, i ) => document.getElementById( "hdg" ).cells[ i + 1 ].innerHTML = e.toFixed( 0 ) );
+		this.sog.map( ( e, i ) => document.getElementById( "sog" ).cells[ i + 1 ].innerHTML = e.toFixed( 2 ) );
+		this.rpm.map( ( e, i ) => document.getElementById( "rpm" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
+		this.power.map( ( e, i ) => document.getElementById( "power" ).cells[ i + 1 ].innerHTML = e.toFixed( 0 ) );
+		this.wind_v.map( ( e, i ) => document.getElementById( "vWind" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
+		this.wind_d.map( ( e, i ) => document.getElementById( "dWind" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
 
 		this.wave.map( ( e, i ) => {
 
@@ -520,7 +524,7 @@ function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 		var alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
 
 		row1 = table.insertRow();
-    		row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
+		row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
 		row1.insertCell( - 1 ).innerHTML = omega.toFixed( 4 );
 		row1.insertCell( - 1 ).innerHTML = omegaBar.toFixed( 4 );
 		row1.insertCell( - 1 ).innerHTML = a1.toFixed( 4 );
