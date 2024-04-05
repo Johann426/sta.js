@@ -1,5 +1,15 @@
-import { besselj, bessely, besseli, besselk } from './bessel.js';
+import { besseli, besselk } from './bessel.js';
 import { f } from './Interpolation.js';
+
+const M = Math;
+const pi = M.PI;
+const g = 9.80665; //9.807 staimo ?
+
+const a = new Complex( 1, 0 )
+console.log( a.re )
+console.log( a.im )
+console.log( a.pow( 1.5 ) )
+console.log( a.mul( 2, 2 ).exp() )
 
 class Ship {
 
@@ -14,7 +24,7 @@ class Ship {
 
 		const table = this.table;
 
-		// loads
+		// loads 3322 임시 데이터
 		this.load = [ 65, 75, 75, 85, 100 ];
 		// heading
 		this.hdg = [ 20, 200, 20, 200, 20, 200, 20, 200, 20, 200 ];
@@ -80,6 +90,7 @@ class Ship {
 		header.rows[ 0 ].cells[ 0 ].innerHTML = 'Resistance increase due to waves';
 		header.rows[ 0 ].cells[ 0 ].style.fontWeight = 'bold';
 
+		const vg = this.sog;
 		const wave = this.wave;
 		const swell = this.swell;
 
@@ -88,21 +99,21 @@ class Ship {
 		row1 = table.insertRow();
 		row2 = table.insertRow();
 		row3 = table.insertRow();
-		row4 = table.insertRow();
+		// row4 = table.insertRow();
 		row5 = table.insertRow();
 		row6 = table.insertRow();
 		row7 = table.insertRow();
-		row8 = table.insertRow();
-		row9 = table.insertRow();
+		// row8 = table.insertRow();
+		// row9 = table.insertRow();
 		row1.insertCell( - 1 ).innerHTML = 'Wave(Seas) height (m)';
 		row2.insertCell( - 1 ).innerHTML = 'Wave(Seas) angle (°)';
 		row3.insertCell( - 1 ).innerHTML = 'Wave(Seas) period (sec)';
-		row4.insertCell( - 1 ).innerHTML = 'RAW - Seas (kN) ';
+		// row4.insertCell( - 1 ).innerHTML = 'RAW - Seas (kN) ';
 		row5.insertCell( - 1 ).innerHTML = 'Swell height (m)';
 		row6.insertCell( - 1 ).innerHTML = 'Swell angle (°)';
 		row7.insertCell( - 1 ).innerHTML = 'Swell period (sec)';
-		row8.insertCell( - 1 ).innerHTML = 'RAW - Swell (kN) ';
-		row9.insertCell( - 1 ).innerHTML = 'RAW - Total (kN) ';
+		// row8.insertCell( - 1 ).innerHTML = 'RAW - Swell (kN) ';
+		// row9.insertCell( - 1 ).innerHTML = 'RAW - Total (kN) ';
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
@@ -115,9 +126,6 @@ class Ship {
 
 		}
 
-		const rawm = []; //motion induced
-		const rawr = []; //reflection induced
-
 		const l = Number( document.getElementById( "lpp" ).innerHTML );
 		const b = Number( document.getElementById( "beam" ).innerHTML );
 		const tf = Number( document.getElementById( "tf" ).innerHTML );
@@ -128,9 +136,10 @@ class Ship {
 		const le = Number( document.getElementById( "le" ).innerHTML );
 		const lr = Number( document.getElementById( "lr" ).innerHTML );
 		const lbwl = Number( document.getElementById( "lbwl" ).innerHTML );
-		const vs = 14.8;
 
-		//STA1
+		//STA1 result
+		const row10 = table.insertRow();
+		row10.insertCell( - 1 ).innerHTML = 'STA1 RAW - Seas (kN) ';
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			let raw, ras, a;
@@ -138,19 +147,233 @@ class Ship {
 			raw = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
 			a = wave[ i ].angle;
 			raw = a <= 45 || a >= 315 ? raw : 0;
-			row4.insertCell( - 1 ).innerHTML = raw.toFixed( 2 );
-
-			ras = 1 / 16 * rho * 9.807 * swell[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
-			a = swell[ i ].angle;
-			ras = a <= 45 || a >= 315 ? ras : 0;
-			row8.insertCell( - 1 ).innerHTML = ras.toFixed( 2 );
-
-			row9.insertCell( - 1 ).innerHTML = ( raw + ras ).toFixed( 2 );
+			row10.insertCell( - 1 ).innerHTML = ( 0.001 * raw ).toFixed( 2 );
 
 		}
 
-		//SNNM
-		const angle = 135;
+		const coefSn = ( h, t01, type ) => {
+
+			const t4 = t01 ** 4;
+			let Af, Bf, fp, f001, f999;
+	
+			if ( type == 0 ) { //for wind waves, the modified Pierson-Moskowitz type frequency spectrum of ITTC 1978
+	
+				Af = 173 * h ** 2 / t4;
+				Bf = 691 / t4;
+				fp = M.pow( 0.8 * Bf, 0.25);
+				f001 = 0.652 * fp;
+				f999 = 5.946 * fp;
+	
+			} else if ( type == 1 ) { //for the narrow band wave spectrum, the JONSWAP(Joint North Sea Wave Observation Project) frequency spectrum
+	
+				const pi4 = ( 2 * pi ) ** 4 / t4;
+				Af = pi4 * 0.072 * h ** 2;
+				Bf = pi4 * 0.44;
+				fp = M.pow( 0.8 * Bf, 0.25);
+				const gamma = 3.3;
+				f001 = 0.5 * fp; //( 0.6477 + 0.005357 * gamma - 0.0002625 * gamma ** 2 ) * fp;
+				f999 = 6.0 * fp; //( 6.3204 - 0.4377 * gamma + 0.05261 * gamma ** 2 - 0.002839 * gamma ** 3 ) * fp;
+	
+			}
+	
+			return { // 99.8 % of the energy is within the range f001 < f < f999
+
+				Af: Af,
+				Bf: Bf,
+				fp: fp, // spectral peak frequency
+				fmin: f001, // thresholds 0.1 %
+				fmax: f999 // thresholds 99.9 %
+
+			}
+		
+		}
+
+		const calcSn = ( t01, w, Af, Bf, type ) => {
+
+			// const w = 2 * pi / t;
+			const w4 = w ** 4;
+			const w5 = w ** 5;
+		
+			if ( type == 0 ) { //for wind waves, the modified Pierson-Moskowitz type frequency spectrum of ITTC 1978
+	
+				return Af / w5 * M.exp( - Bf / w4 );
+	
+			} else if ( type == 1 ) { //for the narrow band wave spectrum, the JONSWAP frequency spectrum
+	
+				const sigma = w <= 2 * pi / ( 1.3 * t01 ) ? 0.07 : 0.09;
+				const exp = M.exp( - 0.5 * ( ( 1.3 * t01 * w / 2 / pi - 1 ) / sigma ) ** 2 );
+				return Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
+	
+			}
+	
+		}
+
+		const { Af, Bf, fp, fmin, fmax } = coefSn( 0.5, 8, 1 );
+		
+		// const res = [];
+		// const n = 200;
+		// let sum = 0;
+
+		// for ( let i = 0; i <= n; i ++ ) {
+
+		// 	const df = ( fmax - fmin ) / n
+		// 	const omega = fmin + df * i;
+		// 	const sn = calcSn( 4, omega, Af, Bf, 0 )
+		// 	res.push( sn );
+		// 	sum += sn * df;
+
+		// }
+
+		// console.log( Af, Bf, fp, fmin, fmax );
+		// console.log( res );
+		// console.log( 'm0=', sum );
+		// console.log( 'm1', 0.306*Af/Bf**0.75)
+
+
+		const arr =[];
+
+		//STA2 result
+		const row11 = table.insertRow();
+		const row12 = table.insertRow();
+		const row13 = table.insertRow();
+		const row14 = table.insertRow();
+		const row15 = table.insertRow();
+		row11.insertCell( - 1 ).innerHTML = 'STA2 RAW motion - Seas (kN) ';
+		row12.insertCell( - 1 ).innerHTML = 'STA2 RAW reflection - Seas (kN) ';
+		row13.insertCell( - 1 ).innerHTML = 'STA2 RAW motion - Swell (kN) ';
+		row14.insertCell( - 1 ).innerHTML = 'STA2 RAW reflection - Swell (kN) ';
+		row15.insertCell( - 1 ).innerHTML = 'STA2 RAW - Total (kN) ';
+		for ( let i = 0; i <= nm1; i ++ ) {
+
+			const vs = vg[ i ];
+			let rawm; //motion induced resistance
+			let rawr; //wave reflection
+			let total = 0;
+
+			for ( let j = 0; j <= 1; j ++ ) {
+
+				const arr = j == 0 ? wave : swell;
+				const h = arr[ i ].height;
+				const a = arr[ i ].angle;
+				const t = arr[ i ].period;
+
+				const { Af, Bf, fmin, fmax } = coefSn( h, t, j );
+
+				rawm = 0;
+				rawr = 0;
+				const n = 200;
+
+				for( let i = 0; i < n; i ++ ) {
+
+					const df = ( fmax - fmin ) / n;
+					const f = fmin + df * i; // its not circular frequency
+					const omega = f; // 2 * pi * f;
+					const k = omega ** 2 / g;
+					const lamda = 2.0 * pi / k;
+					const res = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, a, lamda );
+					const rawml = 4.0 * rho * g * b * b / l * res.kawml;
+					const rawrl = 0.5 * rho * g * b * res.alpha1;
+					const sn = calcSn( t, omega, Af, Bf, j );
+					rawm += 2 * rawml * sn * df;
+					rawr += 2 * rawrl * sn * df;
+
+				}
+
+				if ( j == 0 ) {
+				
+					row11.insertCell( - 1 ).innerHTML = ( 0.001 * rawm ).toFixed( 2 );
+					row12.insertCell( - 1 ).innerHTML = ( 0.001 * rawr ).toFixed( 2 );
+
+				} else if ( j == 1 ) {
+
+					row13.insertCell( - 1 ).innerHTML = ( 0.001 * rawm ).toFixed( 2 );
+					row14.insertCell( - 1 ).innerHTML = ( 0.001 * rawr ).toFixed( 2 );
+
+				}
+
+				total += rawm + rawr;
+
+			}
+
+			arr.push( total );
+			row15.insertCell( - 1 ).innerHTML = ( 0.001 * total ).toFixed( 2 );
+
+		}
+
+		//SNNM result
+		const row16 = table.insertRow();
+		const row17 = table.insertRow();
+		const row18 = table.insertRow();
+		const row19 = table.insertRow();
+		const row20 = table.insertRow();
+		row16.insertCell( - 1 ).innerHTML = 'SNNM RAW motion - Seas (kN) ';
+		row17.insertCell( - 1 ).innerHTML = 'SNNM RAW reflection - Seas (kN) ';
+		row18.insertCell( - 1 ).innerHTML = 'SNNM RAW motion - Swell (kN) ';
+		row19.insertCell( - 1 ).innerHTML = 'SNNM RAW reflection - Swell (kN) ';
+		row20.insertCell( - 1 ).innerHTML = 'SNNM RAW - Total (kN) ';
+
+		for ( let i = 0; i <= nm1; i ++ ) {
+
+			const vs = vg[ i ];
+			let rawm; //motion induced resistance
+			let rawr; //wave reflection
+			let total = 0;
+
+			for ( let j = 0; j <= 1; j ++ ) {
+
+				const arr = j == 0 ? wave : swell;
+				const h = arr[ i ].height;
+				const a = arr[ i ].angle;
+				const t = arr[ i ].period;
+				const { Af, Bf, fmin, fmax } = coefSn( h, t, j );
+
+				rawm = 0;
+				rawr = 0;
+				const n = 200;
+
+				for( let i = 0; i < n; i ++ ) {
+
+					const df = ( fmax - fmin ) / n;
+					const f = fmin + df * i; // its not circular frequency
+					const omega = f; // 2 * pi * f;
+					const k = omega ** 2 / g;
+					const lamda = 2.0 * pi / k;
+					const { kawm, kawr1, kawr2, kawr3, kawr4 } = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, a, lamda );
+					const d = 4.0 * rho * g * b * b / l;
+					const sn = calcSn( t, omega, Af, Bf, j );
+					rawm += 2 * kawm * d * sn * df;
+					rawr += 2 * ( kawr1 + kawr2 + kawr3 + kawr4 ) * d * sn * df;
+
+				}
+
+				if ( j == 0 ) {
+				
+					row16.insertCell( - 1 ).innerHTML = ( 0.001 * rawm ).toFixed( 2 );
+					row17.insertCell( - 1 ).innerHTML = ( 0.001 * rawr ).toFixed( 2 );
+
+				} else if ( j == 1 ) {
+
+					row18.insertCell( - 1 ).innerHTML = ( 0.001 * rawm ).toFixed( 2 );
+					row19.insertCell( - 1 ).innerHTML = ( 0.001 * rawr ).toFixed( 2 );
+
+				}
+
+				total += rawm + rawr;
+
+			}
+
+			row20.insertCell( - 1 ).innerHTML = ( 0.001 * total ).toFixed( 2 );
+
+		}
+		
+
+		//2002 wave
+		// const res3 = wave2002( l, 0.5 * ( tf + ta ), vs );
+
+
+		//SNNM validation
+		const vs = 14.5;
+		const angle = 0;
 		let tb = document.createElement( 'table' );
 		document.body.appendChild( tb );
 		row1 = tb.insertRow();
@@ -194,22 +417,52 @@ class Ship {
 
 		}
 
-		//STA2
-		const res2 = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, 2.5 * l );
-		console.log( res2 );
+		//STA2 validation
+		tb = document.createElement( 'table' );
+		document.body.appendChild( tb );
+		row1 = tb.insertRow();
+		row1.insertCell( - 1 ).innerHTML = "lamda / L";
+		row1.insertCell( - 1 ).innerHTML = "w'";
+		row1.insertCell( - 1 ).innerHTML = "w1";
+		row1.insertCell( - 1 ).innerHTML = "a1";
+		row1.insertCell( - 1 ).innerHTML = "b1";
+		row1.insertCell( - 1 ).innerHTML = "d1";
+		row1.insertCell( - 1 ).innerHTML = "rawml(w)";
+		row1.insertCell( - 1 ).innerHTML = "f1";
+		row1.insertCell( - 1 ).innerHTML = "I1";
+		row1.insertCell( - 1 ).innerHTML = "K1";
+		row1.insertCell( - 1 ).innerHTML = "alpha(w)";
+		row1.insertCell( - 1 ).innerHTML = "Kwave";
+
+		for ( let i = 0; i <= 46; i ++ ) {
+
+			const lamdaOverL = 0.2 + 0.05 * i;
+			const lamda = lamdaOverL * l;
+			const res = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, lamda );
+			row1 = tb.insertRow();
+			row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.omegaBar.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.a1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.kawml.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.f1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.I1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.K1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.alpha1.toFixed( 4 );
+			row1.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
+
+		}
+
+		return arr;
 
 	}
 
 	RAA() {
 
-		const table = this.table; //document.createElement( 'table' );
-		//document.body.appendChild( table );
+		const table = this.table;
 		const nm1 = this.hdg.length - 1;
-// 		const header = table.createTHead();
-// 		header.insertRow( 0 ).insertCell( 0 );
-// 		header.rows[ 0 ].cells[ 0 ].colSpan = nm1 + 2;
-// 		header.rows[ 0 ].cells[ 0 ].innerHTML = 'Resistance increase due to wind';
-// 		header.rows[ 0 ].cells[ 0 ].style.fontWeight = 'bold';
 
 		const ave = true;
 		const vwt = [];
@@ -328,32 +581,51 @@ class Ship {
 
 		const rho = Number( document.getElementById( "rhoa" ).innerHTML );
 		const Ax = Number( document.getElementById( "Ax" ).innerHTML );
+		const arr = [];
 
 		for ( let i = 0; i <= nm1; i ++ ) {
 
 			row1.insertCell( - 1 ).innerHTML = res[ i ].toFixed( 2 );
 			const raa = 0.5 * rho * res[ i ] * Ax * vw[ i ] ** 2 - 0.5 * rho * cx[ 0 ] * Ax * vs[ i ] ** 2;
 			row2.insertCell( - 1 ).innerHTML = ( 0.001 * raa ).toFixed( 2 );
+			arr.push( raa );
 
 		}
+
+		return arr;
+
+	}
+
+	RAS() {
+
+		const table = this.table;
+		const nm1 = this.hdg.length - 1;
+
+		const arr = [];
+
+		const sv2 = S * Vs ** 2 
+		const rf = 0.5 * rhos * sv2 * cf;
+		const rt0 = 0.5 * rhos0 * sv2 * ct0;
+		const ras = 0.5 * rt0 * ( rhos / rhos0 - 1 ) - rf * ( cf0 / cf - 1 )
+
+		return arr;
+
+	}
+
+	DPM() {
 
 	}
 
 }
 
-const M = Math;
-const pi = M.PI;
-const g = 9.807; //9.80665;
 
-init();
-
-function init() {
-
-	const ship = new Ship();
-	ship.RAA();
-	ship.RAW();
-
-}
+const ship = new Ship();
+const raa = ship.RAA();
+const raw = ship.RAW();
+const ras = ship.RAS();
+console.log( raa );
+console.log( raw );
+console.log( ras );
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
@@ -369,6 +641,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 				* ( ( - 1.377 * Fr ** 2 + 1.157 * Fr ) * M.abs( cosa ) + 0.618 * ( 13 + cos2a ) / 14 );
 	const vg = 0.5 * g / w;
 	const Fr_rel = ( u - vg ) / M.sqrt( g * l );
+
 	const cala1 = ( a ) => {
 
 		const a90 = M.pow( 0.87 / cb, ( 1 + Fr ) * M.cos( a ) ) / M.log( b / td ) * ( 1 + 2 * M.cos( a ) ) / 3; // use M.cos( a ) instead of cosa
@@ -391,7 +664,6 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
 	};
 
-	let a1 = cala1( alpha );
 	const cala2 = ( a ) => {
 
 		const a90 = Fr < 0.12 ? 0.0072 + 0.1676 * Fr : M.pow( Fr, 1.5 ) * M.exp( - 3.5 * Fr );
@@ -416,7 +688,7 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
 	};
 
-	let a2 = cala2( alpha );
+	let a1, a2;
 	const atan = M.atan( M.abs( ta - tf ) / l );
 	const a3 = 1.0 + 28.7 * atan;
 	const b1 = omega < 1 ? 11.0 : - 8.5;
@@ -433,19 +705,19 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 			a2 = cala2( pi );
 			const kpi = 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy, 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 			const ratio = a / ( pi / 2 ) - 1; // linear interpolation
-			//console.log( k90, kpi );
 			return k90 + ( kpi - k90 ) * ratio;
 
 		} else {
 
+			a1 = cala1( alpha );
+			a2 = cala2( alpha );
 			return 964.8 * M.pow( cb, 1.34 ) * M.pow( kyy, 2 ) * a1 * a2 * a3 * M.pow( omega, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omega, d1 ) ) );
 
 		}
 
 	};
 
-	var kawm = calKawm( alpha );
-
+	const kawm = calKawm( alpha );
 	const E1 = M.atan( 0.99 * 0.5 * b / le );
 	const E2 = M.atan( 0.99 * 0.5 * b / lr );
 	const fa = alpha <= E1 ? cosa : 0;
@@ -453,22 +725,18 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 	const t34 = cb <= 0.75 ? td * ( 4 + M.sqrt( M.abs( cosa ) ) ) / 5 : td * ( 2 + M.sqrt( M.abs( cosa ) ) ) / 3;
 	const at12 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t12 / lamda - t12 / ( 2.5 * l ) ) ) : 0;
 	const at34 = lamda / l <= 2.5 ? 1.0 - M.exp( - 4 * pi * ( t34 / lamda - t34 / ( 2.5 * l ) ) ) : 0;
-	var kawr1 = alpha <= pi - E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
-	var kawr2 = alpha <= E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
-	var kawr3 = E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
-	var kawr4 = pi - E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
-
-
-
-
+	const kawr1 = alpha <= pi - E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
+	const kawr2 = alpha <= E1 ? 2.25 / 16 * l / b * at12 * ( M.sin( E1 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E1 ) * M.cos( E1 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
+	const kawr3 = E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 - alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 - alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
+	const kawr4 = pi - E2 <= alpha && alpha <= pi ? - 2.25 / 16 * l / b * at34 * ( M.sin( E2 + alpha ) ** 2 + 2 * w * u / g * ( M.cos( alpha ) - M.cos( E2 ) * M.cos( E2 + alpha ) ) ) * M.pow( 0.87 / cb, ( 1 + 4 * M.sqrt( Fr ) ) * fa ) : 0;
 
 	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
 	return {
-  	omega: omega,
+		omega: omega,
 		b1: b1,
 		d1: d1,
 		kawm: kawm,
-  	t12: t12,
+		t12: t12,
 		t34: t34,
 		at12: at12,
 		at34: at34,
@@ -477,116 +745,317 @@ function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 		kawr2: kawr2,
 		kawr3: kawr3,
 		kawr4: kawr4,
-  	kwave: kawm + kawr1 + kawr2 + kawr3 + kawr4
+		kwave: kawm + kawr1 + kawr2 + kawr3 + kawr4
 	};
 
 }
 
 function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 
-	const table = document.createElement( 'table' );
-	document.body.appendChild( table );
-	let row1;
-	row1 = table.insertRow();
-	row1.insertCell( - 1 ).innerHTML = "lamda / L";
-	row1.insertCell( - 1 ).innerHTML = "w'";
-	row1.insertCell( - 1 ).innerHTML = "w1";
-	row1.insertCell( - 1 ).innerHTML = "a1";
-	row1.insertCell( - 1 ).innerHTML = "b1";
-	row1.insertCell( - 1 ).innerHTML = "d1";
-	row1.insertCell( - 1 ).innerHTML = "raw(w)";
-	row1.insertCell( - 1 ).innerHTML = "f1";
-	row1.insertCell( - 1 ).innerHTML = "I1";
-	row1.insertCell( - 1 ).innerHTML = "K1";
-	row1.insertCell( - 1 ).innerHTML = "alpha(w)";
-	row1.insertCell( - 1 ).innerHTML = "Kaw";
+	const isLessThan45 = angle <= 45 || angle >= 315;
 
+	if ( !isLessThan45 ) {
 
-	for ( let i = 0; i <= 46; i ++ ) {
+		return {
 
-		        const lamdaOverL = 0.2 + 0.05 * i;
-		        lamda = lamdaOverL * l;
-
-		const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
-		const omega = M.sqrt( 2 * pi * g / lamda );
-
-		const omegaBar = M.sqrt( l / g ) * M.cbrt( kyy ) / ( 1.17 * M.pow( Fr, - 0.143 ) ) * omega;
-		const a1 = 60.3 * M.pow( cb, 1.34 );
-		const b1 = omegaBar < 1 ? 11.0 : - 8.50;
-		const d1 = omegaBar < 1 ? 14.0 : - 566 * M.pow( l / b, - 2.66 );
-		var raw = M.pow( omegaBar, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omegaBar, d1 ) ) ) * a1 * M.pow( Fr, 1.50 ) * M.exp( - 3.5 * Fr );
-
-		const k = omega ** 2 / g;
-		const x = 1.5 * k * tm;
-		const I1 = besseli( x, 1 );
-		const K1 = besselk( x, 1 );
-		const f1 = 0.692 * M.pow( vs * 1852 / 3600 / M.sqrt( tm * g ), 0.769 ) + 1.81 * M.pow( cb, 6.95 );
-		var alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
-
-		row1 = table.insertRow();
-		row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = omega.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = omegaBar.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = a1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = b1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = d1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = raw.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = f1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = I1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = K1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = alpha1.toFixed( 4 );
-		row1.insertCell( - 1 ).innerHTML = ( raw + alpha1 / 8 * l / b ).toFixed( 4 );
-
-	}
-
-	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
-	return { rawm: raw,
-		 rawr: alpha1 / 8 * l / b };
-
-}
-
-function spectrum( h, t, type ) {
-
-	/*
-	h : significant wave height
-	t : mean period
-	type == 0, for wind waves, the modified Pierson-Moskowitz type frequency spectrum of ITTC 1978
-	type == 1, for the narrow band wave spectrum, the JONSWAP frequency spectrum
-	*/
-
-	const t4 = t ** 4;
-	const w = 2 * pi / t;
-	const w4 = w ** 4;
-	const w5 = w ** 5;
-
-	function CalcSn( type ) {
-
-		if ( type === 0 ) {
-
-			const Af = 173 * h ** 2 / t4;
-			const Bf = 691 / t4;
-			return Af / w5 * M.exp( - Bf / w4 );
-
-		} else {
-
-			const pi4 = ( 2 * pi ) ** 4;
-			const Af = pi4 * 0.072 * h ** 2 / t4;
-			const Bf = pi4 * 0.44 / t4;
-			const sigma = w <= 2 * pi / ( 1.3 * t ) ? 0.07 : 0.09;
-			const exp = M.exp( - 0.5 * ( 1.3 * t * w / ( 2 * pi - 1 ) / sigma ) ** 2 );
-			return Af / w5 * M.exp( - Bf / w4 ) * M.pow( 3.3, exp );
+			omega: 0,
+			omegaBar: 0,
+			a1: 0,
+			b1: 0,
+			d1: 0,
+			kawml: 0,
+			f1: 0,
+			I1: 0,
+			K1: 0,
+			alpha1: 0,
+			kwave: 0
 
 		}
 
 	}
 
-	const wp = 0.772 * w; // =(4/5·Bf)^0.25, spectral peak frequency
-	const w001 = 0.652 * wp; // thresholds 0.1 %
-	const w999 = 5.946 * wp; // thresholds 99.9 %
-	// 99.8 % of the energy is within the range w001 < w < w999
+	const Fr = vs * 1852 / 3600 / M.sqrt( g * l );
+	const omega = M.sqrt( 2 * pi * g / lamda );
 
+	//motion induced resistance
+	const omegaBar = M.sqrt( l / g ) * M.cbrt( kyy ) / ( 1.17 * M.pow( Fr, - 0.143 ) ) * omega;
+	const a1 = 60.3 * M.pow( cb, 1.34 );
+	const b1 = omegaBar < 1 ? 11.0 : - 8.50;
+	const d1 = omegaBar < 1 ? 14.0 : - 566 * M.pow( l / b, - 2.66 );
+	const raw = M.pow( omegaBar, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omegaBar, d1 ) ) ) * a1 * M.pow( Fr, 1.50 ) * M.exp( - 3.5 * Fr );
 
+	//wave reflection
+	const k = omega ** 2 / g;
+	const x = 1.5 * k * tm;
+	const I1 = besseli( x, 1 );
+	const K1 = besselk( x, 1 );
+	const f1 = 0.692 * M.pow( vs * 1852 / 3600 / M.sqrt( tm * g ), 0.769 ) + 1.81 * M.pow( cb, 6.95 );
+	const alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 ) * f1;
+
+	// KAW = RAW / ( 4 rho g zetaA ^ 2 b ^ 2 / l )
+	return {
+
+		omega: omega,
+		omegaBar: omegaBar,
+		a1: a1,
+		b1: b1,
+		d1: d1,
+		kawml: raw,
+		f1: f1,
+		I1: I1,
+		K1: K1,
+		alpha1: alpha1,
+		kwave: raw + alpha1 * 0.125 * l / b
+
+	};
 
 }
 
+function wave2002( l, tm, vs ) {
 
+	const table = document.createElement( 'table' );
+	document.body.appendChild( table );
+	let row1;
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = "lamda / L";
+
+	for ( let i = 0; i <= 46; i ++ ) {
+
+	const lamdaOverL = 0.2 + 0.05 * i;
+	const lamda = lamdaOverL * l;
+	const omega = M.sqrt( 2 * pi * g / lamda );
+	const k = omega ** 2 / g;
+
+	//long wave
+	const k0 = g / ( vs * 1852 / 3600 ) ** 2;
+
+
+	//short wave
+	const x = 1.5 * k * tm;
+	const I1 = besseli( x, 1 );
+	const K1 = besselk( x, 1 );
+	var alpha1 = pi ** 2 * I1 ** 2 / ( pi ** 2 * I1 ** 2 + K1 ** 2 );
+
+
+	row1 = table.insertRow();
+	row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
+
+	}
+
+	return;
+
+}
+
+//mean resistance increase due to motion (in regular waves) based on the Maruo's theory
+function AddResRegular( w, we, V, AmpH, PhaH, AmpP, PhaP, ca, RhoW )
+{
+    let I1, I2, I3;
+	const tau = we * V / g;
+    const K = w * w / g;
+    const K0 = g / (V * V);
+
+    const m3 = -0.5 * K0 * (1.0 + 2.0 * tau + M.sqrt(1.0 + 4.0 * tau));
+    const m4 = -0.5 * K0 * (1.0 + 2.0 * tau - M.sqrt(1.0 + 4.0 * tau));
+    if (tau < 0.25)
+    {
+        const m1 = 0.5 * K0 * (1.0 - 2.0 * tau + M.sqrt(1.0 - 4.0 * tau));
+        const m2 = 0.5 * K0 * (1.0 - 2.0 * tau - M.sqrt(1.0 - 4.0 * tau));
+    }
+    else
+    {
+        const m1 = 0.5 * K0 * (1.0 - 2.0 * tau);
+		const m2 = m1
+    }
+    const dm = 0.01 * K0;
+    const nm = 10;
+    const epsilon = dm / (2 * nm - 1);
+    const a = nm * nm * epsilon;
+	const tiny = 1.0e-10;
+    //------------------------------------------------------------------
+    // Region 3 - inf
+    I3 = 0.0;
+    for (let i = 0; i <= nm; i++)
+    {
+        const m = m3 - i * i * epsilon;
+        const [ KR, KI ] = Kochin( m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca );
+        let ff = (KR * KR + KI * KI) * M.Pow(m + K0 * tau, 2.0) * (m + K * ca);
+        ff /= M.sqrt(M.abs((m - m4) * (m * m - K0 * (1 - 2.0 * tau) * m + K0 * K0 * tau * tau)));
+        if ((i == 0) || (i == nm)) I3 += ff;
+        else I3 += 2.0 * ff;
+    }
+    I3 *= M.sqrt(epsilon);
+    for (let i = 0; i < 10000; i++)
+    {
+        const m = m3 - a - i * dm;
+        const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+        let ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+        ff /= M.sqrt(M.abs((m - m3) * (m - m4) * (m * m - K0 * (1 - 2.0 * tau) * m + K0 * K0 * tau * tau)));
+        if (i == 0) I3 += 0.5 * ff * dm;
+        else I3 += ff * dm;
+        if (M.abs(ff / I3) < tiny) break;
+    }
+    I3 *= -4.0 * pi * RhoW;
+    if (tau < 0.25)
+    {
+        aa = (m2 - m4) < 2.0 * a ? 0.5 * ( m2 - m4 ) : a;
+        const epsilona = aa / (nm * nm);
+        //------------------------------------------------------------------
+        // Region 4-2
+        let I2 = 0.0;
+        for (let i = 0; i <= nm; i++)
+        {
+            const m = m4 + i * i * epsilona;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt(M.Abs((m - m3) * (m - m2) * (m - m1)));
+            if ((i == 0) || (i == nm)) I2 += ff;
+            else I2 += 2.0 * ff;
+        }
+        for (let i = 0; i <= nm; i++)
+        {
+            m = m2 - i * i * epsilona;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt(Math.Abs((m - m4) * (m - m3) * (m - m1)));
+            if ((i == 0) || (i == nm)) I2 += ff;
+            else I2 += 2.0 * ff;
+        }
+        I2 *= Math.Sqrt(epsilona);
+        const dl = (m2 - m4) - 2.0 * a;
+        if (dl > 0.0)
+        {
+            const nma = dl / dm + 1; // need to convert to integer?
+            const dma = dl / nma;
+            for (i = 0; i <= nma; i++)
+            {
+                m = m4 + aa + i * dma;
+                const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+                ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+                ff /= M.sqrt(M.abs((m - m3) * (m - m4) * (m - m2) * (m - m1)));
+                if ((i == 0) || (i == nma)) I2 += 0.5 * ff * dma;
+                else I2 += ff * dma;
+            }
+        }
+        I2 *= 4.0 * pi * RhoW;
+        //------------------------------------------------------------------
+        // Region 1-inf
+        I1 = 0.0;
+        for (let i = 0; i <= nm; i++)
+        {
+            m = m1 + i * i * epsilon;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt(M.abs((m - m3) * (m - m4) * (m - m2)));
+            if ((i == 0) || (i == nm)) I1 += ff;
+            else I1 += 2.0 * ff;
+        }
+        I1 *= M.sqrt(epsilon);
+        for (let i = 0; i < 10000; i++)
+        {
+            m = m1 + a + i * dm;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt((m - m3) * (m - m4) * (m - m2) * (m - m1));
+            if (i == 0) I1 += 0.5 * ff * dm;
+            else I1 += ff * dm;
+            if (M.abs(ff / I1) < tiny) break;
+        }
+        I1 *= 4.0 * pi * RhoW;
+    }
+    else
+    {
+        //------------------------------------------------------------------
+        // Region 4-inf
+        I2 = 0.0;
+        for (let i = 0; i <= nm; i++)
+        {
+            m = m4 + i * i * epsilon;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt((m - m3) * (m * m - K0 * (1 - 2.0 * tau) * m + K0 * K0 * tau * tau));
+            if ((i == 0) || (i == nm)) I2 += ff;
+            else I2 += 2.0 * ff;
+        }
+        I2 *= M.sqrt(epsilon);
+        for (let i = 0; i < 10000; i++)
+        {
+            m = m4 + a + i * dm;
+            const [ KR, KI ] = Kochin(m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca);
+            ff = (KR * KR + KI * KI) * M.pow(m + K0 * tau, 2.0) * (m + K * ca);
+            ff /= M.sqrt((m - m3) * (m - m4) * (m * m - K0 * (1 - 2.0 * tau) * m + K0 * K0 * tau * tau));
+            if (i == 0) I2 += 0.5 * ff * dm;
+            else I2 += ff * dm;
+            if (M.abs(ff / I2) < tiny) break;
+        }
+        I2 *= 4.0 * pi * RhoW;
+        I1 = 0.0;
+    }
+
+    return I1 + I2 + I3;
+
+}
+
+//AmpH, PhaH, AmpP, PhaP : HeaveA, HeaveP, PitchA, PitchP
+function Kochin( m, w, we, V, AmpH, PhaH, AmpP, PhaP, ca )
+{
+    let KR, KI;
+	const zz = [];
+    ci = new Complex(0.0, 1.0);
+
+    const wano = w * w / g;
+    // For Depth attenuation
+    const tau = we * V / g;
+    const K = w * w / g;
+    const K0 = g / (V * V);
+    const a1 = M.pow((m + K0 * tau), 2.0) / K0;
+    // fac_depth = M.exp(-0.75 * m_CVP * m_Draught * a1);
+    const fac_depth = M.exp(-m_CBgeom * m_Draught * a1);
+
+    //----------------------
+    //  cutting out the high frequancy of m
+    const ist = m_DataG.nst / 2;
+    const dx = m_DataG.x[ist] - m_DataG.x[ist - 1];
+    if ( m > ( pi / dx ) )
+    {
+        KR = 0.0;
+        KI = 0.0;
+        // return [ KR, KI ];
+    }
+
+    for (ist = 0; ist < m_DataG.nst; ist++)
+    {
+        zz[ist] = AmpH * ci.mul( PhaH ).exp() - m_DataG.x[ist] * AmpP * ci.mul ( PhaP ).exp() - ci.mul( wano ).mul ( m_DataG.x[ist] ).mul( ca ).exp() * Complex(-m_Draught * wano).exp();  // Wave Attenuation 2
+        zz[ist] *= 2.0 * m_DataG.b[ist];
+    }
+    for (ist = 0; ist < m_DataG.nst; ist++)
+    {
+        zz[ist] *= -ci / (4.0 * pi) * (we + 1.0 * m * V);
+    }
+
+    //---------------------------------
+    // Integration along x
+    let H = new Complex(0.0, 0.0);
+    for (ist = 0; ist < m_DataG.nst; ist++)
+    {
+        if (ist == 0)
+        {
+            dx = 1.0 * (m_DataG.x[ist + 1] - m_DataG.x[ist]);
+        }
+        else if (ist == m_DataG.nst - 1)
+        {
+            dx = 1.0 * (m_DataG.x[ist] - m_DataG.x[ist - 1]);
+        }
+        else
+        {
+            dx = 0.5 * (m_DataG.x[ist + 1] - m_DataG.x[ist - 1]);
+        }
+        H += zz[ist] * Complex.pow(ci * m * m_DataG.x[ist]) * dx;
+    }
+    //  Depth attenuation
+    H *= fac_depth;
+
+    KR = H.Real;
+    KI = H.Imaginary;
+
+	return [ KR, KI ];
+}
