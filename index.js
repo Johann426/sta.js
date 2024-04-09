@@ -1,4 +1,4 @@
-import { besseli, besselk } from './bessel.js'
+import { besseli, besselk } from './bessel.js';
 import { f } from './Interpolation.js';
 
 const M = Math;
