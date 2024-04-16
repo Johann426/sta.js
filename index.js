@@ -49,6 +49,15 @@ class Ship {
 		[ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.swell[ i ].angle = e );
 		[ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ].map( ( e, i ) => this.swell[ i ].period = e );
 
+		this.mt = {
+			'vs'  : [ 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0 ],
+			't'   : [ 0.209, 0.205, 0.202, 0.200, 0.198, 0.196, 0.196, 0.194, 0.193, 0.191, 0.190, 0.189, 0.188, 0.188, 0.190, 0.191, 0.192, 0.192, 0.191, 0.189, 0.188, 0.186, 0.183, 0.181, 0.178 ],
+			'wtm' : [ 0.379, 0.378, 0.378, 0.378, 0.376, 0.375, 0.373, 0.372, 0.372, 0.373, 0.375, 0.377, 0.378, 0.379, 0.379, 0.379, 0.378, 0.378, 0.378, 0.377, 0.377, 0.375, 0.374, 0.371, 0.369 ],
+			'etar': [ 1.007, 1.006, 1.006, 1.006, 1.007, 1.008, 1.010, 1.011, 1.013, 1.014, 1.014, 1.014, 1.015, 1.015, 1.016, 1.017, 1.017, 1.018, 1.018, 1.018, 1.019, 1.019, 1.020, 1.020, 1.021 ],
+			'etad': [ 0.813, 0.816, 0.818, 0.820, 0.820, 0.821, 0.822, 0.822, 0.823, 0.826, 0.828, 0.830, 0.831, 0.831, 0.830, 0.829, 0.828, 0.828, 0.829, 0.830, 0.831, 0.832, 0.832, 0.833, 0.834 ],
+			'cts' : [ 2.0923, 2.0977, 2.1036, 2.11, 2.1161, 2.1226, 2.13, 2.1391, 2.1493, 2.1602, 2.1716, 2.1834, 2.1958, 2.2088, 2.2216, 2.234, 2.2464, 2.2593, 2.2725, 2.2858, 2.2988, 2.3115, 2.3244, 2.3383, 2.3525 ]
+		}
+
 		this.hdg.map( ( e, i ) => document.getElementById( "hdg" ).cells[ i + 1 ].innerHTML = e.toFixed( 0 ) );
 		this.sog.map( ( e, i ) => document.getElementById( "sog" ).cells[ i + 1 ].innerHTML = e.toFixed( 2 ) );
 		this.rpm.map( ( e, i ) => document.getElementById( "rpm" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
@@ -593,15 +602,6 @@ class Ship {
 
 	RAS() {
 
-		this.mt = {
-			'vs'  : [ 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0 ],
-			't'   : [ 0.209, 0.205, 0.202, 0.200, 0.198, 0.196, 0.196, 0.194, 0.193, 0.191, 0.190, 0.189, 0.188, 0.188, 0.190, 0.191, 0.192, 0.192, 0.191, 0.189, 0.188, 0.186, 0.183, 0.181, 0.178 ],
-			'wtm' : [ 0.379, 0.378, 0.378, 0.378, 0.376, 0.375, 0.373, 0.372, 0.372, 0.373, 0.375, 0.377, 0.378, 0.379, 0.379, 0.379, 0.378, 0.378, 0.378, 0.377, 0.377, 0.375, 0.374, 0.371, 0.369 ],
-			'etar': [ 1.007, 1.006, 1.006, 1.006, 1.007, 1.008, 1.010, 1.011, 1.013, 1.014, 1.014, 1.014, 1.015, 1.015, 1.016, 1.017, 1.017, 1.018, 1.018, 1.018, 1.019, 1.019, 1.020, 1.020, 1.021 ],
-			'etad': [ 0.813, 0.816, 0.818, 0.820, 0.820, 0.821, 0.822, 0.822, 0.823, 0.826, 0.828, 0.830, 0.831, 0.831, 0.830, 0.829, 0.828, 0.828, 0.829, 0.830, 0.831, 0.832, 0.832, 0.833, 0.834 ],
-			'cts' : [ 2.0923, 2.0977, 2.1036, 2.11, 2.1161, 2.1226, 2.13, 2.1391, 2.1493, 2.1602, 2.1716, 2.1834, 2.1958, 2.2088, 2.2216, 2.234, 2.2464, 2.2593, 2.2725, 2.2858, 2.2988, 2.3115, 2.3244, 2.3383, 2.3525 ]
-		}
-
 		const S = Number( document.getElementById( "S" ).innerHTML );
 		const l = Number( document.getElementById( "lpp" ).innerHTML );
 		const rhos = Number( document.getElementById( "rhos" ).innerHTML );
@@ -659,15 +659,15 @@ class Ship {
 		for( let i = 0; i <= nm1; i ++ ) {
 
 			const vs = vg[ i ];
-			const u = vs * 1852 / 3600;
-			const delr = raa[ i ] + raw [ i ] + ras[ i ];
+			const u = vs * 1852 / 3600; // m/s
+			const delr = 0.001 * ( raa[ i ] + raw [ i ] + ras[ i ] ); // kN
 			const temp = delr * u / etad;
 			const b = pd[ i ] - temp;
 			// console.log( 'b=', b, b > 0 );
 			const c = pd[ i ] * temp * ksip;
 			pid[ i ] = b > 0 ? 0.5 * ( b + M.sqrt( b ** 2 + 4.0 * c ) ) : 0;
 
-			row.insertCell( - 1 ).innerHTML = ( delr * 0.001 ).toFixed( 2 );
+			row.insertCell( - 1 ).innerHTML = ( delr ).toFixed( 2 );
 
 		}
 
@@ -675,166 +675,225 @@ class Ship {
 
 	}
 
-	currentCorrection() {
+	currentCorrection( vg, pid ) {
 
-		const vg = this.sog;
-		const pid = this.DPM( 0.83, 0.99, -0.124 );
-		console.log( pid )
-		const nm1 = this.hdg.length - 1;
-		let vsq = [];
-		let pm = [];
+		const nm1 = vg.length - 1;
+		let stw, pvs;
+		let n = 0;
+		let sum = 0;
+		let previous = 0;
 
-		/**
-		 * Approximation of stw
-		 * 
-		 * Power = a + b Vs^q
-		 * 
-		 * a, b, and q are unknown
-		 * 
-		 * Solve Ax = b,
-		 * 
-		 * b = Power
-		 * x = [ a, b ] ^ T
-		 * A = [ 1, Vs^q ], (q = 3.0)
-		 * 
-		 */
-		for( let i = 0; i <= nm1; i ++ ) {
+		while( n < 20 ) {
 
-			if ( i % 2 == 0 ) {
+			/**
+			 * Approximation of stw
+			 * 
+			 * Power = a + b Vs^q
+			 * 
+			 * a, b, and q are unknown
+			 * 
+			 * Solve Ax = b,
+			 * 
+			 * b = Power
+			 * x = [ a, b ] ^ T
+			 * A = [ 1, Vs^q ], (q = 3.0)
+			 * 
+			 */
+			const vsq = [];
 
-				const tmp = 0.5 * 1852 / 3600;
-				const vm = tmp * ( vg[ i ] + vg[ i + 1 ] );
-				vsq.push( M.pow( vm, 3.0 ) );
-				pm.push( 0.5 * ( pid[ i ] + pid[ i + 1 ] ) );
+			if( n == 0 ) { // 1st iteration
+			
+				pvs = [];
+
+				for( let i = 0; i <= nm1; i ++ ) {
+
+					if ( i % 2 == 0 ) {
+		
+						const vm = 0.5 * ( vg[ i ] + vg[ i + 1 ] );
+						vsq.push( M.pow( vm, 3.0 ) );
+						pvs.push( 0.5 * ( pid[ i ] + pid[ i + 1 ] ) );
+
+					}
+		
+				}
+
+			} else {
+
+				pvs = pid;
+				stw.map( e => vsq.push( M.pow( e, 3.0 ) ) )
 
 			}
 
-		}
-		// console.log( pm )
+			/**
+			 * Consider the linear equation
+			 * 
+			 * Ax = b,
+			 * 
+			 * where A is matrix with dimension of m x n, b is vector with length of m, and x is vector to be computed with length of n.
+			 * When m > n, it is generally the case having no solution. Thus, for m > n, the goal of solving is to find the value of x
+			 * that minimizes some error.
+			 * 
+			 * minimize | Ax - b | ^ 2
+			 * 
+			 * The solution to the least squares problem is computed by solving the normal equation,
+			 * 
+			 * A^T Ax = A^T b
+			 * 
+			 * where A^T denotes the transpose of A
+			 * 
+			 */
+			
+			let A = vsq.map( e => [ 1, e ] )
+			let m00 = 0;
+			let m01 = 0;
+			let m10 = 0
+			let m11 = 0;
+			let b0 = 0;
+			let b1 = 0;
 
-		/**
-		 * Consider the linear equation
-		 * 
-		 * Ax = b,
-		 * 
-		 * where A is matrix with dimension of m x n, b is vector with length of m, and x is vector to be computed with length of n.
-		 * When m > n, it is generally the case having no solution. Thus, for m > n, the goal of solving is to find the value of x
-		 * that minimizes some error.
-		 * 
-		 * minimize | Ax - b | ^ 2
-		 * 
-		 * The solution to the least squares problem is computed by solving the normal equation,
-		 * 
-		 * A^T Ax = A^T b
-		 * 
-		 * where A^T denotes the transpose of A
-		 * 
-		 */
-		
-		const a = vsq.map( e => [ 1, e ] ) //array( vsq.map( e => [ 1, e ] ) );
-		let m00 = 0;
-		let m01 = 0;
-		let m10 = 0
-		let m11 = 0;
-		let b0 = 0;
-		let b1 = 0;
+			for( let i = 0; i < A.length; i ++ ) {
 
-		for( let i = 0; i < a.length; i ++ ) {
+				m00 += A[ i ][ 0 ] * A[ i ][ 0 ];
+				m01 += A[ i ][ 0 ] * A[ i ][ 1 ];
+				m10 += A[ i ][ 1 ] * A[ i ][ 0 ];
+				m11 += A[ i ][ 1 ] * A[ i ][ 1 ];
+				b0 += A[ i ][ 0 ] * pvs[ i ];
+				b1 += A[ i ][ 1 ] * pvs[ i ];
 
-			m00 += a[ i ][ 0 ] * a[ i ][ 0 ];
-			m01 += a[ i ][ 0 ] * a[ i ][ 1 ];
-			m10 += a[ i ][ 1 ] * a[ i ][ 0 ];
-			m11 += a[ i ][ 1 ] * a[ i ][ 1 ];
-			b0 += a[ i ][ 0 ] * pm[ i ];
-			b1 += a[ i ][ 1 ] * pm[ i ];
+			}
+			
+			let ata = array( [ [ m00, m01 ], [ m10, m11 ] ] );
+			let atb = array( [ [ b0 ], [ b1 ] ] );
+			const x = ata.solve( atb );
+			const [ a, b ] = x.data;
+			// console.log( 'a,b=', a, b );
 
-		}
-		
-		let ata = array( [ [ m00, m01 ], [ m10, m11 ] ] );
-		let atb = array( [ [ b0 ], [ b1 ] ] );
-		// console.log( ata )
-		// console.log( atb )
-		const x = ata.solve( atb );
-		// console.log( x.data )
+			// stw by regression curve
+			const vs = pvs.map( e => M.pow( ( e - a ) / b, 1 / 3 ) );
+			// console.log( 'pvs', pvs)
+			// console.log( 'vs=', vs );
 
-		// speed on the mean curve at the corrected power as updated stw
-		const vs = pm.map( e => M.pow( ( e - x.data[ 0 ] ) / x.data[ 1 ], 1 / 3 ) );
+			// current speed( Vc' = Vg - Vs )
+			const vcprime = vg.map( ( e, i ) => e - vs[ n == 0 ? M.floor( i / 2 ) : i ] ).map( ( e, i ) => i % 2 == 0 ? e : - e );
+			// console.log( 'vc`=', vcprime );
 
-		console.log( vs );
+			/**
+			 * Vc = Vcc cos( 2pi/Tc * t ) + Vcs sin( 2pi/Tc * t ) + Vct * t + Vc0
+			 * 
+			 * Vcc, Vcs, Vct, Vc0 are unknown.
+			 * 
+			 * Solve Ax = b,
+			 * 
+			 * A = [ cos( 2pi/Tc * t ), sin( 2pi/Tc * t ), t, 1 ]
+			 * x = [ Vcc, Vcs, Vct, Vc0 ] ^ T
+			 * b = Vc
+			 * 
+			 */
+			const tc = 0.51753 //44712 // 0.51753 day (12 hours, 25 mins, 12 sec)
+			const twopiTc = 2.0 * pi / tc;
+			const time = [];
 
-		const vc = vg.map( ( e, i ) => e * 1852 / 3600 - vs[ M.floor( i / 2 ) ] )
+			for( let i = 0; i <= nm1; i ++ ) {
+			
+				// time.push( i * 3600 );
+				time.push( i * 1 / 24 );
 
-		console.log( vc );
+			}
+			
+			// A = time.map( e => [ M.cos( twopiTc * e ), M.sin( twopiTc * e ), e / tc, 1 ] );
+			A = time.map( e => [ M.cos( twopiTc * e ), M.sin( twopiTc * e ), e, 1 ] );
 
-		/**
-		 * Vc = Vcc cos( 2pi/Tc * t ) + Vcs sin( 2pi/Tc * t ) + Vct * t + Vc0
-		 * 
-		 * Vcc, Vcs, Vct, Vc0 are unknown.
-		 * 
-		 * Solve Ax = b,
-		 * 
-		 * b = Vc
-		 * x = [ Vcc, Vcs, Vct, Vc0 ] ^ T
-		 * A = [ cos( 2pi/Tc * t ), sin( 2pi/Tc * t ), t, 1 ]
-		 * 
-		 */
+			ata = new Array( 4 );
+			atb = new Array( 4 );
 
-		const tc = 12 * 3600 + 25 * 60 + 12;
-		const twopiTc = 2.0 * pi / tc;
+			for( let i = 0; i < 4; i ++ ) {
 
-		let b = [];
-		const time = [];
+				ata[ i ] = new Array( 4 ).fill( 0 );
+				atb[ i ] = new Array( 1 ).fill( 0 );
 
-		for( let i = 0; i <= nm1; i ++ ) {
-		
-			time.push( i * 3600 );
-		}
-		
-		const A = time.map( e => [ M.cos( twopiTc * e ), M.sin( twopiTc * e ), e / tc, 1 ] );
+				for( let j = 0; j <= nm1; j ++ ) {
 
-		ata = new Array( 4 );
-		atb = new Array( 4 ).fill( 0 );
+					atb[ i ][ 0 ] += A[ j ][ i ] * vcprime[ j ];
 
-		for( let i = 0; i < 4; i ++ ) {
+					for( let k = 0; k < 4; k ++ ) {
 
-			ata[ i ] = new Array( 4 ).fill( 0 );
+						ata[ i ][ k ] += A[ j ][ i ] * A[ j ][ k ];
 
-			for( let j = 0; j <= nm1; j ++ ) {
-
-				atb[ i ] += A[ j ][ i ] * vc[ j ];
-
-				for( let k = 0; k < 4; k ++ ) {
-
-					ata[ i ][ k ] += A[ j ][ i ] * A[ j ][ k ];
+					}
 
 				}
 
 			}
 
+			const ata1 = array( ata );
+			const atb1 = array( atb );
+			const x1 = ata1.solve( atb1 );
+			const [ vcc, vcs, vct, vc0 ] = x1.data
+			// console.log( 'vcc, vcs, vct, vc0=', vcc, vcs, vct, vc0 );
+
+			// updated by current curve
+			// const vc = time.map( e => vcc * M.cos( twopiTc * e ) + vcs * M.sin( twopiTc * e ) + vct / tc * e + vc0 );
+			const vc = time.map( e => vcc * M.cos( twopiTc * e ) + vcs * M.sin( twopiTc * e ) + vct * e + vc0 );
+			// console.log( 'vc=', vc )
+
+			// stw by current curve
+			stw = vg.map( ( e, i ) => i % 2 == 0 ? e - vc[ i ] : e + vc[ i ] );
+			// console.log( 'vs`=', stw )
+
+			sum = 0;
+
+			// calc. error
+			stw.map( ( e, i ) => {
+
+				const pv = a + b * M.pow( e, 3 );
+				const err = pv - pid[ i ]
+				sum += M.pow( err, 2 );
+
+			} )
+
+			console.log( 'error square=', sum );
+			const percent = M.abs( 1 - sum / previous );
+			console.log( 'n=', n, 'error %', 100 * percent );
+			if ( percent < 0.01 ) break;
+			previous = sum;
+			n ++
+
 		}
 
-		const ata1 = array( ata );
-		const atb1 = array( atb )
-		const x1 = ata1.solve( atb1 );
-		console.log( x1.data )
+		const table = this.table;
+		const row1 = table.insertRow();
+		const row2 = table.insertRow();
+		const row3 = table.insertRow();
+		row1.insertCell( - 1 ).innerHTML = "Vs (kts)";
+		row2.insertCell( - 1 ).innerHTML = "PD (kW)";
+		row3.insertCell( - 1 ).innerHTML = "PB (kW)";
+		
+		for( let i = 0; i <= nm1; i ++ ) {
 
-		// return vs;
+			const v = stw[ i ] * 3600 / 1852;
+			const pd = pid[ i ];
+			const pb = pd / 0.99;
+			row1.insertCell( - 1 ).innerHTML = ( v ).toFixed( 3 );
+			row2.insertCell( - 1 ).innerHTML = ( pd ).toFixed( 0 );
+			row3.insertCell( - 1 ).innerHTML = ( pb ).toFixed( 0 );
+
+		}
+
+		return stw;
+
+	}
+
+	calcCorrection() {
+
+		const pid = this.DPM( 0.83, 0.99, -0.124 );
+		const stw = this.currentCorrection( this.sog.map( e => e * 1852 / 3600 ), pid );
 
 	}
 
 }
 
-
 const ship = new Ship();
-const raa = ship.RAA();
-const raw = ship.RAW();
-const ras = ship.RAS();
-const vc = ship.currentCorrection();
-
-// console.log( raa );
-// console.log( raw );
-// console.log( ras );
-// console.log( vc );
+ship.calcCorrection();
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
