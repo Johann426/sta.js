@@ -20,6 +20,8 @@ class Ship {
 		const table = this.table;
 
 		// loads 3322 임시 데이터
+		this.ncr = 44187;
+		this.sm = 0.15;
 		this.load = [ 65, 75, 75, 85, 100 ];
 		// time
 		this.time = [ "2023-12-20T00:00:00", "2023-12-20T01:00:00", "2023-12-20T02:00:00", "2023-12-20T03:00:00", "2023-12-20T04:00:00", "2023-12-20T05:00:00", "2023-12-20T06:00:00", "2023-12-20T07:00:00", "2023-12-20T08:00:00", "2023-12-20T09:00:00" ];
@@ -427,14 +429,24 @@ class Ship {
 
 	}
 
-	RAS() {
+	RAS( celcius, rhos ) {
 
+		// ITTC Fresh Water and Seawater Properties
+		// const seawater ={
+		// 	temp: [ 10, 11, 12 ,13],
+			
+		// }
 		const S = Number( document.getElementById( "S" ).innerHTML );
 		const l = Number( document.getElementById( "lpp" ).innerHTML );
-		const rhos = Number( document.getElementById( "rhos" ).innerHTML );
+
+		const nu = ( temp, rho ) => {
+
+			return 0.000001 * ( ( 43.4233 - 31.38 * 0.001 * rho ) * M.pow( temp + 20, 1.72 * 0.001 * rho - 2.202 ) + 4.7478 - 5.779 * 0.001 * rho )
+
+		}
+
 		const rho0 = 1026;
-		const nu = 0.0000011883;
-		const nu0 = 0.0000011883;
+		const nu0 = nu( 15.0, rho0 ); //0.0000011883;
 		const vg = this.sog;
 
 		const Cf = ( u, l, nu ) => {
@@ -446,7 +458,6 @@ class Ship {
 
 		}
 
-		const table = this.table;
 		const nm1 = this.hdg.length - 1;
 		const arr= [];
 
@@ -455,7 +466,7 @@ class Ship {
 			const vs = vg[ i ];
 			const u = vs * 1852 / 3600;
 			const sv2 = S * u ** 2;
-			const cf = Cf( u, l, nu );
+			const cf = Cf( u, l, nu( celcius, rhos ) );
 			const rf = 0.5 * rhos * sv2 * cf;
 			const ct0 = this.mt.cts[ 1 ] * 0.001; //spline interpolation needed
 			const rt0 = 0.5 * rho0 * sv2 * ct0;
@@ -486,7 +497,7 @@ class Ship {
 
 			const temp = delr[ i ] * u / etad[ i ];
 			const b = pd[ i ] - temp;
-			// console.log( 'b=', b, b > 0 );
+			if ( b < 0 ) console.warn( 'too much correction(minus power)' )
 			const c = pd[ i ] * temp * ksip;
 			pid[ i ] = b > 0 ? 0.5 * ( b + M.sqrt( b ** 2 + 4.0 * c ) ) : 0;
 
@@ -587,7 +598,7 @@ class Ship {
 			let atb = array( [ [ b0 ], [ b1 ] ] );
 			const x = ata.solve( atb );
 			const [ a, b ] = x.data;
-			// console.log( 'a,b=', a, b );
+			console.log( 'a,b=', a, b );
 
 			// stw by regression curve
 			const vs = pvs.map( e => M.pow( ( e - a ) / b, 1 / 3 ) );
@@ -642,12 +653,12 @@ class Ship {
 			const atb1 = array( atb );
 			const x1 = ata1.solve( atb1 );
 			const [ vcc, vcs, vct, vc0 ] = x1.data
-			// console.log( 'vcc, vcs, vct, vc0=', vcc, vcs, vct, vc0 );
+			console.log( 'vcc, vcs, vct, vc0=', vcc, vcs, vct, vc0 );
 
 			// updated by current curve
 			const vc = time.map( e => vcc * M.cos( twopiTc * e ) + vcs * M.sin( twopiTc * e ) + vct / tc * e + vc0 );
 			// const vc = time.map( e => vcc * M.cos( twopiTc * e ) + vcs * M.sin( twopiTc * e ) + vct * e + vc0 );
-			// console.log( 'vc=', vc )
+			console.log( 'vc=', vc )
 
 			// stw by current curve
 			stw = vg.map( ( e, i ) => i % 2 == 0 ? e - vc[ i ] : e + vc[ i ] );
@@ -693,7 +704,9 @@ for ( let i = 0; i <= nm1; i ++ ) {
 
 }
 
-const ras = ship.RAS().map( e => e * 0.001 );
+const temp = 15;
+const rhos = Number( document.getElementById( "rhos" ).innerHTML );
+const ras = ship.RAS( temp, rhos ).map( e => e * 0.001 );
 const delr = [];
 
 for ( let i = 0; i <= nm1; i ++ ) {
@@ -720,16 +733,21 @@ for ( let i = 0; i <= nm1; i ++ ) {
 
 dif /= ( nm1 + 1 )
 
-const ncr = 44187;
-const sm = 0.15;
-const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ncr / ( 1 + sm ) ] );
+const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ship.ncr / ( 1 + ship.sm ) ] );
 
-console.log( speedAtNCR );
+let table = document.createElement( 'table' );
+let row = table.insertRow();
+row.insertCell( - 1 ).innerHTML = "NCR";
+row.insertCell( - 1 ).innerHTML = ship.ncr.toFixed( 1 ) + ' (kW)';
+row = table.insertRow();
+row.insertCell( - 1 ).innerHTML = "Sea Margin";
+row.insertCell( - 1 ).innerHTML = ship.sm.toFixed( 2 ) + ' (%)';
+row = table.insertRow();
+row.insertCell( - 1 ).innerHTML = "Speed at NCR with s.m.";
+row.insertCell( - 1 ).innerHTML = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
+document.body.appendChild( table );
 
-
-const table = document.getElementById( "table1" );
-let row;
-
+table = document.getElementById( "table1" );
 row = table.insertRow();
 row.insertCell( - 1 ).innerHTML = "Relative wind velocity at anemometer height (m/s)";
 vwr.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
@@ -804,7 +822,7 @@ raw.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
 
 row = table.insertRow();
 row.insertCell( - 1 ).innerHTML = 'RAS (kN) ';
-ras.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+ras.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
 
 row = table.insertRow();
 row.insertCell( - 1 ).innerHTML = "&#916R (kN)";
