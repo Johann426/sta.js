@@ -13,59 +13,110 @@ class UITable { // only number is acceptable
 
             for( let j = 0; j < m; j ++ ) {
                 
-                const cell = row.insertCell( - 1 );
-                cell.setAttribute( "contenteditable", true );
-                cell.addEventListener( 'keydown', onKeyDown, false );
-                cell.addEventListener( 'change', onChange, false );
-                cell.addEventListener( 'focus', onFocus, false );
-                cell.addEventListener( 'blur', onBlur, false );
+                if ( i && j ) {
+
+                    const cell = new UICellElement();
+                    row.appendChild( cell.dom );
+
+                } else {
+
+                    const header = document.createElement( 'th' );
+                    row.appendChild( header );
+
+                }
+                
 
             }
 
         }
 
-        function onChange() {
+    }
 
-            const value = this.dom.value;
-            const float = parseFloat( value );
-			this.dom.value = float;
-            console.log( float )
+    paste( arr, imin = 0, jmin = 0 ) {
 
-		}
+        const tb = this.dom;
+        const n = tb.rows.length;
+        const m = tb.rows[ 0 ].cells.length;
+
+        if( Array.isArray( arr ) ) {
+
+            arr.map( ( row, i ) => {
+
+                const ii = imin + i;
+
+                if( Array.isArray( row ) ) {
+
+                    row.map( ( e, j ) => {
+
+                        const jj = jmin + j;
+
+                        if( ii < n && jj < m ) {
+
+                            // const number = parseFloat( e )
+                            tb.rows[ imin + i ].cells[ jmin + j ].innerHTML = e;
+
+                        }
+
+                    } );
+
+                } else {
+
+                    if( ii < n ) {
+                
+                        tb.rows[ imin + i ].cells[ jmin ].innerHTML = row;
+
+                    }
+
+                }
+
+            } )
+
+        }
+
+    }
+
+}
+
+class UICellElement {
+
+    constructor() {
+
+        this.dom = document.createElement( 'td' );
+        this.init();
+
+    }
+
+    init() {
+
+        const scope = this;
+        const dom = this.dom;
+        dom.setAttribute( "contenteditable", true );
+        dom.addEventListener( 'keydown', onKeyDown, false );
+        dom.addEventListener( 'focus', onFocus, false );
+        dom.addEventListener( 'blur', onBlur, false );
+        dom.addEventListener( 'paste', onPaste, false );
+
+        function onPaste( event ) {
+
+            event.preventDefault();
+            const arr = ( event.clipboardData || window.clipboardData ).getData( "text" ).split( '\r\n' ).map( e => e.split('\t') );
+            console.log( arr )
+            const row = this.parentNode;
+            const rowIndex = row.rowIndex;
+            const cellIndex = this.cellIndex;
+            scope.paste( arr, rowIndex, cellIndex );
+
+        }
 
 		function onFocus() {
 
-            // const rowIndex = this.parentNode.rowIndex;
-            // const cellIndex = this.cellIndex;
-            // console.log( rowIndex, cellIndex )
-
-
 		}
 
-		function onBlur() {
+		function onBlur ( event ) {
 
-            const content = this.innerHTML
-            console.log( content )
-            const template = document.createElement('template');
-            template.innerHTML = content;
-            const dom = template.content.firstChild;
-            console.log( dom )
-
-            if ( dom instanceof HTMLTableElement ) {
-
-                const row = this.parentNode;
-                const cellIndex = this.cellIndex;
-                const rowIndex = row.rowIndex;
-                const arr = tableToArray( dom )
-                console.log( arr )
-                scope.paste( arr, rowIndex, cellIndex );
-
-            } else {
-
-                const number = parseFloat( this.innerHTML );
-			    this.innerHTML = number;
-
-            }
+            const dom = event.currentTarget;
+            const number = parseFloat( dom.innerHTML );
+			dom.innerHTML = number;
 
 		}
 
@@ -103,17 +154,7 @@ class UITable { // only number is acceptable
 					event.preventDefault();
 					if( rowIndex < tb.rows.length - 1  ) tb.rows[ rowIndex + 1 ].cells[ cellIndex ].focus()
 					break;
-
-                case 'KeyV':
-
-                    if( event.ctrlKey ) {
-
-                        console.log( 'ctrl + v' )
-                        // console.log( navigator.clipboard.writeText() )
-                        // tableToArray( this.innerHTML )
-
-                    }
-
+                
 			}
 
 		}
@@ -122,7 +163,8 @@ class UITable { // only number is acceptable
 
     paste( arr, imin = 0, jmin = 0 ) {
 
-        const tb = this.dom;
+        const row = this.dom.parentNode;
+        const tb = row.parentNode;
         const n = tb.rows.length;
         const m = tb.rows[ 0 ].cells.length;
 
@@ -140,9 +182,8 @@ class UITable { // only number is acceptable
 
                         if( ii < n && jj < m ) {
 
-                            //
-                            const float = parseFloat( e )
-                            tb.rows[ imin + i ].cells[ jmin + j ].innerHTML = float;
+                            // const number = parseFloat( e )
+                            tb.rows[ imin + i ].cells[ jmin + j ].innerHTML = e;
 
                         }
 
@@ -161,10 +202,6 @@ class UITable { // only number is acceptable
             } )
 
         }
-
-    }
-
-    get() {
 
     }
 
