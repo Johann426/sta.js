@@ -1,10 +1,34 @@
 import { array } from './index.esm.js';
 import { besseli, besselk } from './bessel.js';
 import { f } from './Interpolation.js';
+import { UITable } from './UITable.js';
 
 const M = Math;
 const pi = M.PI;
 const g = 9.80665; //9.807 staimo ?
+const cells = new UITable( 10, 10 );
+document.body.appendChild( cells.dom );
+
+const arr = [];
+
+for( let i = 1; i < 11; i ++ ) {
+
+	const row = new Array();
+	arr.push( row )
+
+	for( let j = 1; j < 11; j ++ ) {
+
+		row.push( i * j + 'aa' );
+
+	}
+
+}
+
+cells.paste( arr, 1, 1 )
+
+
+
+
 
 class Ship {
 
@@ -124,7 +148,7 @@ class Ship {
 		//STA1 result
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			let raw, ras, a;
+			let raw, a;
 
 			raw = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
 			a = wave[ i ].angle;
@@ -219,7 +243,6 @@ class Ship {
 				const vs = vg[ i ];
 				let rawm; //motion induced resistance
 				let rawr; //wave reflection
-				let total = 0;
 	
 				for ( let j = 0; j <= 1; j ++ ) {
 	
@@ -245,6 +268,7 @@ class Ship {
 						const rawml = 4.0 * rho * g * b * b / l * res.kawml;
 						const rawrl = 0.5 * rho * g * b * res.alpha1;
 						const sn = calcSn( t, omega, Af, Bf, j );
+						// console.log( 'j',j, 'sn', sn )
 						rawm += 2 * rawml * sn * df;
 						rawr += 2 * rawrl * sn * df;
 	
@@ -1090,8 +1114,8 @@ function sta2( l, b, tm, cb, kyy, vs, angle, lamda ) {
 	//motion induced resistance
 	const omegaBar = M.sqrt( l / g ) * M.cbrt( kyy ) / ( 1.17 * M.pow( Fr, - 0.143 ) ) * omega;
 	const a1 = 60.3 * M.pow( cb, 1.34 );
-	const b1 = omegaBar < 1 ? 11.0 : - 8.50;
-	const d1 = omegaBar < 1 ? 14.0 : - 566 * M.pow( l / b, - 2.66 );
+	const b1 = omegaBar < 1.0 ? 11.0 : - 8.50;
+	const d1 = omegaBar < 1.0 ? 14.0 : - 566 * M.pow( l / b, - 2.66 );
 	const raw = M.pow( omegaBar, b1 ) * M.exp( b1 / d1 * ( 1 - M.pow( omegaBar, d1 ) ) ) * a1 * M.pow( Fr, 1.50 ) * M.exp( - 3.5 * Fr );
 
 	//wave reflection
