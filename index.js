@@ -6,42 +6,16 @@ import { UITable } from './UITable.js';
 const M = Math;
 const pi = M.PI;
 const g = 9.80665; //9.807 staimo ?
-const cells = new UITable( 10, 10 );
-document.body.appendChild( cells.dom );
-
-const arr = [];
-
-for( let i = 1; i < 11; i ++ ) {
-
-	const row = new Array();
-	arr.push( row )
-
-	for( let j = 1; j < 11; j ++ ) {
-
-		row.push( i * j + 'aa' );
-
-	}
-
-}
-
-cells.paste( arr, 1, 1 )
-
-
-
-
 
 class Ship {
 
 	constructor() {
 
-		this.table = document.getElementById( "table1" );
 		this.initialize();
 
 	}
 
 	initialize() {
-
-		const table = this.table;
 
 		// loads 3322 임시 데이터
 		this.ncr = 44187;
@@ -60,8 +34,8 @@ class Ship {
 		// wind
 		this.wind_v = [ 12.0, 10.0, 12.5, 10.5, 12.5, 10.5, 12.9, 10.9, 13.4, 11.4 ];
 		this.wind_d = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
-		this.Za = Number( document.getElementById( "Za" ).innerHTML );
-		this.Zref = Number( document.getElementById( "Zref" ).innerHTML );
+		this.Za = Number( document.getElementById( "Za" ).textContent );
+		this.Zref = Number( document.getElementById( "Zref" ).textContent );
 		this.wind = {
 			angle: [ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360 ],
 			coef: [ -1.306,-1.517,-1.691,-1.761,-1.734,-1.595,-1.327,-1.008,-0.665,-0.362,-0.025,0.316,0.763,1.193,1.524,1.776,1.773,1.636,1.445,1.625,1.807,1.813,1.667,1.346,0.937,0.508,0.166,-0.23,-0.571,-0.902,-1.223,-1.453,-1.627,-1.636,-1.589,-1.395,-1.306 ]
@@ -92,29 +66,6 @@ class Ship {
 
 		}
 
-		this.hdg.map( ( e, i ) => document.getElementById( "hdg" ).cells[ i + 1 ].innerHTML = e.toFixed( 0 ) );
-		this.sog.map( ( e, i ) => document.getElementById( "sog" ).cells[ i + 1 ].innerHTML = e.toFixed( 2 ) );
-		this.rpm.map( ( e, i ) => document.getElementById( "rpm" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
-		this.power.map( ( e, i ) => document.getElementById( "power" ).cells[ i + 1 ].innerHTML = e.toFixed( 0 ) );
-		this.wind_v.map( ( e, i ) => document.getElementById( "vWind" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
-		this.wind_d.map( ( e, i ) => document.getElementById( "dWind" ).cells[ i + 1 ].innerHTML = e.toFixed( 1 ) );
-
-		this.wave.map( ( e, i ) => {
-
-			document.getElementById( "hWave" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
-			document.getElementById( "aWave" ).cells[ i + 1 ].innerHTML = e.angle.toFixed( 1 );
-			document.getElementById( "pWave" ).cells[ i + 1 ].innerHTML = e.period.toFixed( 1 );
-
-		} );
-
-		this.swell.map( ( e, i ) => {
-
-			document.getElementById( "hSwell" ).cells[ i + 1 ].innerHTML = e.height.toFixed( 1 );
-			document.getElementById( "aSwell" ).cells[ i + 1 ].innerHTML = e.angle.toFixed( 1 );
-			document.getElementById( "pSwell" ).cells[ i + 1 ].innerHTML = e.period.toFixed( 1 );
-
-		} );
-
 	}
 
 	RAW( speed, wave, swell, option = 'sta2' ) {
@@ -134,16 +85,16 @@ class Ship {
 
 		const nm1 = this.hdg.length - 1;
 		const vg = speed;
-		const l = Number( document.getElementById( "lpp" ).innerHTML );
-		const b = Number( document.getElementById( "beam" ).innerHTML );
-		const tf = Number( document.getElementById( "tf" ).innerHTML );
-		const ta = Number( document.getElementById( "ta" ).innerHTML );
-		const rho = Number( document.getElementById( "rhos" ).innerHTML );
-		const cb = Number( document.getElementById( "cb" ).innerHTML );
-		const kyy = Number( document.getElementById( "kyy" ).innerHTML );
-		const le = Number( document.getElementById( "le" ).innerHTML );
-		const lr = Number( document.getElementById( "lr" ).innerHTML );
-		const lbwl = Number( document.getElementById( "lbwl" ).innerHTML );
+		const l = Number( document.getElementById( "lpp" ).textContent );
+		const b = Number( document.getElementById( "beam" ).textContent );
+		const tf = Number( document.getElementById( "tf" ).textContent );
+		const ta = Number( document.getElementById( "ta" ).textContent );
+		const rho = Number( document.getElementById( "rhos" ).textContent );
+		const cb = Number( document.getElementById( "cb" ).textContent );
+		const kyy = Number( document.getElementById( "kyy" ).textContent );
+		const le = Number( document.getElementById( "le" ).textContent );
+		const lr = Number( document.getElementById( "lr" ).textContent );
+		const lbwl = Number( document.getElementById( "lbwl" ).textContent );
 
 		//STA1 result
 		for ( let i = 0; i <= nm1; i ++ ) {
@@ -460,8 +411,8 @@ class Ship {
 		// 	temp: [ 10, 11, 12 ,13],
 			
 		// }
-		const S = Number( document.getElementById( "S" ).innerHTML );
-		const l = Number( document.getElementById( "lpp" ).innerHTML );
+		const S = Number( document.getElementById( "S" ).textContent );
+		const l = Number( document.getElementById( "lpp" ).textContent );
 
 		const nu = ( temp, rho ) => {
 
@@ -712,11 +663,20 @@ class Ship {
 
 	}
 
+	analysis() {
+
+	}
+
+	
+
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Analysis
+/////////////////////////////////////////////////////////////////////////////////////////////
 const ship = new Ship();
-const rho = Number( document.getElementById( "rhoa" ).innerHTML );
-const Ax = Number( document.getElementById( "Ax" ).innerHTML );
+const rho = Number( document.getElementById( "rhoa" ).textContent );
+const Ax = Number( document.getElementById( "Ax" ).textContent );
 const nm1 = ship.hdg.length - 1;
 const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rho, Ax, ship.wind ) 
 const { wave, swell } = ship.RAW( ship.sog, ship.wave, ship.swell );
@@ -729,7 +689,7 @@ for ( let i = 0; i <= nm1; i ++ ) {
 }
 
 const temp = 15;
-const rhos = Number( document.getElementById( "rhos" ).innerHTML );
+const rhos = Number( document.getElementById( "rhos" ).textContent );
 const ras = ship.RAS( temp, rhos ).map( e => e * 0.001 );
 const delr = [];
 
@@ -759,142 +719,256 @@ dif /= ( nm1 + 1 )
 
 const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ship.ncr / ( 1 + ship.sm ) ] );
 
-let table = document.createElement( 'table' );
-let row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "NCR";
-row.insertCell( - 1 ).innerHTML = ship.ncr.toFixed( 1 ) + ' (kW)';
-row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Sea Margin";
-row.insertCell( - 1 ).innerHTML = ship.sm.toFixed( 2 ) + ' (%)';
-row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Speed at NCR with s.m.";
-row.insertCell( - 1 ).innerHTML = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
-document.body.appendChild( table );
+let table, row;
 
-table = document.getElementById( "table1" );
-row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Relative wind velocity at anemometer height (m/s)";
-vwr.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Measured data
+/////////////////////////////////////////////////////////////////////////////////////////////
+table = new UITable();
+document.body.appendChild( table.dom );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Relative wind direction at anemometer height (°)";
-dwr.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Engine load (%)'
+ship.load.map( e => {
+
+	const cell = row.insertHeader();
+	cell.textContent = e;
+	cell.colSpan = 2;
+
+} );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "True wind velocity at anemometer height (m/s)";
-vwt.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Run number'
+ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "True wind direction at anemometer height (°)";
-dwt.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Heading (°)'
+ship.hdg.map( e => row.insertCell().textContent = e );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "True wind velocity at anemometer height, double run averaged (m/s)";
-vwtAve.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Speed over ground (knots)'
+ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "True wind direction at anemometer height, double run averaged (°)";
-dwtAve.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Shaft speed (rpm)'
+ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "True wind velocity at reference height (m/s)";
-vwtRef.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Shaft power (kW)'
+ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Relative wind velocity at reference height (m/s)";
-vwrRef.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Wind velocity (m/s)'
+ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Relative wind direction at reference height (°)";
-dwrRef.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Wind direction (°)'
+ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Wind coefficient";
-caa.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = 'Wave height (m)'
+ship.wave.map( e => row.insertCell().textContent = e.height.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "RAA (kN)";
-raa.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 3 ) );
+row.insertHeader().textContent = 'Wave direction (°)'
+ship.wave.map( e => row.insertCell().textContent = e.angle.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Wave motion (kN) ';
-wave.rawm.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = 'Wave period (sec)'
+ship.wave.map( e => row.insertCell().textContent = e.period.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Wave reflection (kN) ';
-wave.rawr.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = 'Swell height (m)'
+ship.swell.map( e => row.insertCell().textContent = e.height.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Wave total (kN) ';
-wave.total.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = 'Swell direction (°)'
+ship.swell.map( e => row.insertCell().textContent = e.angle.toFixed( 1 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Swell motion (kN) ';
-swell.rawm.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = 'Swell period (sec)'
+ship.swell.map( e => row.insertCell().textContent = e.period.toFixed( 1 ) );
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// Results
+/////////////////////////////////////////////////////////////////////////////////////////////
+row = table.insertRow();
+row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
+vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Swell reflection (kN) ';
-swell.rawr.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
+dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'Swell total (kN) ';
-swell.total.map( e => row.insertCell( - 1 ).innerHTML = ( 0.001 * e ).toFixed( 2 ) );
+row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
+vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'RAW (kN) ';
-raw.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = "True wind direction at anemometer height (°)";
+dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = 'RAS (kN) ';
-ras.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
+vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "&#916R (kN)";
-delr.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 2 ) );
+row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
+dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "Vs (kts)";
-stw.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 3 ) );
+row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
+vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "PD (kW)";
-pid.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 0 ) );
+row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
+vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
 row = table.insertRow();
-row.insertCell( - 1 ).innerHTML = "PB (kW)";
-pb.map( e => row.insertCell( - 1 ).innerHTML = e.toFixed( 0 ) );
+row.insertHeader().textContent = "Relative wind direction at reference height (°)";
+dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
+row = table.insertRow();
+row.insertHeader().textContent = "Wind coefficient";
+caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = "RAA (kN)";
+raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Wave motion (kN) ';
+wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Wave reflection (kN) ';
+wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Wave total (kN) ';
+wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Swell motion (kN) ';
+swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Swell reflection (kN) ';
+swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Swell total (kN) ';
+swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'RAW (kN) ';
+raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'RAS (kN) ';
+ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = "ΔR (kN)";
+delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = "Vs (kts)";
+stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = "PD (kW)";
+pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
+
+row = table.insertRow();
+row.insertHeader().textContent = "PB (kW)";
+pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
+
+table = new UITable();
+document.body.appendChild( table.dom );
+row = table.insertRow();
+row.insertCell( - 1 ).textContent = "NCR";
+row.insertCell( - 1 ).textContent = ship.ncr.toFixed( 1 ) + ' (kW)';
+row = table.insertRow();
+row.insertCell( - 1 ).textContent = "Sea Margin";
+row.insertCell( - 1 ).textContent = ship.sm.toFixed( 2 ) + ' (%)';
+row = table.insertRow();
+row.insertCell( - 1 ).textContent = "Speed at NCR with s.m.";
+row.insertCell( - 1 ).textContent = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
+
+
+//Chart
+const ctx = document.getElementById('canvas');
+
+const data = {
+
+	datasets: [
+		{
+			label: 'Ballast M/T',
+			data: [],
+			backgroundColor: 'rgb(255, 99, 132)'
+		},
+		{
+			label: 'Design M/T',
+			data: [],
+			backgroundColor: 'rgb(99, 132, 255)'
+		}
+	],
+
+};
+
+  ship.mt.vs.map( e => data.datasets[ 0 ].data.push( { x: e } ) );
+  ship.mt.pb.map( ( e, i ) => data.datasets[ 0 ].data[ i ].y = e )
+  
+  ship.mt.vsLoaded.map( e => data.datasets[ 1 ].data.push( { x: e } ) );
+  ship.mt.pbLoaded.map( ( e, i ) => data.datasets[ 1 ].data[ i ].y = e ); ;
+
+const config = {
+	type: 'scatter',
+	data: data,
+	options: {
+	  scales: {
+		x: {
+		  type: 'linear',
+		  position: 'bottom'
+		}
+	  }
+	}
+  };
+
+  new Chart( ctx, config );
 
 
 //SNNM validation
-const l = Number( document.getElementById( "lpp" ).innerHTML );
-const b = Number( document.getElementById( "lpp" ).innerHTML );
-const tf = Number( document.getElementById( "tf" ).innerHTML );
-const ta = Number( document.getElementById( "ta" ).innerHTML );
-const cb = Number( document.getElementById( "cb" ).innerHTML );
-const kyy = Number( document.getElementById( "kyy" ).innerHTML );
-const le = Number( document.getElementById( "le" ).innerHTML );
-const lr = Number( document.getElementById( "lr" ).innerHTML );
+const l = Number( document.getElementById( "lpp" ).textContent );
+const b = Number( document.getElementById( "lpp" ).textContent );
+const tf = Number( document.getElementById( "tf" ).textContent );
+const ta = Number( document.getElementById( "ta" ).textContent );
+const cb = Number( document.getElementById( "cb" ).textContent );
+const kyy = Number( document.getElementById( "kyy" ).textContent );
+const le = Number( document.getElementById( "le" ).textContent );
+const lr = Number( document.getElementById( "lr" ).textContent );
 const vs = 14.5;
 const angle = 0;
-let tb = document.createElement( 'table' );
-document.body.appendChild( tb );
+let tb = new UITable();
+document.body.appendChild( tb.dom );
 row = tb.insertRow();
-row.insertCell( - 1 ).innerHTML = "lamda / L";
-row.insertCell( - 1 ).innerHTML = "w'";
-row.insertCell( - 1 ).innerHTML = "b1";
-row.insertCell( - 1 ).innerHTML = "d1";
-row.insertCell( - 1 ).innerHTML = "Kawm";
-row.insertCell( - 1 ).innerHTML = "T12";
-row.insertCell( - 1 ).innerHTML = "T34";
-row.insertCell( - 1 ).innerHTML = "alphaT12";
-row.insertCell( - 1 ).innerHTML = "alphaT34";
-row.insertCell( - 1 ).innerHTML = "f(alpha)";
-row.insertCell( - 1 ).innerHTML = "Kawr1";
-row.insertCell( - 1 ).innerHTML = "Kawr2";
-row.insertCell( - 1 ).innerHTML = "Kawr3";
-row.insertCell( - 1 ).innerHTML = "Kawr4";
-row.insertCell( - 1 ).innerHTML = "Kaw";
+row.insertHeader().textContent = "lamda / L";
+row.insertHeader().textContent = "w'";
+row.insertHeader().textContent = "b1";
+row.insertHeader().textContent = "d1";
+row.insertHeader().textContent = "Kawm";
+row.insertHeader().textContent = "T12";
+row.insertHeader().textContent = "T34";
+row.insertHeader().textContent = "alphaT12";
+row.insertHeader().textContent = "alphaT34";
+row.insertHeader().textContent = "f(alpha)";
+row.insertHeader().textContent = "Kawr1";
+row.insertHeader().textContent = "Kawr2";
+row.insertHeader().textContent = "Kawr3";
+row.insertHeader().textContent = "Kawr4";
+row.insertHeader().textContent = "Kaw";
 
 for ( let i = 0; i <= 46; i ++ ) {
 
@@ -902,40 +976,40 @@ for ( let i = 0; i <= 46; i ++ ) {
 	const lamda = lamdaOverL * l;
 	const res = snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda );
 	row = tb.insertRow();
-	row.insertCell( - 1 ).innerHTML = lamdaOverL.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawm.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.t12.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.t34.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.at12.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.at34.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.fa.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawr1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawr2.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawr3.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawr4.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
+	row.insertCell().textContent = lamdaOverL.toFixed( 4 );
+	row.insertCell().textContent = res.omega.toFixed( 4 );
+	row.insertCell().textContent = res.b1.toFixed( 4 );
+	row.insertCell().textContent = res.d1.toFixed( 4 );
+	row.insertCell().textContent = res.kawm.toFixed( 4 );
+	row.insertCell().textContent = res.t12.toFixed( 4 );
+	row.insertCell().textContent = res.t34.toFixed( 4 );
+	row.insertCell().textContent = res.at12.toFixed( 4 );
+	row.insertCell().textContent = res.at34.toFixed( 4 );
+	row.insertCell().textContent = res.fa.toFixed( 4 );
+	row.insertCell().textContent = res.kawr1.toFixed( 4 );
+	row.insertCell().textContent = res.kawr2.toFixed( 4 );
+	row.insertCell().textContent = res.kawr3.toFixed( 4 );
+	row.insertCell().textContent = res.kawr4.toFixed( 4 );
+	row.insertCell().textContent = res.kwave.toFixed( 4 );
 
 }
 
 //STA2 validation
-tb = document.createElement( 'table' );
-document.body.appendChild( tb );
+tb = new UITable();
+document.body.appendChild( tb.dom );
 row = tb.insertRow();
-row.insertCell( - 1 ).innerHTML = "lamda / L";
-row.insertCell( - 1 ).innerHTML = "w'";
-row.insertCell( - 1 ).innerHTML = "w1";
-row.insertCell( - 1 ).innerHTML = "a1";
-row.insertCell( - 1 ).innerHTML = "b1";
-row.insertCell( - 1 ).innerHTML = "d1";
-row.insertCell( - 1 ).innerHTML = "rawml(w)";
-row.insertCell( - 1 ).innerHTML = "f1";
-row.insertCell( - 1 ).innerHTML = "I1";
-row.insertCell( - 1 ).innerHTML = "K1";
-row.insertCell( - 1 ).innerHTML = "alpha(w)";
-row.insertCell( - 1 ).innerHTML = "Kwave";
+row.insertHeader().textContent = "lamda / L";
+row.insertHeader().textContent = "w'";
+row.insertHeader().textContent = "w1";
+row.insertHeader().textContent = "a1";
+row.insertHeader().textContent = "b1";
+row.insertHeader().textContent = "d1";
+row.insertHeader().textContent = "rawml(w)";
+row.insertHeader().textContent = "f1";
+row.insertHeader().textContent = "I1";
+row.insertHeader().textContent = "K1";
+row.insertHeader().textContent = "alpha(w)";
+row.insertHeader().textContent = "Kwave";
 
 for ( let i = 0; i <= 46; i ++ ) {
 
@@ -943,18 +1017,18 @@ for ( let i = 0; i <= 46; i ++ ) {
 	const lamda = lamdaOverL * l;
 	const res = sta2( l, b, 0.5 * ( tf + ta ), cb, kyy, vs, angle, lamda );
 	row = tb.insertRow();
-	row.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.omega.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.omegaBar.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.a1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.b1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.d1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kawml.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.f1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.I1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.K1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.alpha1.toFixed( 4 );
-	row.insertCell( - 1 ).innerHTML = res.kwave.toFixed( 4 );
+	row.insertCell().textContent = ( lamda / l ).toFixed( 4 );
+	row.insertCell().textContent = res.omega.toFixed( 4 );
+	row.insertCell().textContent = res.omegaBar.toFixed( 4 );
+	row.insertCell().textContent = res.a1.toFixed( 4 );
+	row.insertCell().textContent = res.b1.toFixed( 4 );
+	row.insertCell().textContent = res.d1.toFixed( 4 );
+	row.insertCell().textContent = res.kawml.toFixed( 4 );
+	row.insertCell().textContent = res.f1.toFixed( 4 );
+	row.insertCell().textContent = res.I1.toFixed( 4 );
+	row.insertCell().textContent = res.K1.toFixed( 4 );
+	row.insertCell().textContent = res.alpha1.toFixed( 4 );
+	row.insertCell().textContent = res.kwave.toFixed( 4 );
 
 }
 
@@ -1151,7 +1225,7 @@ function wave2002( l, tm, vs ) {
 	document.body.appendChild( table );
 	let row1;
 	row1 = table.insertRow();
-	row1.insertCell( - 1 ).innerHTML = "lamda / L";
+	row1.insertCell( - 1 ).textContent = "lamda / L";
 
 	for ( let i = 0; i <= 46; i ++ ) {
 
@@ -1172,7 +1246,7 @@ function wave2002( l, tm, vs ) {
 
 
 	row1 = table.insertRow();
-	row1.insertCell( - 1 ).innerHTML = ( lamda / l ).toFixed( 4 );
+	row1.insertCell( - 1 ).textContent = ( lamda / l ).toFixed( 4 );
 
 	}
 
