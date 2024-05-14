@@ -46,3 +46,73 @@ td {
 /* caption {
 	padding: 10px;
 } */
+
+#viewportSTA {
+	position: absolute;
+	top: 32px;
+	left: 0;
+	/* right: 300px; */
+	bottom: 0;
+	z-index: -1;
+	/* overflow: hidden; */
+}
+
+#tabbedPanel {
+	position: absolute;
+	right: 0;
+	top: 332px;
+	bottom: 0;
+	width: 300px;
+	background-color: rgb(24, 24, 24);
+	overflow: auto;
+}
+
+	.Tabs { /* .TabbedPanel .Tabs */
+		text-transform: uppercase;
+		text-align: center;
+		display: flex;
+		background-color: rgb(12, 12, 12);
+		border-left: 1px solid rgb(96, 96, 96);
+		border-radius: 10px 0;
+	}
+	
+	.Tabs .Tab {
+		flex-grow: 1;
+		border-radius: 10px 10px 0 0;
+		border-top: 1px solid rgb(96, 96, 96);
+		border-right: 1px solid rgb(96, 96, 96);
+		border-bottom: 1px solid rgb(96, 96, 96);
+		padding: 12px 10px 8px 10px;
+		font-size: 14px;
+		color: grey;
+		background-color: rgb(12, 12, 12);;
+	}
+
+	.Tabs .Tab:hover {
+		color: beige;
+	}
+
+	.Tabs .Tab.selected {
+		color: white;
+		border-bottom: 0;
+		background-color: rgb(36, 36, 36);
+	}
+
+	.Panels { /* .TabbedPanel .Panels */
+		color: lightgray;
+		border-right: 1px solid;
+		border-bottom: 1px solid;
+		border-left: 1px solid;
+		border-color: rgb(96, 96, 96);
+		background-color: rgb(36, 36, 36);
+		margin: 0;
+		padding: 5px 10px;
+	}
+
+		.item {
+			padding: 5px 10px;
+		}
+
+		.item:hover {
+			background-color: Green;
+		}
