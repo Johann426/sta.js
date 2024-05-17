@@ -1,33 +1,36 @@
 html {
+	font-size: 15px;
 	font-family: sans-serif;
+	color-scheme: light;
 }
 
 table {
+	color: lightgray;
 	border-collapse: collapse;
-	border: 2px solid rgb(200,200,200);
+	border: 2px solid rgb(96,96,96);
 	letter-spacing: 1px;
 	font-size: 0.8rem;
 }
 
 tr:nth-child(even)  {
-	background-color: rgb(250,250,250);
+	background-color: rgb(36,36,36);
 }
 
 tr:nth-child(odd)  {
-	background-color: rgb(245,245,245);
+	background-color: rgb(24,36,36);
 }
 
 td, th {
-	border: 1px solid rgb(190,190,190);
+	border: 1px solid rgb(96,96,96);
 	padding: 10px 20px;
 }
 
 td.selected, th.selected {
-	background-color: rgb(215, 235, 250);
+	background-color: rgb(15, 35, 50);
 }
 
 th {
-	background-color: rgb(235,235,235);
+	background-color: rgb(24,24,24);
 	font-weight: bold;
 }
 
@@ -59,10 +62,10 @@ td {
 
 #tabbedPanel {
 	position: absolute;
-	right: 0;
+	/* right: 0; */
 	top: 332px;
 	bottom: 0;
-	width: 300px;
+	/* width: 300px; */
 	background-color: rgb(24, 24, 24);
 	overflow: auto;
 }
@@ -116,3 +119,51 @@ td {
 		.item:hover {
 			background-color: Green;
 		}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+	background-color: rgb(36, 36, 36);
+	color: white;
+	cursor: pointer;
+	padding: 18px;
+	width: 100%;
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 15px;
+  }
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+background-color: #555;
+}
+
+.collapsible:after {
+content: '\002B'; /* Unicode character for "plus" sign (+) */
+float: right;
+margin-left: 5px;
+}
+
+.active:after {
+content: "\2212"; /* Unicode character for "minus" sign (-) */
+}
+
+/* Style the collapsible content. Animated Collapsible (Slide Down) */
+.content {
+padding: 0 18px;
+background-color: rgb(36, 36, 36);
+max-height: 0;
+/* overflow: hidden; */
+overflow: auto;
+transition: max-height 0.2s ease-out;
+}
+
+
+@media (prefers-color-scheme: dark) {
+	
+	html {
+		font-size: 15px;
+		font-family: sans-serif;
+		color-scheme: dark;
+	}
+
+}
