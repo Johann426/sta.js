@@ -2,20 +2,107 @@ import { array } from './index.esm.js';
 import { besseli, besselk } from './bessel.js';
 import { f } from './Interpolation.js';
 import { UITable } from './UITable.js';
+import { UICollapsible } from './UICollapsible.js';
+import { UIDiv, UISelect, UITabbedPanel } from './ui.js';
 
 const M = Math;
 const pi = M.PI;
 const g = 9.80665; //9.807 staimo ?
+
+class viewportSTA extends UIDiv{
+
+	constructor() {
+
+		super();
+		this.setId( 'viewportSTA' );
+
+		const tabbedPanel = new UITabbedPanel();
+		this.add( tabbedPanel );
+		
+		const particular = new UIDiv();
+		const correction = new UIDiv();
+		const result = new UIDiv();
+		
+		tabbedPanel.setId( 'tabbedPanel' )
+		tabbedPanel.addTab( 'particular', 'particular', particular );
+		tabbedPanel.addTab( 'correction', 'correction', correction );
+		tabbedPanel.addTab( 'result', 'result', result );
+		tabbedPanel.select( 'correction' );
+
+		Object.assign( this, { particular, correction, result } )
+
+		const wind = new UICollapsible( 'wind' );
+		const wave = new UICollapsible( 'wave' );
+		const current = new UICollapsible( 'current' );
+		correction.add( wind, wave, current );
+
+		let table, row;
+
+		table = new UITable();
+		wind.content.dom.appendChild( table.dom );
+		
+		for ( let i = 0; i <= 36; i ++ ) {
+
+			row = table.insertRow();
+			row.insertCell().textContent = ( i * 10 ).toString();
+			row.insertCell().textContent = ''
+
+		}
+		
+		const options = new UISelect().setOptions( {
+
+			iterative: 'iterative',
+			mom: 'mean of means'
+
+	 	} );
+		
+		options.setValue( 'iterative' )
+
+		current.content.dom.appendChild( options.dom );
+
+	}
+
+}
 
 class Ship {
 
 	constructor() {
 
 		this.initialize();
+		this.name = 'STA'
+
+	}
+
+	toJSON() {
+
+		const data = {
+			metadata: {
+				version: 1.0,
+				type: this.constructor.name,
+				generator: this.constructor.name + '.toJSON'
+			}
+		};
+
+		Object.assign( data, this )
+
+		return data;
 
 	}
 
 	initialize() {
+
+		this.l = Number( document.getElementById( "lpp" ).textContent );
+		this.b = Number( document.getElementById( "beam" ).textContent );
+		this.tf = Number( document.getElementById( "tf" ).textContent );
+		this.ta = Number( document.getElementById( "ta" ).textContent );
+		this.disp = Number( document.getElementById( "disp" ).textContent );
+		this.wetted = Number( document.getElementById( "S" ).textContent );
+		this.rho = Number( document.getElementById( "rhos" ).textContent );
+		this.cb = Number( document.getElementById( "cb" ).textContent );
+		this.kyy = Number( document.getElementById( "kyy" ).textContent );
+		this.le = Number( document.getElementById( "le" ).textContent );
+		this.lr = Number( document.getElementById( "lr" ).textContent );
+		this.lbwl = Number( document.getElementById( "lbwl" ).textContent );
 
 		// loads 3322 임시 데이터
 		this.ncr = 44187;
@@ -85,16 +172,7 @@ class Ship {
 
 		const nm1 = this.hdg.length - 1;
 		const vg = speed;
-		const l = Number( document.getElementById( "lpp" ).textContent );
-		const b = Number( document.getElementById( "beam" ).textContent );
-		const tf = Number( document.getElementById( "tf" ).textContent );
-		const ta = Number( document.getElementById( "ta" ).textContent );
-		const rho = Number( document.getElementById( "rhos" ).textContent );
-		const cb = Number( document.getElementById( "cb" ).textContent );
-		const kyy = Number( document.getElementById( "kyy" ).textContent );
-		const le = Number( document.getElementById( "le" ).textContent );
-		const lr = Number( document.getElementById( "lr" ).textContent );
-		const lbwl = Number( document.getElementById( "lbwl" ).textContent );
+		const { l, b, tf, ta, rho, cb, kyy, le, lr, lbwl } = this;
 
 		//STA1 result
 		for ( let i = 0; i <= nm1; i ++ ) {
@@ -675,10 +753,12 @@ class Ship {
 // Analysis
 /////////////////////////////////////////////////////////////////////////////////////////////
 const ship = new Ship();
-const rho = Number( document.getElementById( "rhoa" ).textContent );
-const Ax = Number( document.getElementById( "Ax" ).textContent );
+ship.rhoa = Number( document.getElementById( "rhoa" ).textContent );
+ship.Ax = Number( document.getElementById( "Ax" ).textContent );
+const { rhoa, Ax, rho } = ship;
+
 const nm1 = ship.hdg.length - 1;
-const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rho, Ax, ship.wind ) 
+const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rhoa, Ax, ship.wind ) 
 const { wave, swell } = ship.RAW( ship.sog, ship.wave, ship.swell );
 const raw = [];
 
@@ -689,8 +769,7 @@ for ( let i = 0; i <= nm1; i ++ ) {
 }
 
 const temp = 15;
-const rhos = Number( document.getElementById( "rhos" ).textContent );
-const ras = ship.RAS( temp, rhos ).map( e => e * 0.001 );
+const ras = ship.RAS( temp, rho ).map( e => e * 0.001 );
 const delr = [];
 
 for ( let i = 0; i <= nm1; i ++ ) {
@@ -724,8 +803,99 @@ let table, row;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Measured data
 /////////////////////////////////////////////////////////////////////////////////////////////
+const viewport = new viewportSTA();
+document.body.appendChild( viewport.dom );
+
+const { particular, correction, result } = viewport;
+
 table = new UITable();
-document.body.appendChild( table.dom );
+particular.dom.appendChild( table.dom );
+
+row = table.insertRow();
+row.insertHeader().textContent = 'LOA (m)'
+row.insertCell().textContent = ''
+
+row = table.insertRow();
+row.insertHeader().textContent = 'LPP (m)'
+row.insertCell().textContent = ship.l;
+
+row = table.insertRow();
+row.insertHeader().textContent = 'B (m)'
+row.insertCell().textContent = ship.b;
+
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Tfwd (m)'
+row.insertCell().textContent = ship.tf;
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Taft (m)'
+row.insertCell().textContent = ship.ta;
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Δ (m\u00B3)'
+row.insertCell().textContent = ship.disp;
+
+row = table.insertRow();
+row.insertHeader().textContent = 'S (m\u00B2)'
+row.insertCell().textContent = ship.wetted;
+
+row = table.insertRow();
+row.insertHeader().textContent = 'Ax (m\u00B2)'
+row.insertCell().textContent = ship.Ax;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'Z<sub>a</sub> (m)';
+row.insertCell().textContent = ship.Za;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'Z<sub>ref</sub> (m)';
+row.insertCell().textContent = ship.Zref;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = '&#961<sub>s</sub> (kg/m<sup>3</sup>)';
+row.insertCell().textContent = ship.rho;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = '&#961<sub>air</sub> (kg/m<sup>3</sup>)';
+row.insertCell().textContent = ship.rhoa;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'C<sub>B</sub>';
+row.insertCell().textContent = ship.cb;
+
+
+
+
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'k<sub>yy</sub>';
+row.insertCell().textContent = ship.kyy;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'L<sub>E</sub>';
+row.insertCell().textContent = ship.le;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'L<sub>R</sub>';
+row.insertCell().textContent = ship.lr;
+
+row = table.insertRow();
+row.insertHeader().dom.innerHTML = 'L<sub>BWL</sub>';
+row.insertCell().textContent = ship.lbwl;
+
+
+
+
+
+
+
+
+
+
+
+table = new UITable();
+viewport.dom.appendChild( table.dom );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Engine load (%)'
@@ -886,58 +1056,165 @@ row.insertHeader().textContent = "PB (kW)";
 pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
 
 table = new UITable();
-document.body.appendChild( table.dom );
+viewport.dom.appendChild( table.dom );
 row = table.insertRow();
-row.insertCell( - 1 ).textContent = "NCR";
-row.insertCell( - 1 ).textContent = ship.ncr.toFixed( 1 ) + ' (kW)';
+row.insertHeader().textContent = "NCR";
+row.insertHeader().textContent = ship.ncr + ' (kW)';
 row = table.insertRow();
-row.insertCell( - 1 ).textContent = "Sea Margin";
-row.insertCell( - 1 ).textContent = ship.sm.toFixed( 2 ) + ' (%)';
+row.insertHeader().textContent = "Sea Margin";
+row.insertHeader().textContent = ship.sm * 100 + ' (%)';
 row = table.insertRow();
-row.insertCell( - 1 ).textContent = "Speed at NCR with s.m.";
-row.insertCell( - 1 ).textContent = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
+row.insertHeader().textContent = "Speed at NCR with s.m.";
+row.insertHeader().textContent = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
 
 
 //Chart
-const ctx = document.getElementById('canvas');
+if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+	
+	Chart.defaults.borderColor = 'DimGray';
+
+}
+
+const ctx = document.createElement('canvas');
+viewport.dom.appendChild( ctx );
+ctx.width = 300;
+ctx.height = 400;
 
 const data = {
 
 	datasets: [
 		{
 			label: 'Ballast M/T',
-			data: [],
-			backgroundColor: 'rgb(255, 99, 132)'
+			// backgroundColor: 'rgb(255, 99, 132)',
+			// borderColor: 'rgb(255, 149, 182)',
+			showLine: true,
+			data: ship.mt.vs.map( ( e, i ) => { 
+				
+				return {
+					
+					x: e,
+					y: ship.mt.pb[ i ]
+
+				}
+
+			} ),
+
 		},
 		{
 			label: 'Design M/T',
-			data: [],
-			backgroundColor: 'rgb(99, 132, 255)'
+			// backgroundColor: 'rgb(99, 132, 255)',
+			// borderColor: 'rgb(149, 182, 255)',
+			showLine: true,
+			data: ship.mt.vsLoaded.map( ( e, i ) => { 
+				
+				return {
+					
+					x: e,
+					y: ship.mt.pbLoaded[ i ]
+					
+				}
+
+			} ),
 		}
 	],
 
 };
 
-  ship.mt.vs.map( e => data.datasets[ 0 ].data.push( { x: e } ) );
-  ship.mt.pb.map( ( e, i ) => data.datasets[ 0 ].data[ i ].y = e )
-  
-  ship.mt.vsLoaded.map( e => data.datasets[ 1 ].data.push( { x: e } ) );
-  ship.mt.pbLoaded.map( ( e, i ) => data.datasets[ 1 ].data[ i ].y = e ); ;
-
 const config = {
+	
 	type: 'scatter',
 	data: data,
-	options: {
-	  scales: {
-		x: {
-		  type: 'linear',
-		  position: 'bottom'
-		}
-	  }
-	}
-  };
 
-  new Chart( ctx, config );
+	options: {
+	
+		responsive: false,
+
+		scales: {
+		
+			x: {
+			
+				type: 'linear',
+				position: 'bottom',
+				
+				title: {
+
+					display: true,
+					text: 'Speed [knots]',
+
+					font: {
+
+						size: 14,
+						weight: 'bold',
+
+					}
+
+				},
+
+				// ticks: {
+
+				// 	// Include a dollar sign in the ticks
+				// 	callback: function(value, index, ticks) {
+
+				// 		return value.toFixed( 1 ) + ' kts';
+
+				// 	}
+
+                // }
+			
+			},
+
+			y: {
+			
+				type: 'linear',
+				position: 'left',
+				
+				title: {
+
+					display: true,
+					text: 'Power [kW]',
+					
+					font: {
+
+						size: 14,
+						weight: 'bold',
+
+					}
+
+				},
+
+				// ticks: {
+
+				// 	// Include a dollar sign in the ticks
+				// 	callback: function(value, index, ticks) {
+
+				// 		return value.toLocaleString() + ' kW';
+
+				// 	}
+
+                // }
+			
+			}
+
+	  	},
+
+		plugins: {
+
+			datalabels: {
+
+				anchor: 'start',
+				align: '-45',
+				clamp: true,
+				color: "orange",
+
+			}
+
+		},
+	
+	}
+
+};
+
+new Chart( ctx, config );
 
 
 //SNNM validation
@@ -952,7 +1229,8 @@ const lr = Number( document.getElementById( "lr" ).textContent );
 const vs = 14.5;
 const angle = 0;
 let tb = new UITable();
-document.body.appendChild( tb.dom );
+viewport.dom.appendChild( tb.dom );
+
 row = tb.insertRow();
 row.insertHeader().textContent = "lamda / L";
 row.insertHeader().textContent = "w'";
@@ -996,7 +1274,7 @@ for ( let i = 0; i <= 46; i ++ ) {
 
 //STA2 validation
 tb = new UITable();
-document.body.appendChild( tb.dom );
+viewport.dom.appendChild( tb.dom );
 row = tb.insertRow();
 row.insertHeader().textContent = "lamda / L";
 row.insertHeader().textContent = "w'";
@@ -1032,8 +1310,47 @@ for ( let i = 0; i <= 46; i ++ ) {
 
 }
 
-		
+// const tmp = document.createElement('button');
+// document.body.appendChild( tmp );
+// tmp.textContent = 'save';
+// tmp.addEventListener( 'click', () => {
 
+// 	let output = ship;
+
+// 	try {
+
+// 		output = JSON.stringify( output, null, '\t' );
+
+
+// 	} catch ( e ) {
+
+// 		output = JSON.stringify( output );
+
+// 	}
+
+// 	save( output )
+
+// } )
+
+// async function save( contents ) {
+
+// 	const opts = {
+
+// 		types: [ {
+
+// 			description: 'JSON file',
+// 			accept: { 'json/plain': [ '.json' ] }
+
+// 		} ]
+
+// 	};
+
+// 	const handle = await window.showSaveFilePicker( opts );
+// 	const writable = await handle.createWritable();
+// 	await writable.write( contents );
+// 	await writable.close();
+
+// }
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
