@@ -12,7 +12,7 @@ class UITable { // only number is acceptable in table body
             const rowIndex = event.target.parentNode.rowIndex;
             const cellIndex = event.target.cellIndex;
             index[ 0 ] = rowIndex;
-            index[ 1 ] = cellIndex;
+            index[ 1 ] = rowIndex == 0 ? cellIndex * 2 : cellIndex;
             dom.addEventListener( 'pointermove', onPointerMove );
 
         }
@@ -31,15 +31,17 @@ class UITable { // only number is acceptable in table body
             const cellIndex = event.target.cellIndex;
             const is = rowIndex > index[ 0 ] ? index[ 0 ] : rowIndex;
             const ie = rowIndex > index[ 0 ] ? rowIndex : index[ 0 ];
-            const js = cellIndex > index[ 1 ] ? index[ 1 ] : cellIndex;
-            const je = cellIndex > index[ 1 ] ? cellIndex : index[ 1 ];
             removeClass();
 
             for ( let i = is; i <= ie; i ++ ) {
 
                 const row = dom.rows[ i ];
+                const js = cellIndex > index[ 1 ] ? index[ 1 ] : rowIndex == 0 ? cellIndex * 2 : cellIndex;
+                const je = cellIndex > index[ 1 ] ? rowIndex == 0 ? cellIndex * 2 : cellIndex : index[ 1 ];
+                const jsm = i == 0 ? Math.ceil( js / 2 ) : js;
+                const jem = i == 0 ? Math.floor( je / 2 ) : je;
 
-                for ( let j = js; j <= je; j ++ ) {
+                for ( let j = jsm; j <= jem; j ++ ) {
 
                     const cell = row.cells[ j ];
                     cell.className = "selected";
@@ -285,7 +287,7 @@ class UICellElement {
             const cellIndex = event.target.cellIndex;
             
 
-			switch ( event.code ) {
+			switch ( event.key ) {
 
 				case 'Enter':
                     event.preventDefault();
@@ -319,9 +321,7 @@ class UICellElement {
         dom.addEventListener( 'drop', onDrop );
         dom.addEventListener( 'blur', onBlur, false );
         dom.addEventListener( 'keydown', onKeyDown, false );
-        
-        // editable cell
-        dom.setAttribute( 'contenteditable', true ); 
+        dom.setAttribute( 'contenteditable', true ); // editable cell
 
     }
 
