@@ -6,20 +6,21 @@ class UITable { // only number is acceptable in table body
         this.initialize( n, m );
         const dom = this.dom;
         const index = [];
+        let ij;
         
         const onPointerDown = function ( event ) {
 
             const rowIndex = event.target.parentNode.rowIndex;
             const cellIndex = event.target.cellIndex;
             index[ 0 ] = rowIndex;
-            index[ 1 ] = rowIndex == 0 ? cellIndex * 2 : cellIndex;
+            index[ 1 ] = cellIndex;
+            removeClass();
             dom.addEventListener( 'pointermove', onPointerMove );
 
         }
 
         const onPointerUp = function ( event ) {
 
-            removeClass();
             dom.removeEventListener( 'pointermove', onPointerMove );
 
         }
@@ -31,17 +32,15 @@ class UITable { // only number is acceptable in table body
             const cellIndex = event.target.cellIndex;
             const is = rowIndex > index[ 0 ] ? index[ 0 ] : rowIndex;
             const ie = rowIndex > index[ 0 ] ? rowIndex : index[ 0 ];
+            const js = cellIndex > index[ 1 ] ? index[ 1 ] : cellIndex;
+            const je = cellIndex > index[ 1 ] ? cellIndex : index[ 1 ];
             removeClass();
 
             for ( let i = is; i <= ie; i ++ ) {
 
                 const row = dom.rows[ i ];
-                const js = cellIndex > index[ 1 ] ? index[ 1 ] : rowIndex == 0 ? cellIndex * 2 : cellIndex;
-                const je = cellIndex > index[ 1 ] ? rowIndex == 0 ? cellIndex * 2 : cellIndex : index[ 1 ];
-                const jsm = i == 0 ? Math.ceil( js / 2 ) : js;
-                const jem = i == 0 ? Math.floor( je / 2 ) : je;
 
-                for ( let j = jsm; j <= jem; j ++ ) {
+                for ( let j = js; j <= je; j ++ ) {
 
                     const cell = row.cells[ j ];
                     cell.className = "selected";
@@ -49,6 +48,8 @@ class UITable { // only number is acceptable in table body
                 }
 
             }
+
+            ij = [ is, ie, js, je ];
 
         }
 
@@ -83,9 +84,36 @@ class UITable { // only number is acceptable in table body
 
         }
 
+        const onCopy = ( event ) => {
+
+            let str = new String();
+
+            for ( let i = ij[ 0 ]; i <= ij[ 1 ]; i ++ ) {
+
+                const row = dom.rows[ i ];
+
+                for ( let j = ij[ 2 ]; j <= ij[ 3 ]; j ++ ) {
+
+                    const cell = row.cells[ j ];
+                    const value = cell.textContent;
+                    str = j == ij[ 2 ] ? str.concat( value ) : str.concat( '\t', value );
+
+                }
+
+                str = str.concat( '\r\n' );
+
+            }
+            
+            console.log( str )
+            event.clipboardData.setData("text/plain", str );
+            event.preventDefault();
+
+        }
+
         dom.addEventListener( 'pointerdown', onPointerDown );
         dom.addEventListener( 'pointerup', onPointerUp );
         dom.addEventListener( 'paste', onPaste );
+        dom.addEventListener( 'copy', onCopy );
 
     }
 
