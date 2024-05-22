@@ -1,5 +1,5 @@
 html {
-	font-size: 15px;
+	font-size: 14px;
 	font-family: sans-serif;
 	color-scheme: light;
 }
@@ -9,7 +9,9 @@ table {
 	border-collapse: collapse;
 	border: 2px solid rgb(96,96,96);
 	letter-spacing: 1px;
-	font-size: 0.8rem;
+	font-size: 12px;
+	/* white-space: nowrap; */  /* Text will never wrap to the next line. */
+	table-layout:fixed;  /* table's width of each column to be fixed (or to be determined if not specified) */
 }
 
 tr:nth-child(even)  {
@@ -26,7 +28,7 @@ td, th {
 }
 
 td.selected, th.selected {
-	background-color: rgb(15, 35, 50);
+	background-color: rgb(35, 48, 96);
 }
 
 th {
@@ -36,6 +38,7 @@ th {
 
 td {
 	text-align: center;
+	/* font-weight: bold; */
 }
 
 /* td:not(:first-child) {
@@ -54,18 +57,70 @@ td {
 	position: absolute;
 	top: 32px;
 	left: 0;
-	/* right: 300px; */
 	bottom: 0;
-	z-index: -1;
-	/* overflow: hidden; */
+	width: 100%;
 }
 
-#tabbedPanel {
+#menubarSTA {
 	position: absolute;
-	/* right: 0; */
-	top: 332px;
-	bottom: 0;
-	/* width: 300px; */
+	width: 100%;
+	height: 32px;
+	background-color: rgb(36, 36, 36);
+	padding: 0;
+	margin: 0;
+	top: 0;
+	right: 0;
+}
+
+.menu {
+	float: left;
+	cursor: default;
+}
+
+	.menu .head {
+		display: inline-block;
+		color: white;
+		margin: 0;
+		padding: 8px 16px; /* top and bottom: 8px, right and left: 16px */
+		line-height: 16px;
+	}
+
+	.menu .head:hover {
+		background-color: rgb(48, 96, 196);
+		border-radius: 0 10px;
+	}
+
+	.menu .items {
+		position: fixed;
+		display: none;
+		background-color: rgb(48, 48, 48);
+		max-height: 50%;
+		overflow: auto;
+	}
+
+		.menu .items .item {
+			color: white;
+			padding: 5px 10px; /* top and bottom: 5px, right and left: 10px */
+			margin: 0 !important;
+		}
+
+		.menu .items .item:hover {
+			background-color: rgb(48, 96, 196);
+			border-radius: 10px;
+		}
+
+		.menu .items .divider {
+			border: 0;
+			border-top: 1px solid lightgray;
+			padding: 0;
+		}
+
+	.menu:hover .items {
+		display: block;
+	}
+
+#tabbedPanel {
+	width: 100%;
 	background-color: rgb(24, 24, 24);
 	overflow: auto;
 }
