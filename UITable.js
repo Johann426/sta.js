@@ -1,9 +1,11 @@
-class UITable { // only number is acceptable in table body
+import { UIElement } from "./ui.js";
+
+class UITable extends UIElement { // only number is acceptable in table body
 
     constructor( n = 0, m = 0 ) {
 
-        this.dom = document.createElement( 'table' );
-        this.initialize( n, m );
+        super( document.createElement( 'table' ) );
+        this.rows = [];
         const dom = this.dom;
         const index = [];
         let ij;
@@ -117,47 +119,21 @@ class UITable { // only number is acceptable in table body
 
     }
 
-    initialize( n, m ) {
+    insertRow( i = - 1 ) {
 
-        const dom = this.dom;
-
-        while( dom.rows.length > 0 ) {
-
-            dom.deleteRow( 0 );
-
-        }
-
-        for( let i = 0; i < n; i ++ ) {
-
-            const row = new UIRowElement();
-            dom.appendChild( row.dom );
-
-            for( let j = 0; j < m; j ++ ) {
-                
-                if ( i ) {
-
-                    const cell = new UICellElement();
-                    row.insertCell();
-
-                } else {
-
-                    const cell = new UICellElement( 'th' );
-                    row.insertCell();
-
-                }
-
-            }
-
-        }
+        const { dom, rows } = this;
+        const row = new UIRowElement();
+        rows.push( row );
+        dom.appendChild( row.dom );
+        return row;
 
     }
 
-    insertRow( row, i = - 1 ) {
+    removeRow( i = - 1 ) {
 
-        const dom = this.dom;
-        row = new UIRowElement();
-        dom.appendChild( row.dom );
-        return row;
+        const { dom, rows } = this;
+        rows.splice( i, 1 );
+        dom.deleteRow( i );
 
     }
 
@@ -206,13 +182,49 @@ class UITable { // only number is acceptable in table body
 
     }
 
+    getData() {
+
+        const arr = new Array();
+        const rows = this.rows;
+
+        for( let i = 0; i < rows.length; i ++ ) {
+
+            const row = rows[ i ];
+            let header;
+            
+            for( let j = 0; j < row.dom.cells.length; j ++ ) {
+
+                const txt = row.dom.cells[ j ].textContent;
+
+                if( j == 0 ) {
+
+                    header = txt.replace( /\s\(.*\)/g,'' )
+                    arr[ header ] = new Array();
+
+                } else {
+
+                    // regex of DateTime validator
+                    const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+                    const dateTime = txt.match(regex);
+                    arr[ header ][ j - 1 ] = !dateTime ? parseFloat( txt ) : txt;
+
+                }
+
+            }
+
+        }
+
+        return arr;
+
+    }
+
 }
 
-class UIRowElement {
+class UIRowElement extends UIElement {
 
     constructor() {
 
-        this.dom = document.createElement( 'tr' );
+        super( document.createElement( 'tr' ) );
 
     }
 
@@ -238,11 +250,11 @@ class UIRowElement {
 
 }
 
-class UICellElement {
+class UICellElement extends UIElement{
 
     constructor( type = 'td' ) {
 
-        this.dom = document.createElement( type );
+        super( document.createElement( type ) );
         type == 'td' ? this.init() : null;
 
     }
@@ -300,9 +312,19 @@ class UICellElement {
 
         const onBlur = () => {
 
-            const value = dom.textContent;
-            const number = parseFloat( value );
-			dom.textContent = number.toFixed( this.decimal );
+            const txt = dom.textContent;
+
+            // regex of DateTime validator
+            const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+            const dateTime = txt.match(regex);
+            // console.log( dateTime );
+            
+            if( txt != '' && !dateTime ) {
+
+                const number = parseFloat( txt.replace( ',', '' ) );
+			    dom.textContent = number.toFixed( this.decimal ).replace( /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',' ); // thousand seperator
+
+            }
 
 		}
 
