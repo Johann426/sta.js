@@ -2,67 +2,16 @@ import { array } from './index.esm.js';
 import { besseli, besselk } from './bessel.js';
 import { f } from './Interpolation.js';
 import { UITable } from './UITable.js';
-import { UICollapsible } from './UICollapsible.js';
-import { UIDiv, UISelect, UITabbedPanel } from './ui.js';
+
+
+import { MenubarSTA } from './MenubarSTA.js';
+import { ViewportSTA } from './ViewportSTA.js';
 
 const M = Math;
 const pi = M.PI;
 const g = 9.80665; //9.807 staimo ?
 
-class viewportSTA extends UIDiv{
-
-	constructor() {
-
-		super();
-		this.setId( 'viewportSTA' );
-
-		const tabbedPanel = new UITabbedPanel();
-		this.add( tabbedPanel );
-		
-		const particular = new UIDiv();
-		const correction = new UIDiv();
-		const result = new UIDiv();
-		
-		tabbedPanel.setId( 'tabbedPanel' )
-		tabbedPanel.addTab( 'particular', 'particular', particular );
-		tabbedPanel.addTab( 'correction', 'correction', correction );
-		tabbedPanel.addTab( 'result', 'result', result );
-		tabbedPanel.select( 'correction' );
-
-		Object.assign( this, { particular, correction, result } )
-
-		const wind = new UICollapsible( 'wind' );
-		const wave = new UICollapsible( 'wave' );
-		const current = new UICollapsible( 'current' );
-		correction.add( wind, wave, current );
-
-		let table, row;
-
-		table = new UITable();
-		wind.content.dom.appendChild( table.dom );
-		
-		for ( let i = 0; i <= 36; i ++ ) {
-
-			row = table.insertRow();
-			row.insertCell().textContent = ( i * 10 ).toString();
-			row.insertCell().textContent = ''
-
-		}
-		
-		const options = new UISelect().setOptions( {
-
-			iterative: 'iterative',
-			mom: 'mean of means'
-
-	 	} );
-		
-		options.setValue( 'iterative' )
-
-		current.content.dom.appendChild( options.dom );
-
-	}
-
-}
+console.log( parseFloat( '1,000' ) );
 
 class Ship {
 
@@ -109,7 +58,7 @@ class Ship {
 		this.sm = 0.15;
 		this.load = [ 65, 75, 75, 85, 100 ];
 		// time
-		this.time = [ "2023-12-20T00:00:00", "2023-12-20T01:00:00", "2023-12-20T02:00:00", "2023-12-20T03:00:00", "2023-12-20T04:00:00", "2023-12-20T05:00:00", "2023-12-20T06:00:00", "2023-12-20T07:00:00", "2023-12-20T08:00:00", "2023-12-20T09:00:00" ];
+		this.time = [ "2023-12-20 00:00:00", "2023-12-20 01:00:00", "2023-12-20 02:00:00", "2023-12-20 03:00:00", "2023-12-20 04:00:00", "2023-12-20 05:00:00", "2023-12-20 06:00:00", "2023-12-20 07:00:00", "2023-12-20 08:00:00", "2023-12-20 09:00:00" ];
 		// heading
 		this.hdg = [ 20, 200, 20, 200, 20, 200, 20, 200, 20, 200 ];
 		// speed over ground
@@ -128,15 +77,17 @@ class Ship {
 			coef: [ -1.306,-1.517,-1.691,-1.761,-1.734,-1.595,-1.327,-1.008,-0.665,-0.362,-0.025,0.316,0.763,1.193,1.524,1.776,1.773,1.636,1.445,1.625,1.807,1.813,1.667,1.346,0.937,0.508,0.166,-0.23,-0.571,-0.902,-1.223,-1.453,-1.627,-1.636,-1.589,-1.395,-1.306 ]
 		};
 
-		this.wave = [];
-		[ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ].map( ( e, i ) => this.wave[ i ] = { height: e } );
-		[ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.wave[ i ].angle = e );
-		[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ].map( ( e, i ) => this.wave[ i ].period = e );
+		this.wave = {
+			'angle': [ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ],
+			'height': [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ],
+			'period': [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+		};
 
-		this.swell = [];
-		[ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ].map( ( e, i ) => this.swell[ i ] = { height: e } );
-		[ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ].map( ( e, i ) => this.swell[ i ].angle = e );
-		[ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ].map( ( e, i ) => this.swell[ i ].period = e );
+		this.swell = {
+			'angle': [ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ],
+			'height': [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ],
+			'period': [ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ]
+		};
 
 		this.mt = {
 			'vs'  : [ 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0 ],
@@ -179,8 +130,8 @@ class Ship {
 
 			let raw, a;
 
-			raw = 1 / 16 * rho * 9.807 * wave[ i ].height ** 2 * b * Math.sqrt( b / lbwl );
-			a = wave[ i ].angle;
+			raw = 1 / 16 * rho * 9.807 * wave.height[ i ] ** 2 * b * Math.sqrt( b / lbwl );
+			a = wave.angle[ i ];
 			raw = a <= 45 || a >= 315 ? raw : 0;
 
 		}
@@ -276,9 +227,9 @@ class Ship {
 				for ( let j = 0; j <= 1; j ++ ) {
 	
 					const arr = j == 0 ? wave : swell;
-					const h = arr[ i ].height;
-					const a = arr[ i ].angle;
-					const t = arr[ i ].period;
+					const h = arr.height[ i ];
+					const a = arr.angle[ i ];
+					const t = arr.period[ i ];
 	
 					const { Af, Bf, fmin, fmax } = coefSn( h, t, j );
 	
@@ -803,8 +754,11 @@ let table, row;
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Measured data
 /////////////////////////////////////////////////////////////////////////////////////////////
-const viewport = new viewportSTA();
+const viewport = new ViewportSTA( ship );
 document.body.appendChild( viewport.dom );
+
+const menubar = new MenubarSTA( ship );
+document.body.appendChild( menubar.dom );
 
 const { particular, correction, result } = viewport;
 
@@ -863,10 +817,6 @@ row.insertCell().textContent = ship.rhoa;
 row = table.insertRow();
 row.insertHeader().dom.innerHTML = 'C<sub>B</sub>';
 row.insertCell().textContent = ship.cb;
-
-
-
-
 
 row = table.insertRow();
 row.insertHeader().dom.innerHTML = 'k<sub>yy</sub>';
@@ -937,27 +887,27 @@ ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Wave height (m)'
-ship.wave.map( e => row.insertCell().textContent = e.height.toFixed( 1 ) );
+ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Wave direction (°)'
-ship.wave.map( e => row.insertCell().textContent = e.angle.toFixed( 1 ) );
+ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Wave period (sec)'
-ship.wave.map( e => row.insertCell().textContent = e.period.toFixed( 1 ) );
+ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Swell height (m)'
-ship.swell.map( e => row.insertCell().textContent = e.height.toFixed( 1 ) );
+ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Swell direction (°)'
-ship.swell.map( e => row.insertCell().textContent = e.angle.toFixed( 1 ) );
+ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 row = table.insertRow();
 row.insertHeader().textContent = 'Swell period (sec)'
-ship.swell.map( e => row.insertCell().textContent = e.period.toFixed( 1 ) );
+ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1310,47 +1260,6 @@ for ( let i = 0; i <= 46; i ++ ) {
 
 }
 
-// const tmp = document.createElement('button');
-// document.body.appendChild( tmp );
-// tmp.textContent = 'save';
-// tmp.addEventListener( 'click', () => {
-
-// 	let output = ship;
-
-// 	try {
-
-// 		output = JSON.stringify( output, null, '\t' );
-
-
-// 	} catch ( e ) {
-
-// 		output = JSON.stringify( output );
-
-// 	}
-
-// 	save( output )
-
-// } )
-
-// async function save( contents ) {
-
-// 	const opts = {
-
-// 		types: [ {
-
-// 			description: 'JSON file',
-// 			accept: { 'json/plain': [ '.json' ] }
-
-// 		} ]
-
-// 	};
-
-// 	const handle = await window.showSaveFilePicker( opts );
-// 	const writable = await handle.createWritable();
-// 	await writable.write( contents );
-// 	await writable.close();
-
-// }
 
 function snnm( l, b, tf, ta, cb, kyy, le, lr, vs, angle, lamda ) {
 
