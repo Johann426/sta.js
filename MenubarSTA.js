@@ -7,6 +7,7 @@ class MenubarSTA extends UIDiv {
         super();
         this.setId( 'menubarSTA' );
         this.add( this.file( ship, viewport ) );
+        this.add( this.run( ship, viewport ) );
 
     }
 
@@ -87,6 +88,48 @@ class MenubarSTA extends UIDiv {
             inpOpen( ship, viewport );
 
         } );
+
+        items.add( item );
+
+        return menu;
+
+    }
+
+    run( ship, viewport ) {
+
+        const menu = new UIPanel();
+        menu.setClass( 'menu' );
+
+        const head = new UIPanel();
+		head.setTextContent( 'Run' );
+		head.setClass( 'head' );
+		menu.add( head );
+
+		const items = new UIPanel();
+		items.setClass( 'items' );
+		menu.add( items );
+
+        let item;
+		item = new UIRow();
+		item.setClass( 'item' );
+		item.setTextContent( 'Calculate' );
+		item.onClick( () => {
+
+			console.warn( 'not implemented' )
+
+		} );
+
+        items.add( item );
+		items.add( new UIHorizontalRule().setClass( 'divider' ) );
+
+		item = new UIRow();
+		item.setClass( 'item' );
+		item.setTextContent( 'Environment' );
+		item.onClick( () => {
+
+			console.warn( 'not implemented' )
+
+		} );
 
         items.add( item );
 
@@ -249,8 +292,8 @@ async function inpOpen( ship, viewport ) {
         } );
 
         part = data['<OWN_WIND_FORCE_COEFFI>']
-        keys = part.shift();
         data.wind = new Object();
+        keys = part.shift();
         keys.map( key => data.wind[ key ] = new Array() );
 
         part.map( row => {
@@ -260,8 +303,8 @@ async function inpOpen( ship, viewport ) {
         } );
 
         part = data['<MODEL_TEST_COEFFI>']
-        keys = part[ 5 ]; // SPEED ETAR THDF WTM CTS ETAD
         data.mtCoef = new Object();
+        keys = part[ 5 ]; // SPEED ETAR THDF WTM CTS ETAD
         keys.map( key => data.mtCoef[ key ] = new Array() );
 
         part.map( ( row, j ) => {
@@ -281,8 +324,8 @@ async function inpOpen( ship, viewport ) {
         } );
 
         part = data['<SPEED_POWER_RPM_TRIAL>']
-        keys = part.shift();
         data.mtTrial = new Object();
+        keys = part.shift();
         keys.map( key => data.mtTrial[ key ] = new Array() );
 
         part.map( row => {
@@ -314,8 +357,18 @@ async function inpOpen( ship, viewport ) {
 
             }
 
-
         } )
+
+        part = data['<ARM>']
+        data.arm = new Object();
+        keys = part.shift();
+        keys.map( key => data.arm[ key ] = new Array() );
+
+        part.map( row => {
+
+            row.map( ( val, i ) => val ? data.arm[ keys[ i ] ].push( val ) : null );
+
+        } );
 
         
         ship.shipName = data[ 'SHIP_NAME' ];
@@ -336,7 +389,8 @@ async function inpOpen( ship, viewport ) {
         ship.Ax = data[ 'TRANS_PROJECT_AREA' ];
         ship.rhoa  = data[ '' ];
 
-        ship.ncr = data[ 'NCR_POWER_KW' ];
+        ship.mcr = [ data[ 'NO_PROP' ], data[ 'MCR_POWER_KW' ], data[ 'MCR_RPM' ] ];
+        ship.ncr = [ data[ 'NO_PROP' ], data[ 'NCR_POWER_KW' ], data[ 'NCR_RPM' ] ];
         ship.sm = data[ 'NCR_POWER_KW' ] / data[ 'CONTRACT_POWER_SM' ] - 1;
 
         ship.load = data[ 'ENG_LOAD' ];
@@ -374,11 +428,23 @@ async function inpOpen( ship, viewport ) {
 
         ship.mt = {
             vs: data.mtTrial[ 'SPEED' ],
-            pb: data.mtTrial[ 'POWER' ],
+            pb: data.mtTrial[ 'POWER' ].map( e => parseFloat( e ) ),
             rpm: data.mtTrial[ 'RPM' ],
             vsLoaded: data.mtLoaded[ 'Design' ][ 'SPEED' ],
-            pbLoaded: data.mtLoaded[ 'Design' ][ 'POWER' ],
+            pbLoaded: data.mtLoaded[ 'Design' ][ 'POWER' ].map( e => parseFloat( e ) ),
             rpmLoaded: data.mtLoaded[ 'Design' ][ 'RPM' ],
+            vsEEDI: data.mtLoaded[ 'EEDI' ][ 'SPEED' ],
+            pbEEDI: data.mtLoaded[ 'EEDI' ][ 'POWER' ].map( e => parseFloat( e ) ),
+            rpmEEDI: data.mtLoaded[ 'EEDI' ][ 'RPM' ],
+        }
+
+        ship.arm ={
+
+            hdg: data.arm[ 'HEADING' ],
+            fr: data.arm[ 'FROUDE' ],
+            lamda: data.arm[ 'WAVE_LENGTH' ],
+            raw: data.arm[ 'WAVE_RESISTANCE' ],
+
         }
 
         console.log( ship )
@@ -394,8 +460,9 @@ async function inpOpen( ship, viewport ) {
 
 function updateViewport( ship, viewport ) {
 
-    let table;
+    let table, chartData;
 
+    // Particulars tab
     table = viewport.particular.tables[ 0 ];
 
     const { shipno, l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl } = ship;
@@ -409,6 +476,19 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.particular.tables[ 1 ];
 
+    const { mcr, ncr, eedi } = ship;
+
+    [ mcr, ncr, eedi ].map( ( arr, i ) => {
+
+        const row = table.rows[ i + 1 ];
+        arr ? arr.map( ( e, j ) => row.cells[ j + 1 ].textContent = e ) : null;
+
+    } );
+
+    table.rows[ 4 ].cells[ 1 ].textContent = ship.sm.toFixed(2);
+
+    table = viewport.particular.tables[ 2 ];
+
     const { tf, ta, disp, tempSea, rho, tempAir, rhoa  } = ship;
     
     [ tf, ta, disp, tempSea, rho, tempAir, rhoa ].map( ( e, i ) => {
@@ -418,16 +498,16 @@ function updateViewport( ship, viewport ) {
 
     } );
 
+    // Model test tab
     const mt = ship.mt;
-
     table = viewport.modeltest.tables[ 0 ];
 
     [ mt.vs, mt.pb, mt.rpm ].map( ( arr, i ) => {
         
         arr.map( ( e, j ) => { 
 
-            const row = table.rows[ j + 1 ];
-            row.dom.cells[ i ].textContent = e;
+            const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+            row.dom.cells[ i ] ? row.dom.cells[ i ].textContent = e : row.insertCell().textContent = e;
 
         } )
 
@@ -439,8 +519,8 @@ function updateViewport( ship, viewport ) {
         
         arr.map( ( e, j ) => { 
 
-            const row = table.rows[ j + 1 ];
-            row.dom.cells[ i ].textContent = e;
+            const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+            row.dom.cells[ i ] ? row.dom.cells[ i ].textContent = e : row.insertCell().textContent = e;
 
         } )
 
@@ -454,8 +534,8 @@ function updateViewport( ship, viewport ) {
 
             arr.map( ( e, j ) => { 
 
-                const row = table.rows[ j + 1 ];
-                row.dom.cells[ i ].textContent = e;
+                const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+                row.dom.cells[ i ] ? row.dom.cells[ i ].textContent = e : row.insertCell().textContent = e;
 
             } )
 
@@ -464,7 +544,7 @@ function updateViewport( ship, viewport ) {
     } );
 
     
-    const chartData = viewport.modeltest.chart.config._config.data.datasets;
+    chartData = viewport.modeltest.chart.config._config.data.datasets;
 
     chartData[ 0 ].data = mt.vs.map( ( e, i ) => { 
                     
@@ -488,16 +568,52 @@ function updateViewport( ship, viewport ) {
 
     } );
 
+    if( mt.vsEEDI ) chartData[ 2 ].data = mt.vsEEDI.map( ( e, i ) => { 
+                    
+        return {
+            
+            x: e,
+            y: mt.pbEEDI[ i ]
+
+        }
+
+    } );
+
     viewport.modeltest.chart.update();
 
+    // Correction tab
+    table = viewport.correction.wind.table;
+
+    ship.wind.angle.map( ( e, i ) => table.rows[ i + 1 ].cells[ 0 ].textContent = e );
+    ship.wind.coef.map( ( e, i ) => table.rows[ i + 1 ].cells[ 1 ].textContent = e );
+
+    chartData = viewport.correction.wind.chart.config._config.data.datasets;
+
+    chartData[ 0 ].data = ship.wind.angle.map( ( e, i ) => { 
+                    
+        return {
+            
+            x: e,
+            y: ship.wind.coef[ i ]
+
+        }
+
+    } );
+
+    viewport.correction.wind.chart.update();
+
+    // Measured data tab
     table = viewport.measured.table;
 
     ship.load.map( ( e, i ) => {
 
         const row = table.rows[ 0 ];
-        row.dom.cells[ i + 1 ].textContent = e;
+        row.dom.cells[ i + 1 ] ? row.dom.cells[ i + 1 ].textContent = e : row.insertCell().textContent = e;
 
     } );
+
+    const runNo = table.rows[ 1 ];
+    table.rows[ 0 ].cells.slice( 1 ).map( ( e, i ) => runNo.cells[ i + 1 ] ?  runNo.cells[ i + 1 ].textContent = i + 1 : runNo.insertHeader().textContent = i + 1 );
 
     const { time, hdg, sog, rpm, power, wind_v, wind_d, wave, swell } = ship;
 
@@ -507,7 +623,7 @@ function updateViewport( ship, viewport ) {
         
         arr.map( ( e, j ) => {
 
-            row.dom.cells[ j + 1 ].textContent = e;
+            row.dom.cells[ j + 1 ] ? row.dom.cells[ j + 1 ].textContent = e : row.insertCell().textContent = e;
 
         } );
 
@@ -521,7 +637,7 @@ function updateViewport( ship, viewport ) {
 
             arr.map( ( e, j ) => {
 
-                row.dom.cells[ j + 1 ].textContent = e;
+                row.dom.cells[ j + 1 ] ? row.dom.cells[ j + 1 ].textContent = e : row.insertCell().textContent = e;
 
             } );
 
