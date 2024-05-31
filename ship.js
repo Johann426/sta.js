@@ -1,10 +1,16 @@
+import { f } from './Interpolation.js';
+import { array } from './index.esm.js';
+import { snnm, sta2 } from './index.js'
+
+const M = Math;
+const pi = M.PI;
+const g = 9.80665;
 
 class Ship {
 
 	constructor() {
 
 		this.initialize();
-		this.name = 'STA'
 
 	}
 
@@ -26,71 +32,7 @@ class Ship {
 
 	initialize() {
 
-		this.l = Number( document.getElementById( "lpp" ).textContent );
-		this.b = Number( document.getElementById( "beam" ).textContent );
-		this.tf = Number( document.getElementById( "tf" ).textContent );
-		this.ta = Number( document.getElementById( "ta" ).textContent );
-		this.disp = Number( document.getElementById( "disp" ).textContent );
-		this.wetted = Number( document.getElementById( "S" ).textContent );
-		this.rho = Number( document.getElementById( "rhos" ).textContent );
-		this.cb = Number( document.getElementById( "cb" ).textContent );
-		this.kyy = Number( document.getElementById( "kyy" ).textContent );
-		this.le = Number( document.getElementById( "le" ).textContent );
-		this.lr = Number( document.getElementById( "lr" ).textContent );
-		this.lbwl = Number( document.getElementById( "lbwl" ).textContent );
-		this.rhoa = Number( document.getElementById( "rhoa" ).textContent );
-		this.Ax = Number( document.getElementById( "Ax" ).textContent );
 
-		// loads 3322 임시 데이터
-		this.ncr = 44187;
-		this.sm = 0.15;
-		this.load = [ 65, 75, 75, 85, 100 ];
-		// time
-		this.time = [ "2023-12-20 00:00:00", "2023-12-20 01:00:00", "2023-12-20 02:00:00", "2023-12-20 03:00:00", "2023-12-20 04:00:00", "2023-12-20 05:00:00", "2023-12-20 06:00:00", "2023-12-20 07:00:00", "2023-12-20 08:00:00", "2023-12-20 09:00:00" ];
-		// heading
-		this.hdg = [ 20, 200, 20, 200, 20, 200, 20, 200, 20, 200 ];
-		// speed over ground
-		this.sog = [ 21.39, 21.29, 22.34, 22.24, 22.34, 22.24, 23.22, 23.12, 24.18, 24.08 ];
-		// shaft speed [rpm]
-		this.rpm = [ 69.7, 69.7, 73.1, 73.1, 73.1, 73.1, 76.3, 76.3, 79.6, 79.6 ];
-		// shaft power [kW]
-		this.power = [ 28722, 28722, 33140, 33140, 33140, 33140, 37559, 37559, 42721, 42721 ];
-		// wind
-		this.wind_v = [ 12.0, 10.0, 12.5, 10.5, 12.5, 10.5, 12.9, 10.9, 13.4, 11.4 ];
-		this.wind_d = [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ];
-		this.Za = Number( document.getElementById( "Za" ).textContent );
-		this.Zref = Number( document.getElementById( "Zref" ).textContent );
-		this.wind = {
-			angle: [ 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360 ],
-			coef: [ -1.306,-1.517,-1.691,-1.761,-1.734,-1.595,-1.327,-1.008,-0.665,-0.362,-0.025,0.316,0.763,1.193,1.524,1.776,1.773,1.636,1.445,1.625,1.807,1.813,1.667,1.346,0.937,0.508,0.166,-0.23,-0.571,-0.902,-1.223,-1.453,-1.627,-1.636,-1.589,-1.395,-1.306 ]
-		};
-
-		this.wave = {
-			'angle': [ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ],
-			'height': [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ],
-			'period': [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
-		};
-
-		this.swell = {
-			'angle': [ 0, 180, 0, 180, 0, 180, 0, 180, 0, 180 ],
-			'height': [ 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 ],
-			'period': [ 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ]
-		};
-
-		this.mt = {
-			'vs'  : [ 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0 ],
-			't'   : [ 0.209, 0.205, 0.202, 0.200, 0.198, 0.196, 0.196, 0.194, 0.193, 0.191, 0.190, 0.189, 0.188, 0.188, 0.190, 0.191, 0.192, 0.192, 0.191, 0.189, 0.188, 0.186, 0.183, 0.181, 0.178 ],
-			'wtm' : [ 0.379, 0.378, 0.378, 0.378, 0.376, 0.375, 0.373, 0.372, 0.372, 0.373, 0.375, 0.377, 0.378, 0.379, 0.379, 0.379, 0.378, 0.378, 0.378, 0.377, 0.377, 0.375, 0.374, 0.371, 0.369 ],
-			'etar': [ 1.007, 1.006, 1.006, 1.006, 1.007, 1.008, 1.010, 1.011, 1.013, 1.014, 1.014, 1.014, 1.015, 1.015, 1.016, 1.017, 1.017, 1.018, 1.018, 1.018, 1.019, 1.019, 1.020, 1.020, 1.021 ],
-			'etad': [ 0.813, 0.816, 0.818, 0.820, 0.820, 0.821, 0.822, 0.822, 0.823, 0.826, 0.828, 0.830, 0.831, 0.831, 0.830, 0.829, 0.828, 0.828, 0.829, 0.830, 0.831, 0.832, 0.832, 0.833, 0.834 ],
-			'cts' : [ 2.0923, 2.0977, 2.1036, 2.11, 2.1161, 2.1226, 2.13, 2.1391, 2.1493, 2.1602, 2.1716, 2.1834, 2.1958, 2.2088, 2.2216, 2.234, 2.2464, 2.2593, 2.2725, 2.2858, 2.2988, 2.3115, 2.3244, 2.3383, 2.3525 ],
-			'pb': [ 7700,8554,9473,10452,11529,12670,13895,15214,16611,18065,19620,21282,23054,24982,27037,29197,31525,33904,36402,39002,41723,44585,47593,50749,54110 ],
-			'rpm': [ 44.27,45.86,47.47,49.07,50.76,52.43,54.11,55.83,57.52,59.13,60.74,62.36,63.98,65.67,67.36,69.04,70.80,72.48,74.20,75.90,77.63,79.38,81.17,82.97,84.85 ],
-			'vsLoaded': [ 12.0,12.5,13.0,13.5,14.0,14.5,15.0,15.5,16.0,16.5,17.0,17.5,18.0,18.5,19.0,19.5,20.0,20.5,21.0,21.5,22.0,22.5,23.0 ],
-			'pbLoaded': [ 6802,7659,8596,9602,10672,11822,13037,14353,15744,17232,18844,20546,22403,24402,26542,28889,31379,34049,36994,40333,44060,48201,52738 ],
-			'rpmLoaded': [ 41.54,43.20,44.91,46.61,48.29,49.99,51.66,53.39,55.08,56.77,58.50,60.18,61.94,63.72,65.49,67.36,69.19,71.02,72.90,74.92,77.02,79.23,81.50 ]
-
-		}
 
 	}
 
@@ -149,7 +91,7 @@ class Ship {
 	
 			}
 	
-			return { // 99.8 % of the energy is within the range f001 < f < f999
+			return { // 99.8 % of the energy is within the range of f001 < f < f999
 
 				Af: Af,
 				Bf: Bf,
@@ -171,7 +113,7 @@ class Ship {
 	
 				return Af / w5 * M.exp( - Bf / w4 );
 	
-			} else if ( type == 1 ) { //for the narrow band wave spectrum, the JONSWAP frequency spectrum
+			} else if ( type == 1 ) { //for the narrow band wave spectrum, the JONSWAP(Joint North Sea Wave Observation Project) frequency spectrum
 	
 				const sigma = w <= 2 * pi / ( 1.3 * t01 ) ? 0.07 : 0.09;
 				const exp = M.exp( - 0.5 * ( ( 1.3 * t01 * w / 2 / pi - 1 ) / sigma ) ** 2 );
@@ -428,8 +370,9 @@ class Ship {
 		// 	temp: [ 10, 11, 12 ,13],
 			
 		// }
-		const S = Number( document.getElementById( "S" ).textContent );
-		const l = Number( document.getElementById( "lpp" ).textContent );
+
+		const S = this.wetted;
+		const l = this.l
 
 		const nu = ( temp, rho ) => {
 
@@ -682,6 +625,76 @@ class Ship {
 
 	analysis() {
 
+        const ship = this;
+        const nm1 = ship.hdg.length - 1;
+        const { rhoa, Ax, rho } = ship;
+        const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rhoa, Ax, ship.wind ) 
+        const { wave, swell } = ship.RAW( ship.sog, ship.wave, ship.swell );
+        const raw = [];
+
+        for ( let i = 0; i <= nm1; i ++ ) {
+            
+            raw[ i ] = 0.001 * ( wave.total[ i ] + swell.total[ i ] )
+
+        }
+
+        const temp = 15.0;
+        const ras = ship.RAS( temp, rho ).map( e => e * 0.001 );
+        const delr = [];
+
+        for ( let i = 0; i <= nm1; i ++ ) {
+
+            delr[ i ] = raa[ i ] + raw [ i ] + ras[ i ] ; // kN
+
+        }
+
+        const pid = ship.DPM( ship.sog, ship.power, delr, { x: ship.mt.vs, y: ship.mt.etad }, 0.99, -0.099 )
+        const pb = pid.map( e => e / 0.99 );
+        const time0 = new Date( ship.time[ 0 ] ).getTime();
+        const time = ship.time.map( e => ( new Date( e ).getTime() - time0 ) / 1000 )
+        const stw = ship.currentCorrection( time, ship.sog.map( e => e * 1852 / 3600 ), pid );
+
+        // speed-power curve
+        const pmt = f( ship.mt.vs, ship.mt.pb, stw );
+        let dif = 0;
+
+		// difference in power between trial and model
+        for ( let i = 0; i <= nm1; i ++ ) {
+
+            dif += pb[ i ] - pmt[ i ]; 
+
+        }
+
+        dif /= ( nm1 + 1 )
+
+        const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ship.ncr / ( 1 + ship.sm ) ] );
+
+        return {
+
+            vwr: vwr,
+            dwr: dwr,
+            vwt: vwt,
+            dwt: dwt,
+            vwtAve: vwtAve,
+            dwtAve: dwtAve,
+            vwtRef: vwtRef,
+            vwrRef: vwrRef,
+            dwrRef: dwrRef,
+            caa: caa,
+            raa: raa,
+            wave: wave,
+            swell: swell,
+            raw: raw,
+            ras: ras,
+            delr: delr,
+            pid: pid,
+            stw: stw,
+            pb: pb,
+			powerOffset: dif,
+			speedAtNCR: speedAtNCR,
+
+        }
+        
 	}
 
 }
