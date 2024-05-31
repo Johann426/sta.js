@@ -112,10 +112,35 @@ class UITable extends UIElement { // only number is acceptable in table body
 
         }
 
+        const onKeyDown = ( event ) => {
+
+			switch ( event.key ) {
+
+				case 'Delete':
+                    
+                    for ( let i = ij[ 0 ]; i <= ij[ 1 ]; i ++ ) {
+
+                        const row = dom.rows[ i ];
+        
+                        for ( let j = ij[ 2 ]; j <= ij[ 3 ]; j ++ ) {
+        
+                            const cell = row.cells[ j ];
+                            cell.textContent = '';
+                        }
+
+                    }
+
+					break;
+
+			}
+
+		}
+        
         dom.addEventListener( 'pointerdown', onPointerDown );
         dom.addEventListener( 'pointerup', onPointerUp );
         dom.addEventListener( 'paste', onPaste );
         dom.addEventListener( 'copy', onCopy );
+        dom.addEventListener( 'keydown', onKeyDown, false );
 
     }
 
@@ -132,8 +157,9 @@ class UITable extends UIElement { // only number is acceptable in table body
     removeRow( i = - 1 ) {
 
         const { dom, rows } = this;
-        rows.splice( i, 1 );
         dom.deleteRow( i );
+
+        return rows.splice( i, 1 )[ 0 ];
 
     }
 
@@ -198,7 +224,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
                 if( j == 0 ) {
 
-                    header = txt.replace( /\s\(.*\)/g,'' )
+                    header = txt.replace( /\s\(.*\)/g, '' )
                     arr[ header ] = new Array();
 
                 } else {
@@ -225,13 +251,15 @@ class UIRowElement extends UIElement {
     constructor() {
 
         super( document.createElement( 'tr' ) );
+        this.cells = [];
 
     }
 
     insertCell( i = - 1 ) {
 
-        const dom = this.dom;
+        const { dom, cells } = this;
         const cell = new UICellElement();
+        cells.push( cell );
         dom.appendChild( cell.dom );
         
         return cell;
@@ -240,11 +268,21 @@ class UIRowElement extends UIElement {
 
     insertHeader( i = - 1 ) {
 
-        const dom = this.dom;
+        const { dom, cells } = this;
         const cell = new UICellElement( 'th' );
+        cells.push( cell );
         dom.appendChild( cell.dom );
         
         return cell;
+
+    }
+
+    removeCell( i = - 1 ) {
+
+        const { dom, cells } = this;
+        dom.deleteCell( i );
+
+        return cells.splice( i, 1 )[ 0 ];
 
     }
 
@@ -269,6 +307,18 @@ class UICellElement extends UIElement{
     set textContent( txt ) {
 
         this.dom.textContent = txt;
+
+    }
+
+    get innerHTML() {
+
+        return this.dom.textContent;
+
+    }
+
+    set innerHTML( txt ) {
+
+        this.dom.innerHTML = txt;
 
     }
 
@@ -317,7 +367,6 @@ class UICellElement extends UIElement{
             // regex of DateTime validator
             const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
             const dateTime = txt.match(regex);
-            // console.log( dateTime );
             
             if( txt != '' && !dateTime ) {
 
@@ -330,13 +379,12 @@ class UICellElement extends UIElement{
 
         const onKeyDown = ( event ) => {
 
-			event.stopPropagation();
+			// event.stopPropagation();
             const row = event.target.parentNode;
             const tb = row.parentNode;
             const rowIndex = row.rowIndex;
             const cellIndex = event.target.cellIndex;
             
-
 			switch ( event.key ) {
 
 				case 'Enter':
