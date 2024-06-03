@@ -1,4 +1,4 @@
-import { UIButton, UIDiv, UIInteger, UISelect, UISpan, UITabbedPanel, UIText, UITextArea } from './ui.js';
+import { UIButton, UICheckbox, UIDiv, UIInteger, UISelect, UISpan, UITabbedPanel, UIText, UITextArea } from './ui.js';
 import { UICollapsible } from './UICollapsible.js';
 import { UITable } from './UITable.js';
 
@@ -25,7 +25,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'correction', correction );
 		tabbedPanel.addTab( 'measured', 'measured data', measured );
 		tabbedPanel.addTab( 'result', 'result', result );
-		tabbedPanel.select( 'result' );
+		tabbedPanel.select( 'correction' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
@@ -47,9 +47,8 @@ class ViewportSTA extends UIDiv{
 		let div, table, row;
 
 		// Ship particulars
-		div = new UIDiv();
-		div.setDisplay( 'inline-block' );
-		div.add( new UIText( 'Ship particulars' ).setWidth('100%').setTextAlign( 'center' ) );
+		div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+		div.add( new UIText( 'Ship particulars' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
 		particular.add( div );
 
 		table = new UITable().setWidth('300px');
@@ -82,7 +81,7 @@ class ViewportSTA extends UIDiv{
 		
 		row = table.insertRow();
 		row.insertHeader().innerHTML = 'Z<sub>ref</sub> (m)';
-		row.insertCell().textContent = ship.Zref;
+		row.insertCell().textContent = 10;
 		
 		row = table.insertRow();
 		row.insertHeader().innerHTML = 'C<sub>B</sub>';
@@ -104,42 +103,53 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().innerHTML = 'L<sub>BWL</sub>';
 		row.insertCell().textContent = ship.lbwl;
 
-		// Main engine
-		div = new UIDiv();
-		div.setDisplay( 'inline-block' );
-		div.add( new UIText( 'Main engine' ).setWidth('100%').setTextAlign( 'center' ) );
+		// Engine & speed
+		div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		particular.add( div );
+		
+		// Main engine
+		div.add( new UIText( 'Main engine' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
+
+		table = new UITable().setWidth('360px');
+		div.add( table );
+		particular.tables.push( table );
+
+		row = table.insertRow()
+		row.insertHeader().textContent = ''
+		row.insertHeader().textContent = 'Power (kW)'
+		row.insertHeader().textContent = 'RPM'
+
+		// row = table.insertRow();
+		// row.insertHeader().textContent = 'MCR'
+		// Array( 2 ).fill().map( () => row.insertCell() );
+
+		row = table.insertRow();
+		row.insertHeader().textContent = 'NCR Load'
+		Array( 2 ).fill().map( () => row.insertCell() );
+
+		row = table.insertRow();
+		row.insertHeader().textContent = 'EEDI Load'
+		Array( 2 ).fill().map( () => row.insertCell() );
+
+		// Speed
+		div.add( new UIText( 'Service speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
 
 		table = new UITable().setWidth('360px');
 		div.add( table );
 		particular.tables.push( table );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = ''
-		row.insertHeader().textContent = 'No.'
-		row.insertHeader().textContent = 'Power (kW)'
-		row.insertHeader().textContent = 'RPM (r/min)'
+		row.insertHeader().textContent = 'Sea margin (%)'
+		row.insertCell();
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'MCR'
-		Array( 3 ).fill().map( () => row.insertCell() );
-
-		row = table.insertRow();
-		row.insertHeader().textContent = 'NCR'
-		Array( 3 ).fill().map( () => row.insertCell() );
-
-		row = table.insertRow();
-		row.insertHeader().textContent = 'EEDI'
-		Array( 3 ).fill().map( () => row.insertCell() );
-
-		row = table.insertRow();
-		row.insertHeader().textContent = 'S.M.'
+		row.insertHeader().textContent = 'Speed at NCR with sea margin (knots)'
 		row.insertCell();
 
 		// Draft reading
 		div = new UIDiv();
-		div.setDisplay( 'inline-block' );
-		div.add( new UIText( 'Draft reading' ).setWidth('100%').setTextAlign( 'center' ) );
+		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );;
+		div.add( new UIText( 'Draft reading' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
 		particular.add( div );
 
 		table = new UITable().setWidth('300px');
@@ -193,7 +203,7 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButtonUI( table ) );
+		div.add( ...addButton( table ) );
 
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
@@ -218,7 +228,7 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButtonUI( table ) );
+		div.add( ...addButton( table ) );
 
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
@@ -241,7 +251,7 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButtonUI( table ) );
+		div.add( ...addButton( table ) );
 
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
@@ -448,8 +458,6 @@ class ViewportSTA extends UIDiv{
 		let div, table, row;
 
 		div = new UIDiv();
-		div.setDisplay( 'inline-block' );
-		// div.add( new UIText( 'Ship particulars' ).setWidth('100%').setTextAlign( 'center' ) );
 		measured.add( div );
 
 		const addButton = new UIText( 'Add double runs (+)' ).setClass( 'item' );
@@ -511,20 +519,22 @@ class ViewportSTA extends UIDiv{
 		row = table.insertRow();
 		row.insertHeader().textContent = 'Ship heading (°)'
 		// ship.hdg.map( e => row.insertCell().textContent = e );
+		
+		const border = '2px solid rgb(96,96,96)'
 
-		row = table.insertRow();
+		row = table.insertRow().setBorderTop( border )
 		row.insertHeader().textContent = 'Ship speed (knots)'
 		// ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
 
-		row = table.insertRow();
-		row.insertHeader().textContent = 'Shaft speed (rpm)'
+		row = table.insertRow();//.setBorderLeft( border ).setBorderRight( border );
+		row.insertHeader().textContent = 'RPM (r/min)'
 		// ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
-		row = table.insertRow();
-		row.insertHeader().textContent = 'Shaft power (kW)'
+		row = table.insertRow();//.setBorderLeft( border ).setBorderRight( border ).setBorderBottom( border );
+		row.insertHeader().textContent = 'Power (kW)'
 		// ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
 
-		row = table.insertRow();
+		row = table.insertRow().setBorderTop( border );;
 		row.insertHeader().textContent = 'Wind velocity (m/s)'
 		// ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
@@ -532,7 +542,7 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().textContent = 'Wind direction (°)'
 		// ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
-		row = table.insertRow();
+		row = table.insertRow().setBorderTop( border );;
 		row.insertHeader().textContent = 'Wave height (m)'
 		// ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
@@ -544,7 +554,7 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().textContent = 'Wave period (sec)'
 		// ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
-		row = table.insertRow();
+		row = table.insertRow().setBorderTop( border );
 		row.insertHeader().textContent = 'Swell height (m)'
 		// ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
@@ -566,6 +576,25 @@ class ViewportSTA extends UIDiv{
 
 		const { correction, ship } = this;
 		
+		let div, table, row, options;
+
+		div = new UIDiv().add( new UIText( 'Correction method' ).setPadding( '10px 0px 5px 0px' ) );
+		correction.add( div );
+		
+		options = new UISelect().setDisplay( 'block' ).setOptions( {
+
+			iso2002: 'ISO 15016:2002',
+			iso2015: 'ISO 15016:2015',
+			ittc2017: 'ITTC 2017',
+			ittc2021: 'ITTC 2021'
+
+	 	} );
+		
+		options.setValue( 'iso2015' )
+
+		div.add( options );
+		correction.method = options;
+
 		const wind = new UICollapsible( 'wind' );
 		const wave = new UICollapsible( 'wave' );
 		const current = new UICollapsible( 'current' );
@@ -574,16 +603,19 @@ class ViewportSTA extends UIDiv{
 		
 		Object.assign( correction, { wind, wave, current } )
 
-		let div, table, row;
+		// Wind coefficients
+		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
+		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 
-		div = new UIDiv();
-		div.setDisplay( 'inline-block' );
 		div.add( new UIText( 'Wind resistance coefficient' ).setWidth('100%').setTextAlign( 'center' ) );
-		table = new UITable();
-		wind.table = table;
-		div.add( table );
 		wind.content.add( div );
-		
+
+		wind.tables = [];
+
+		table = new UITable();
+		wind.tables.push( table );
+		div.add( table );
+
 		row = table.insertRow();
 		row.insertHeader().setPadding( '2px 10px' ).textContent = 'Angle (°)'
 		row.insertHeader().setPadding( '2px 10px' ).innerHTML = 'C<sub>X</sub>'
@@ -596,16 +628,15 @@ class ViewportSTA extends UIDiv{
 
 		}
 
-		div = new UIDiv()
+		// Wind coefficients chart
+		div = new UIDiv().setPadding( '10px 20px' );
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		wind.content.add( div );
-
 		const canvas = document.createElement('canvas');
 		div.dom.appendChild( canvas );
 		canvas.width = 480;
-		canvas.height = 720;
+		canvas.height = 680;
 		canvas.style.display = 'inline'
-		// canvas.style.border = 'solid'
 
 		const data = {
 
@@ -678,16 +709,41 @@ class ViewportSTA extends UIDiv{
 					}
 
 				},
-			
+
+				plugins: {
+
+					legend: false
+
+				}
+
 			}
 
 		};
 
 		wind.chart = new Chart( canvas, config );
-
-
 		
-		const options = new UISelect().setOptions( {
+		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
+		wind.content.add( div );
+		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+		div.add( new UIText( 'Use average (Annex C.1.1)' ).setWidth('90%').setTextAlign( 'center' ) );
+		wind.useAverage = new UICheckbox().setValue( true )
+		div.add( wind.useAverage );
+
+		// wave
+		options = new UISelect().setOptions( {
+
+			sta1: 'STAWAVE-1',
+			sta2: 'STAWAVE-2',
+			snnm: 'SNNM'
+
+	 	} );
+		
+		options.setValue( 'sta2' )
+
+		wave.content.add( options );
+
+		// current
+		options = new UISelect().setOptions( {
 
 			none: 'no current',
 			iterative: 'iterative',
@@ -704,12 +760,17 @@ class ViewportSTA extends UIDiv{
 	res() {
 
 		const { ship, result } = this;
+
+		let div, table, row;
+
 		const calButton = new UIText( 'Calculate result' ).setClass( 'item' );
 		result.add( calButton );
 
 		//Chart
+		div = new UIDiv();
+		result.add( div );
 		const canvas = document.createElement('canvas');
-		this.dom.appendChild( canvas );
+		div.dom.appendChild( canvas );
 		canvas.width = 700;
 		canvas.height = 1024;
 
@@ -863,9 +924,6 @@ class ViewportSTA extends UIDiv{
 			// Measured data
 			table = new UITable();
 			result.add( table );
-
-			table = new UITable();
-			this.dom.appendChild( table.dom );
 
 			row = table.insertRow();
 			row.insertHeader().textContent = 'Engine load (%)'
@@ -1030,10 +1088,10 @@ class ViewportSTA extends UIDiv{
 			row.insertHeader().textContent = ship.ncr[ 1 ] + ' (kW)';
 			row = table.insertRow();
 			row.insertHeader().textContent = "Sea Margin";
-			row.insertHeader().textContent = ship.sm * 100 + ' (%)';
+			row.insertHeader().textContent = ship.sm + ' (%)';
 			row = table.insertRow();
 			row.insertHeader().textContent = "Speed at NCR with s.m.";
-			row.insertHeader().textContent = speedAtNCR[ 0 ].toFixed( 3 ) + ' (knots)';
+			row.insertHeader().textContent = speedAtNCR.toFixed( 3 ) + ' (knots)';
 
 			// Speed-power chart
 			data.datasets[ 0 ].data = drawCurve( ship.mt.vs, ship.mt.pb )
@@ -1068,15 +1126,11 @@ class ViewportSTA extends UIDiv{
 
 		} );
 
-		
-
 	}
-
-
 
 }
 
-function addButtonUI( table ) {
+function addButton( table ) {
 
 	table.history = [];
 
