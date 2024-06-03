@@ -165,7 +165,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
     paste( arr, imin = 0, jmin = 0 ) {
 
-        const tb = this.dom;
+        const tb = this;
         const rows = tb.rows;
         const n = rows.length;
 
@@ -185,8 +185,8 @@ class UITable extends UIElement { // only number is acceptable in table body
 
                         if( jj < m ) {
 
-                            // const number = parseFloat( e )
-                            tb.rows[ imin + i ].cells[ jmin + j ].innerHTML = e;
+                            const cell = tb.rows[ imin + i ].cells[ jmin + j ]
+                            if ( cell.editable ) cell.textContent = e;
 
                         }
 
@@ -196,7 +196,8 @@ class UITable extends UIElement { // only number is acceptable in table body
 
                     if( ii < n ) {
                 
-                        tb.rows[ imin + i ].cells[ jmin ].innerHTML = row;
+                        const cell = tb.rows[ imin + i ].cells[ jmin ];
+                        if ( cell.editable ) cell.textContent = row;
 
                     }
 
@@ -293,7 +294,7 @@ class UICellElement extends UIElement{
     constructor( type = 'td' ) {
 
         super( document.createElement( type ) );
-        type == 'td' ? this.init() : null;
+        type == 'th' ? this.editable = false : this.init().editable = true;
 
     }
 
@@ -350,7 +351,6 @@ class UICellElement extends UIElement{
 
     init() {
 
-        const scope = this;
         const dom = this.dom;
 
         const onDrop = ( event ) => {
@@ -420,6 +420,8 @@ class UICellElement extends UIElement{
         dom.addEventListener( 'blur', onBlur, false );
         dom.addEventListener( 'keydown', onKeyDown, false );
         dom.setAttribute( 'contenteditable', true ); // editable cell
+
+        return this;
 
     }
 
