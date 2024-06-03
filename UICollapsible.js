@@ -25,8 +25,6 @@ class UICollapsible extends UIDiv {
         button.onClick( onClick );
         button.setClass( 'collapsible' );
         content.setClass( 'content' );
-        content.setHeight( '300px' );
-
 
         this.add( button, content );
 
