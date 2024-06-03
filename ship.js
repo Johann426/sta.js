@@ -53,7 +53,8 @@ class Ship {
 
 		const nm1 = this.hdg.length - 1;
 		const vg = speed;
-		const { l, b, tf, ta, rho, cb, kyy, le, lr, lbwl } = this;
+		const { l, b, tf, ta, rhos, cb, kyy, le, lr, lbwl } = this;
+		const rho = rhos;
 
 		//STA1 result
 		for ( let i = 0; i <= nm1; i ++ ) {
@@ -363,7 +364,7 @@ class Ship {
 
 	}
 
-	RAS( celcius, rhos ) {
+	RAS( celcius, rhos, rhos0 = 1026, temp0 = 15.0 ) {
 
 		// ITTC Fresh Water and Seawater Properties
 		// const seawater ={
@@ -371,8 +372,7 @@ class Ship {
 			
 		// }
 
-		const S = this.wetted;
-		const l = this.l
+		const { l, wetted, hdg, sog, mt } = this;
 
 		const nu = ( temp, rho ) => {
 
@@ -380,9 +380,10 @@ class Ship {
 
 		}
 
-		const rho0 = 1026;
-		const nu0 = nu( 15.0, rho0 ); //0.0000011883;
-		const vg = this.sog;
+		const rho0 = rhos0;
+		const nu0 = nu( temp0, rho0 ); //0.0000011883 (at 15 °C);
+		const S = wetted;
+		const vg = sog;
 
 		const Cf = ( u, l, nu ) => {
 
@@ -393,7 +394,7 @@ class Ship {
 
 		}
 
-		const nm1 = this.hdg.length - 1;
+		const nm1 = hdg.length - 1;
 		const arr= [];
 
 		for ( let i = 0; i <= nm1; i ++ ) {
@@ -403,7 +404,7 @@ class Ship {
 			const sv2 = S * u ** 2;
 			const cf = Cf( u, l, nu( celcius, rhos ) );
 			const rf = 0.5 * rhos * sv2 * cf;
-			const ct0 = this.mt.cts[ 1 ] * 0.001; //spline interpolation needed
+			const ct0 = f( mt.res.vs, mt.res.cts, [ vs ] )[ 0 ] * 0.001;
 			const rt0 = 0.5 * rho0 * sv2 * ct0;
 			const ras = 0.5 * rt0 * ( rhos / rho0 - 1 ) - rf * ( Cf( u, l, nu0 ) / cf - 1 )
 			arr.push( ras );
@@ -627,7 +628,7 @@ class Ship {
 
         const ship = this;
         const nm1 = ship.hdg.length - 1;
-        const { rhoa, Ax, rho } = ship;
+        const { rhoa, Ax, rhos, rhos0, temp0 } = ship;
         const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rhoa, Ax, ship.wind ) 
         const { wave, swell } = ship.RAW( ship.sog, ship.wave, ship.swell );
         const raw = [];
@@ -639,7 +640,7 @@ class Ship {
         }
 
         const temp = 15.0;
-        const ras = ship.RAS( temp, rho ).map( e => e * 0.001 );
+        const ras = ship.RAS( temp, rhos, rhos0, temp0 ).map( e => e * 0.001 );
         const delr = [];
 
         for ( let i = 0; i <= nm1; i ++ ) {
@@ -648,7 +649,7 @@ class Ship {
 
         }
 
-        const pid = ship.DPM( ship.sog, ship.power, delr, { x: ship.mt.vs, y: ship.mt.etad }, 0.99, -0.099 )
+        const pid = ship.DPM( ship.sog, ship.power, delr, { x: ship.mt.sp.vs, y: ship.mt.sp.etad }, 0.99, -0.099 );
         const pb = pid.map( e => e / 0.99 );
         const time0 = new Date( ship.time[ 0 ] ).getTime();
         const time = ship.time.map( e => ( new Date( e ).getTime() - time0 ) / 1000 )
@@ -665,9 +666,11 @@ class Ship {
 
         }
 
-        dif /= ( nm1 + 1 )
+        dif /= ( nm1 + 1 );
 
-        const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ship.ncr / ( 1 + ship.sm ) ] );
+		const ncrPower = ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm );
+
+        const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ncrPower ] );
 
         return {
 
@@ -691,7 +694,7 @@ class Ship {
             stw: stw,
             pb: pb,
 			powerOffset: dif,
-			speedAtNCR: speedAtNCR,
+			speedAtNCR: speedAtNCR[ 0 ],
 
         }
         
