@@ -1,0 +1,11 @@
+
+pip install pyinstaller
+
+pyinstaller -w -F --add-data "templates;templates" --add-data "static;static" server.py
+
+F - Bundles everything in a single file
+w - Avoid displaying a console
+--add-data - Add Folders to the directory/executable
+
+
+build, dist forders will be created
