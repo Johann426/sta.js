@@ -1,39 +1,224 @@
 html {
+	font-size: 14px;
 	font-family: sans-serif;
+	color-scheme: light;
 }
 
 table {
+	color: lightgray;
 	border-collapse: collapse;
-	border: 2px solid rgb(200,200,200);
+	border: 3px solid rgb(96,96,96);
 	letter-spacing: 1px;
-	font-size: 0.8rem;
+	font-size: 12px;
+	/* white-space: nowrap; */  /* Text will never wrap to the next line. */
+	table-layout:fixed;  /* table's width of each column to be fixed (or to be determined if not specified) */
+}
+
+tr:nth-child(even)  {
+	background-color: rgb(36,36,36);
+}
+
+tr:nth-child(odd)  {
+	background-color: rgb(24,36,36);
 }
 
 td, th {
-	border: 1px solid rgb(190,190,190);
+	border: 1px solid rgb(96,96,96);
 	padding: 10px 20px;
 }
 
-th {
-	background-color: rgb(235,235,235);
+td.selected, th.selected {
+	background-color: rgb(35, 48, 96);
 }
 
-td:first-child {
+th {
+	background-color: rgb(24,24,24);
 	font-weight: bold;
 }
 
 td {
 	text-align: center;
+	/* font-weight: bold; */
 }
 
-tr:nth-child(even) td {
-	background-color: rgb(250,250,250);
-}
+/* td:not(:first-child) {
+	text-align: center;
+} */
 
-tr:nth-child(odd) td {
-	background-color: rgb(245,245,245);
-}
+/* td:first-child {
+	font-weight: bold;
+} */
 
-caption {
+/* caption {
 	padding: 10px;
+} */
+
+#viewportSTA {
+	position: absolute;
+	top: 32px;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+}
+
+#menubarSTA {
+	position: absolute;
+	width: 100%;
+	height: 32px;
+	background-color: rgb(36, 36, 36);
+	padding: 0;
+	margin: 0;
+	top: 0;
+	right: 0;
+}
+
+.menu {
+	float: left;
+	cursor: default;
+}
+
+	.menu .head {
+		display: inline-block;
+		color: white;
+		margin: 0;
+		padding: 8px 16px; /* top and bottom: 8px, right and left: 16px */
+		line-height: 16px;
+	}
+
+	.menu .head:hover {
+		background-color: rgb(48, 96, 196);
+		border-radius: 0 10px;
+	}
+
+	.menu .items {
+		position: fixed;
+		display: none;
+		background-color: rgb(48, 48, 48);
+		max-height: 50%;
+		overflow: auto;
+	}
+
+		.menu .items .item {
+			color: white;
+			padding: 5px 10px; /* top and bottom: 5px, right and left: 10px */
+			margin: 0 !important;
+		}
+
+		.menu .items .item:hover {
+			background-color: rgb(48, 96, 196);
+			border-radius: 10px;
+		}
+
+		.menu .items .divider {
+			border: 0;
+			border-top: 1px solid lightgray;
+			padding: 0;
+		}
+
+	.menu:hover .items {
+		display: block;
+	}
+
+#tabbedPanel {
+	width: 100%;
+	background-color: rgb(24, 24, 24);
+	overflow: auto;
+}
+
+	.Tabs { /* .TabbedPanel .Tabs */
+		text-transform: uppercase;
+		text-align: center;
+		display: flex;
+		background-color: rgb(12, 12, 12);
+		border-left: 1px solid rgb(96, 96, 96);
+		border-radius: 10px 0;
+	}
+	
+	.Tabs .Tab {
+		flex-grow: 1;
+		border-radius: 10px 10px 0 0;
+		border-top: 1px solid rgb(96, 96, 96);
+		border-right: 1px solid rgb(96, 96, 96);
+		border-bottom: 1px solid rgb(96, 96, 96);
+		padding: 12px 10px 8px 10px;
+		font-size: 14px;
+		color: grey;
+		background-color: rgb(12, 12, 12);;
+	}
+
+	.Tabs .Tab:hover {
+		color: beige;
+	}
+
+	.Tabs .Tab.selected {
+		color: white;
+		border-bottom: 0;
+		background-color: rgb(36, 36, 36);
+	}
+
+	.Panels { /* .TabbedPanel .Panels */
+		color: lightgray;
+		border-right: 1px solid;
+		border-bottom: 1px solid;
+		border-left: 1px solid;
+		border-color: rgb(96, 96, 96);
+		background-color: rgb(36, 36, 36);
+		margin: 0;
+		padding: 5px 10px;
+	}
+
+		.item {
+			padding: 5px 10px;
+		}
+
+		.item:hover {
+			background-color: darkgreen;
+		}
+
+/* Style the button that is used to open and close the collapsible content */
+.collapsible {
+	background-color: rgb(36, 36, 36);
+	color: white;
+	cursor: pointer;
+	padding: 18px;
+	width: 100%;
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 15px;
+  }
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+.active, .collapsible:hover {
+	background-color: rgb(36, 60, 48);;
+}
+
+.collapsible:after {
+	content: '\002B'; /* Unicode character for "plus" sign (+) */
+	float: right;
+	margin-left: 5px;
+}
+
+.active:after {
+	content: "\2212"; /* Unicode character for "minus" sign (-) */
+}
+
+/* Style the collapsible content. Animated Collapsible (Slide Down) */
+.content {
+	padding: 0 18px;
+	background-color: rgb(36, 36, 36);
+	max-height: 0;
+	/* overflow: hidden; */
+	overflow: auto;
+	transition: max-height 0.2s ease-out;
+}
+
+
+@media (prefers-color-scheme: dark) {
+	
+	html {
+		font-size: 15px;
+		font-family: sans-serif;
+		color-scheme: dark;
+	}
+
 }
