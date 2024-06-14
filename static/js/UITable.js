@@ -120,13 +120,12 @@ class UITable extends UIElement { // only number is acceptable in table body
                     
                     for ( let i = ij[ 0 ]; i <= ij[ 1 ]; i ++ ) {
 
-                        const row = this.rows[ i ];
+                        const row = dom.rows[ i ];
         
                         for ( let j = ij[ 2 ]; j <= ij[ 3 ]; j ++ ) {
         
                             const cell = row.cells[ j ];
-                            if ( cell.editable ) cell.textContent = '';
-                            
+                            cell.textContent = '';
                         }
 
                     }
