@@ -2,6 +2,15 @@ import { UIButton, UICheckbox, UIDiv, UIInteger, UISelect, UISpan, UITabbedPanel
 import { UICollapsible } from './UICollapsible.js';
 import { UITable } from './UITable.js';
 
+const colors = [
+	'rgb(11,132,165)', //blue
+	'rgb(202,71,47)', //red
+	'rgb(246,200,95)', //yellow
+	'rgb(157,216,102)', //green
+	'rgb(111, 78, 124)', //purple
+	'rgb(255,160,86)', // orange
+	'rgb(141,221,208)' //cyan
+]
 class ViewportSTA extends UIDiv{
 
 	constructor( ship ) {
@@ -25,7 +34,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'correction', correction );
 		tabbedPanel.addTab( 'measured', 'measured data', measured );
 		tabbedPanel.addTab( 'result', 'result', result );
-		tabbedPanel.select( 'correction' );
+		tabbedPanel.select( 'result' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
@@ -132,7 +141,7 @@ class ViewportSTA extends UIDiv{
 		Array( 2 ).fill().map( () => row.insertCell() );
 
 		// Speed
-		div.add( new UIText( 'Service speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
+		div.add( new UIText( 'Contract speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
 
 		table = new UITable().setWidth('360px');
 		div.add( table );
@@ -143,7 +152,7 @@ class ViewportSTA extends UIDiv{
 		row.insertCell();
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Speed at NCR with sea margin (knots)'
+		row.insertHeader().textContent = 'Contract speed at NCR power with sea margin (knots)'
 		row.insertCell();
 
 		// Draft reading
@@ -291,12 +300,13 @@ class ViewportSTA extends UIDiv{
 				{
 
 					label: 'Ballast',
-					// backgroundColor: 'rgb(255, 99, 132)',
-					// borderColor: 'rgb(255, 149, 182)',
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[0],
 					showLine: true,
 					borderWidth: 2,
 					borderDash: [5, 5],
-					pointStyle: 'circle'
+					//pointStyle: 'circle'
+					pointRadius: 0,
 					// data: ship.mt.vs.map( ( e, i ) => { 
 						
 					// 	return {
@@ -313,20 +323,26 @@ class ViewportSTA extends UIDiv{
 				{
 
 					label: 'Design',
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[1],
 					showLine: true,
 					borderWidth: 2,
 					borderDash: [12, 5],
-					pointStyle: 'rectRot'
+					//pointStyle: 'rectRot'
+					pointRadius: 0,
 					
 				},
 
 				{
 
 					label: 'EEDI condition',
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[2],
 					showLine: true,
 					borderWidth: 2,
 					borderDash: [2, 2],
-					pointStyle: 'triangle'
+					//pointStyle: 'triangle'
+					pointRadius: 0,
 
 				}
 			],
@@ -730,20 +746,55 @@ class ViewportSTA extends UIDiv{
 		div.add( wind.useAverage );
 
 		// wave
-		options = new UISelect().setOptions( {
+		div = new UIDiv().add( new UIText( 'ISO 15016:2002' ).setPadding( '10px 0px 5px 0px' ) );
+		wave.content.add( div );
+		
+		options = new UISelect().setDisplay( 'block' ).setOptions( {
+
+			fal: 'Faltinsen',
+			fuji: 'Fujii-Takahashi',
+			kwon: 'Kwon',
+
+	 	} );
+		
+		options.setValue( 'fal' )
+		div.add( options );
+
+		div = new UIDiv().add( new UIText( 'ISO 15016:2015' ).setPadding( '10px 0px 5px 0px' ) );
+		wave.content.add( div );
+		
+		options = new UISelect().setDisplay( 'block' ).setOptions( {
 
 			sta1: 'STAWAVE-1',
 			sta2: 'STAWAVE-2',
+			nmri: 'Theoretical method with simplified tank tests in short wave',
+			test: 'Seakeeping model tests',
 			snnm: 'SNNM'
 
 	 	} );
 		
 		options.setValue( 'sta2' )
-
-		wave.content.add( options );
+		div.add( options );
+		
 
 		// current
-		options = new UISelect().setOptions( {
+		div = new UIDiv().add( new UIText( 'ISO 15016:2002' ).setPadding( '10px 0px 5px 0px' ) );
+		current.content.add( div );
+		
+		options = new UISelect().setDisplay( 'block' ).setOptions( {
+
+			none: 'no current',
+			curv: 'current curve'
+
+	 	} );
+		
+		options.setValue( 'none' )
+		div.add( options );
+
+		div = new UIDiv().add( new UIText( 'ISO 15016:2015' ).setPadding( '10px 0px 5px 0px' ) );
+		current.content.add( div );
+		
+		options = new UISelect().setDisplay( 'block' ).setOptions( {
 
 			none: 'no current',
 			iterative: 'iterative',
@@ -752,8 +803,7 @@ class ViewportSTA extends UIDiv{
 	 	} );
 		
 		options.setValue( 'iterative' )
-
-		current.content.add( options );
+		div.add( options );
 
 	}
 	
@@ -781,6 +831,8 @@ class ViewportSTA extends UIDiv{
 
 					label: 'Ballast(Model)',
 					showLine: true,
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[0],
 					borderWidth: 1,
 					borderDash: [5, 5],
 					pointRadius: 0,
@@ -792,6 +844,8 @@ class ViewportSTA extends UIDiv{
 
 					label: 'Loaded(Model)',
 					showLine: true,
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[1],
 					borderWidth: 1,
 					borderDash: [12, 5],
 					pointRadius: 0,
@@ -802,6 +856,8 @@ class ViewportSTA extends UIDiv{
 
 					label: 'Ballast(Sea trial)',
 					showLine: true,
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[2],
 					borderWidth: 3,
 					pointRadius: 0,
 
@@ -811,6 +867,8 @@ class ViewportSTA extends UIDiv{
 
 					label: 'Loaded(Predicted)',
 					showLine: true,
+					backgroundColor: 'rgba(0, 0, 0, 0.0)',
+					borderColor: colors[3],
 					borderWidth: 3,
 					// backgroundColor: 'lightgreen',
 					// borderColor: 'green',
@@ -822,6 +880,8 @@ class ViewportSTA extends UIDiv{
 				{
 
 					label: 'Measured',
+					backgroundColor: colors[4],
+					borderColor: colors[4],
 					borderWidth: 2,
 					borderDash: [2, 2],
 					pointStyle: 'circle',
@@ -832,6 +892,8 @@ class ViewportSTA extends UIDiv{
 				{
 
 					label: 'Corrected',
+					backgroundColor: colors[5],
+					borderColor: colors[5],
 					borderWidth: 2,
 					borderDash: [2, 2],
 					pointStyle: 'triangle',
@@ -919,214 +981,266 @@ class ViewportSTA extends UIDiv{
 
 		calButton.dom.addEventListener( 'click', () => {
 			
-			let table, row;
-
-			// Measured data
-			table = new UITable();
-			result.add( table );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Engine load (%)'
-			ship.load.map( e => row.insertCell().textContent = e );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Run number'
-			ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Heading (°)'
-			ship.hdg.map( e => row.insertCell().textContent = e );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Speed over ground (knots)'
-			ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Shaft speed (rpm)'
-			ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Shaft power (kW)'
-			ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wind velocity (m/s)'
-			ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wind direction (°)'
-			ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave height (m)'
-			ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave direction (°)'
-			ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave period (sec)'
-			ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell height (m)'
-			ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell direction (°)'
-			ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell period (sec)'
-			ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-			/////////////////////////////////////////////////////////////////////////////////////////////
-			// Results
-			/////////////////////////////////////////////////////////////////////////////////////////////
-			const res = ship.analysis();
-			console.log( res );
-			const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
-			const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR } = res;
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
-			vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
-			dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
-			vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "True wind direction at anemometer height (°)";
-			dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
-			vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
-			dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
-			vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
-			vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Relative wind direction at reference height (°)";
-			dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Wind coefficient";
-			caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "RAA (kN)";
-			raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave motion (kN) ';
-			wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave reflection (kN) ';
-			wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Wave total (kN) ';
-			wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell motion (kN) ';
-			swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell reflection (kN) ';
-			swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'Swell total (kN) ';
-			swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'RAW (kN) ';
-			raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = 'RAS (kN) ';
-			ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "ΔR (kN)";
-			delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "PD (kW)";
-			pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "Vs (kts)";
-			stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-			row = table.insertRow();
-			row.insertHeader().textContent = "PB (kW)";
-			pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-
-			table = new UITable();
-			result.add( table );
-			row = table.insertRow();
-			row.insertHeader().textContent = "NCR";
-			row.insertHeader().textContent = ship.ncr[ 1 ] + ' (kW)';
-			row = table.insertRow();
-			row.insertHeader().textContent = "Sea Margin";
-			row.insertHeader().textContent = ship.sm + ' (%)';
-			row = table.insertRow();
-			row.insertHeader().textContent = "Speed at NCR with s.m.";
-			row.insertHeader().textContent = speedAtNCR.toFixed( 3 ) + ' (knots)';
-
-			// Speed-power chart
-			data.datasets[ 0 ].data = drawCurve( ship.mt.vs, ship.mt.pb )
-
-			data.datasets[ 1 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded )
-
-			data.datasets[ 2 ].data = drawCurve( ship.mt.vs, ship.mt.pb.map( e => e + powerOffset ))
-			console.log( data.datasets[ 2 ].data )
-
-			data.datasets[ 3 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded.map( e => e + powerOffset ) )
-
-			data.datasets[ 4 ].data = drawCurve( ship.sog, ship.power )
-
-			data.datasets[ 5 ].data = drawCurve( stw, pb )
-
-			function drawCurve( vs, pb ) {
-
-				return vs.map( ( v, i ) => { 
-                    
-					return {
-						
-						x: v,
-						y: pb[ i ]
-			
-					}
-			
-				} );
-
-			}
-
-			result.chart.update();
+			// runSTA( ship, result );
+			runClassLib( ship );
 
 		} );
 
 	}
+
+}
+
+function runClassLib( ship ) {
+
+	console.log( 'it depends on class library in server method' )
+
+	sendData( ship )
+
+	function sendData( value ) { 
+		
+		$.ajax({ 
+			url: '/process',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify( value ),
+			success: function(response) {
+				console.log('success');
+				console.log( response );
+			}, 
+			error: function(error) { 
+				console.log(error); 
+			} 
+		});
+	} 
+
+}
+
+function runSTA( ship, result ) { //result: UIDiv
+
+	runClassLib( ship ); // run class library(.dll)
+
+	const chart = result.chart // chart.js
+	const data = chart.config.data
+
+	checkValidity();
+
+	// Temperature to density
+	// wind resistance
+	// wave resistance
+	// water temperature salinity
+	// current correction
+	// speed-power
+	
+	let table, row;
+
+	// Measured data
+	table = new UITable();
+	result.add( table );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Engine load (%)'
+	ship.load.map( e => row.insertCell().textContent = e );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Run number'
+	ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Heading (°)'
+	ship.hdg.map( e => row.insertCell().textContent = e );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Speed over ground (knots)'
+	ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Shaft speed (rpm)'
+	ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Shaft power (kW)'
+	ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wind velocity (m/s)'
+	ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wind direction (°)'
+	ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave height (m)'
+	ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave direction (°)'
+	ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave period (sec)'
+	ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell height (m)'
+	ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell direction (°)'
+	ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell period (sec)'
+	ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	// Results
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	const res = ship.analysis();
+	console.log( res );
+	const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
+	const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR } = res;
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
+	vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
+	dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
+	vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "True wind direction at anemometer height (°)";
+	dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
+	vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
+	dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
+	vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
+	vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Relative wind direction at reference height (°)";
+	dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Wind coefficient";
+	caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "RAA (kN)";
+	raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave motion (kN) ';
+	wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave reflection (kN) ';
+	wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Wave total (kN) ';
+	wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell motion (kN) ';
+	swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell reflection (kN) ';
+	swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'Swell total (kN) ';
+	swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'RAW (kN) ';
+	raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = 'RAS (kN) ';
+	ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "ΔR (kN)";
+	delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "PD (kW)";
+	pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "Vs (kts)";
+	stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+	row = table.insertRow();
+	row.insertHeader().textContent = "PB (kW)";
+	pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
+
+	table = new UITable();
+	result.add( table );
+	row = table.insertRow();
+	row.insertHeader().textContent = "NCR";
+	row.insertHeader().textContent = ship.ncr[ 1 ] + ' (kW)';
+	row = table.insertRow();
+	row.insertHeader().textContent = "Sea Margin";
+	row.insertHeader().textContent = ship.sm + ' (%)';
+	row = table.insertRow();
+	row.insertHeader().textContent = "Speed at NCR with s.m.";
+	row.insertHeader().textContent = speedAtNCR.toFixed( 3 ) + ' (knots)';
+
+	// Speed-power chart
+	data.datasets[ 0 ].data = drawCurve( ship.mt.vs, ship.mt.pb )
+
+	data.datasets[ 1 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded )
+
+	data.datasets[ 2 ].data = drawCurve( ship.mt.vs, ship.mt.pb.map( e => e + powerOffset ))
+	console.log( data.datasets[ 2 ].data )
+
+	data.datasets[ 3 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded.map( e => e + powerOffset ) )
+
+	data.datasets[ 4 ].data = drawCurve( ship.sog, ship.power )
+
+	data.datasets[ 5 ].data = drawCurve( stw, pb )
+
+	function drawCurve( vs, pb ) {
+
+		return vs.map( ( v, i ) => { 
+			
+			return {
+				
+				x: v,
+				y: pb[ i ]
+	
+			}
+	
+		} );
+
+	}
+
+	chart.update();
+
+}
+
+function checkValidity() {
+
+	console.warn( 'not implemented' );
 
 }
 
@@ -1152,4 +1266,4 @@ function addButton( table ) {
 
 }
 
-export { ViewportSTA };
+export { ViewportSTA, runSTA };
