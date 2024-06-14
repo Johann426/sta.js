@@ -1,4 +1,5 @@
 import { UIDiv, UIHorizontalRule, UIPanel, UIRow } from "./ui.js";
+import { runSTA } from "./ViewportSTA.js";
 
 class MenubarSTA extends UIDiv {
 
@@ -115,7 +116,7 @@ class MenubarSTA extends UIDiv {
 		item.setTextContent( 'Calculate' );
 		item.onClick( () => {
 
-			console.warn( 'not implemented' )
+            runSTA( ship, viewport.result );
 
 		} );
 
@@ -299,7 +300,7 @@ async function inpOpen( ship, viewport ) {
 
         } );
 
-        part = data['<OWN_WIND_FORCE_COEFFI>']
+        part = data['<OWN_WIND_FORCE_COEFFI>'][ 1 ][ 0 ] == 'null' ? data['<STANDARD_WIND_FORCE_COEFFI>'] : data['<OWN_WIND_FORCE_COEFFI>']
         data.wind = new Object();
         keys = part.shift();
         keys.map( key => data.wind[ key ] = new Array() );
@@ -419,8 +420,11 @@ async function inpOpen( ship, viewport ) {
         ship.time = data[ 'INNING_TIME' ].map( e => e.replace( '_', ' ' ) );
         ship.hdg = data[ 'DIR_OF_RUN' ];
         ship.sog = data[ 'SPEED_MEASURED' ];
-        ship.rpm = data[ 'SHAFT_RPM_MEASURED_S' ];
-        ship.power = data[ 'SHAFT_POWER_MEASURED_S' ];
+        ship.rpm = data[ 'SHAFT_RPM_MEASURED_S' ].map( e => parseFloat( e ) );
+        data[ 'SHAFT_RPM_MEASURED_P' ].map( ( e, i ) => ship.rpm[ i ] = 0.5 * ( ship.rpm[ i ] + parseFloat( e ) ) );
+        ship.power = data[ 'SHAFT_POWER_MEASURED_S' ].map( e => parseFloat( e ) );
+        data[ 'SHAFT_POWER_MEASURED_P' ].map( ( e, i ) => ship.power[ i ] += parseFloat( e ) );
+
         ship.wind_v = data[ 'WIND_VELOCITY' ];
         ship.wind_d = data[ 'WIND_DIR' ];
         ship.wind = {
@@ -455,9 +459,9 @@ async function inpOpen( ship, viewport ) {
             vsLoaded: data.mtLoaded[ 'Design' ][ 'SPEED' ],
             pbLoaded: data.mtLoaded[ 'Design' ][ 'POWER' ],
             rpmLoaded: data.mtLoaded[ 'Design' ][ 'RPM' ],
-            vsEEDI: data.mtLoaded[ 'EEDI' ][ 'SPEED' ],
-            pbEEDI: data.mtLoaded[ 'EEDI' ][ 'POWER' ],
-            rpmEEDI: data.mtLoaded[ 'EEDI' ][ 'RPM' ],
+            vsEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'SPEED' ] : undefined,
+            pbEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'POWER' ] : undefined,
+            rpmEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'RPM' ] : undefined,
             
             res: {
                 vs: data.mtCoef[ 'SPEED' ],
@@ -508,7 +512,7 @@ async function inpOpen( ship, viewport ) {
         toArryDataFloat( wind.angle, wind.coef );
         toArryDataFloat( mt.vs, mt.pb, mt.rpm );
         toArryDataFloat( mt.vsLoaded, mt.pbLoaded, mt.rpmLoaded );
-        toArryDataFloat( mt.vsEEDI, mt.pbEEDI, mt.rpmEEDI );
+        mt.vsEEDI ? toArryDataFloat( mt.vsEEDI, mt.pbEEDI, mt.rpmEEDI ) : null;
         toArryDataFloat( mt.res.vs, mt.res.cts );
         toArryDataFloat( mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad );
         toArryDataFloat( mt.pow.j, mt.pow.kt, mt.pow.kq );
@@ -550,6 +554,28 @@ async function inpOpen( ship, viewport ) {
             } );
 
         }
+
+        [ wave, swell ].map( wave => {
+
+            let saved;
+
+            for( let i = 0; i < wave.angle.length; i ++ ) {
+
+                if( i % 2 == 0 ) {
+
+                    saved = wave.angle[ i ];
+                    wave.angle[ i ] = wave.angle[ i + 1 ]
+
+                } else {
+
+                    wave.angle[ i ] = saved;
+
+                }
+                
+
+            }
+
+        } )
 
         console.log( ship )
         updateViewport( ship, viewport );
