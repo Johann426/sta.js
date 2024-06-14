@@ -8,9 +8,9 @@ const g = 9.80665;
 
 class Ship {
 
-	constructor() {
+	constructor( guideline = 'ISO 15016:2015') {
 
-		this.initialize();
+		this.guideline = guideline; // 'ISO 15016:2002' | 'ISO 15016:2015' | 'ITTC 7.5-04-01-01.1 (2017)' | 'ITTC 7.5-04-01-01.1 (2021)'
 
 	}
 
@@ -27,12 +27,6 @@ class Ship {
 		Object.assign( data, this )
 
 		return data;
-
-	}
-
-	initialize() {
-
-
 
 	}
 
@@ -59,11 +53,14 @@ class Ship {
 		//STA1 result
 		for ( let i = 0; i <= nm1; i ++ ) {
 
-			let raw, a;
+			let raw, angle;
 
 			raw = 1 / 16 * rho * 9.807 * wave.height[ i ] ** 2 * b * Math.sqrt( b / lbwl );
-			a = wave.angle[ i ];
-			raw = a <= 45 || a >= 315 ? raw : 0;
+			// angle from -180 to 180
+			angle = wave.angle[i] % 360;
+			if ( angle < 0 ) angle += 360;
+			if ( angle > 180 ) angle -= 360;
+			raw = angle > 45 || angle < -45 ? raw : 0;
 
 		}
 
@@ -268,7 +265,7 @@ class Ship {
 	}
 
 
-	RAA( heading, speed, vwind, dwind, Za, Zref, rho, Ax, cxList ) {
+	RAA( heading, speed, vwind, dwind, Za, Zref, rho, Ax, cxList, useAverage = true, guideline = 'ISO 15016:2015' ) {
 
 		const nm1 = heading.length - 1;
 		const vwt =[];
@@ -319,8 +316,8 @@ class Ship {
 			const sin = M.sin( dwtAve[ i ] - hdg );
 			const cos = M.cos( dwtAve[ i ] - hdg );
 			const sog = speed[ i ] * 1852 / 3600;
-
-			const corr = M.pow( Zref / Za, 1 / 7 );
+			const exponent = guideline == 'ISO 15016:2015' ? 1 / 7 : 1 / 9;
+			const corr = M.pow( Zref / Za, exponent );
 			vwtRef[ i ] = vwtAve[ i ] * corr;
 			vwrRef[ i ] = M.sqrt( vwtRef[ i ] * vwtRef[ i ] + sog * sog + 2.0 * vwtRef[ i ] * sog * cos );
 			const y = vwtRef[ i ] * sin;
@@ -334,7 +331,7 @@ class Ship {
 		const d = dwrRef.map( e => e * 180.0 / pi );
 		const caa = f( a, cx, d );
 
-		const vw = vwrRef;
+		const vw = useAverage ? vwrRef : vwind;
 		const vs = speed.map( e => e * 1852 / 3600 );
 
 		const raa = [];
@@ -364,7 +361,7 @@ class Ship {
 
 	}
 
-	RAS( celcius, rhos, rhos0 = 1026, temp0 = 15.0 ) {
+	RAS( celcius, rhos, rhos0 = 1026, temp0 = 15.0, guideline = 'ISO 15016:2015' ) {
 
 		// ITTC Fresh Water and Seawater Properties
 		// const seawater ={
@@ -388,8 +385,7 @@ class Ship {
 		const Cf = ( u, l, nu ) => {
 
 			const Re = ( u * l) / nu; // Reynolds number
-			const delCf = 0.0;
-			
+			const delCf = guideline == 'ISO 15016:2015' ? 0.0 : 0.044 * ( M.pow( 150e-6 / l, 1.0 / 3.0 ) - 10.0 * M.pow( Re, -1.0 / 3.0 ) ) + 0.000125;
 			return 0.075 / M.pow( M.log10( Re ) - 2, 2 ) + delCf;
 
 		}
