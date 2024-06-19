@@ -41,6 +41,18 @@ class MenubarSTA extends UIDiv {
 		} );
 
         items.add( item );
+
+        item = new UIRow();
+		item.setClass( 'item' );
+		item.setTextContent( 'Import File(.inp)' );
+
+		item.onClick( () => {
+
+            inpOpen( ship, viewport );
+
+        } );
+
+        items.add( item );
 		items.add( new UIHorizontalRule().setClass( 'divider' ) );
 
 		item = new UIRow();
@@ -80,17 +92,7 @@ class MenubarSTA extends UIDiv {
         items.add( item );
         items.add( new UIHorizontalRule().setClass( 'divider' ) );
 
-		item = new UIRow();
-		item.setClass( 'item' );
-		item.setTextContent( 'Import File(.inp)' );
-
-		item.onClick( () => {
-
-            inpOpen( ship, viewport );
-
-        } );
-
-        items.add( item );
+		
 
         return menu;
 
@@ -254,7 +256,7 @@ async function inpOpen( ship, viewport ) {
 
         console.log( data )
 
-        ship.shipNo = data['<SHIP_NO>'][ 0 ][ 1 ];
+        ship.shipNo = data['<SHIP_NO>'][ 0 ][ 2 ];
         ship.trialCondition = data['<COND_NO>'][ 0 ][ 1 ];
         
         data['<SHIP_MAIN_PARTICULAR>'].map( row => {
@@ -392,6 +394,7 @@ async function inpOpen( ship, viewport ) {
 
         
         ship.shipName = data[ 'SHIP_NAME' ];
+        ship.ownerName = data[ 'OWNER_NAME' ];
         ship.l = data[ 'LBP' ];
         ship.b = data[ 'BREADTH' ];
         ship.tf = data[ 'DRAFT_FORE' ];
@@ -409,7 +412,10 @@ async function inpOpen( ship, viewport ) {
         ship.Ax = data[ 'TRANS_PROJECT_AREA' ];
         ship.rhoa  = data[ '' ];
         
+        ship.contractCondition = data[ 'CONTRACT_CONDITION' ];
+        ship.contractPower = data[ 'CONTRACT_POWER_SM' ];
         ship.contractSpeed = data[ 'CONTRACT_SPEED' ];
+
         ship.noProp = data[ 'NO_PROP' ];
         ship.mcr = [ data[ 'MCR_POWER_KW' ], data[ 'MCR_RPM' ] ];
         ship.ncr = [ data[ 'NCR_POWER_KW' ], data[ 'NCR_RPM' ] ];
@@ -590,14 +596,18 @@ async function inpOpen( ship, viewport ) {
 
 function updateViewport( ship, viewport ) {
 
-    let table, chartData;
+    let table, div, chartData;
 
     // Particulars tab
     table = viewport.particular.tables[ 0 ];
 
-    const { shipno, l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl } = ship;
+    const { shipName, ownerName, shipNo } = ship;
+
+    [ shipName, ownerName, shipNo ].map( ( e, i ) => viewport.particular.textInput[ i ].setValue( e ) );
+
+    const { l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl } = ship;
     
-    [ shipno, l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl ].map( ( e, i ) => {
+    [ l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl ].map( ( e, i ) => {
         
         const row = table.rows[ i ];
         row.cells[ 1 ].textContent = e;
@@ -682,43 +692,15 @@ function updateViewport( ship, viewport ) {
 
     } );
 
-    
-    chartData = viewport.modeltest.chart.config._config.data.datasets;
-
-    chartData[ 0 ].data = mt.vs.map( ( e, i ) => { 
-                    
-        return {
-            
-            x: e,
-            y: mt.pb[ i ]
-
-        }
-
-    } );
-
-    chartData[ 1 ].data = mt.vsLoaded.map( ( e, i ) => { 
-                    
-        return {
-            
-            x: e,
-            y: mt.pbLoaded[ i ]
-
-        }
-
-    } );
-
-    if( mt.vsEEDI ) chartData[ 2 ].data = mt.vsEEDI.map( ( e, i ) => { 
-                    
-        return {
-            
-            x: e,
-            y: mt.pbEEDI[ i ]
-
-        }
-
-    } );
-
-    viewport.modeltest.chart.update();
+    //Speed-power curve
+    chartData = viewport.modeltest.chart.data;
+    chartData[ 0 ].x = mt.vs;
+    chartData[ 0 ].y = mt.pb;
+    chartData[ 1 ].x = mt.vsLoaded;
+    chartData[ 1 ].y = mt.pbLoaded;
+    chartData[ 2 ].x = mt.vsEEDI;
+    chartData[ 2 ].y = mt.pbEEDI;
+    Plotly.newPlot( viewport.modeltest.chart.dom, chartData, viewport.modeltest.chart.layout )
 
     // Correction tab
     table = viewport.correction.wind.tables[ 0 ];
@@ -726,20 +708,11 @@ function updateViewport( ship, viewport ) {
     ship.wind.angle.map( ( e, i ) => table.rows[ i + 1 ].cells[ 0 ].textContent = e );
     ship.wind.coef.map( ( e, i ) => table.rows[ i + 1 ].cells[ 1 ].textContent = e );
 
-    chartData = viewport.correction.wind.chart.config._config.data.datasets;
+    chartData = viewport.correction.wind.chart.data;
+    chartData[0].x = ship.wind.angle
+    chartData[0].y = ship.wind.coef
 
-    chartData[ 0 ].data = ship.wind.angle.map( ( e, i ) => { 
-                    
-        return {
-            
-            x: e,
-            y: ship.wind.coef[ i ]
-
-        }
-
-    } );
-
-    viewport.correction.wind.chart.update();
+    Plotly.newPlot( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout )
 
     // Measured data tab
     table = viewport.measured.table;
