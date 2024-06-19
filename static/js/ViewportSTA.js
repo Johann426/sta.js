@@ -1,16 +1,7 @@
-import { UIButton, UICheckbox, UIDiv, UIInteger, UISelect, UISpan, UITabbedPanel, UIText, UITextArea } from './ui.js';
+import { UIButton, UICheckbox, UIDiv, UIInput, UIInteger, UISelect, UISpan, UITabbedPanel, UIText, UITextArea } from './ui.js';
 import { UICollapsible } from './UICollapsible.js';
 import { UITable } from './UITable.js';
 
-const colors = [
-	'rgb(11,132,165)', //blue
-	'rgb(202,71,47)', //red
-	'rgb(246,200,95)', //yellow
-	'rgb(157,216,102)', //green
-	'rgb(111, 78, 124)', //purple
-	'rgb(255,160,86)', // orange
-	'rgb(141,221,208)' //cyan
-]
 class ViewportSTA extends UIDiv{
 
 	constructor( ship ) {
@@ -29,31 +20,42 @@ class ViewportSTA extends UIDiv{
 		const result = new UIDiv();
 		
 		tabbedPanel.setId( 'tabbedPanel' )
-		tabbedPanel.addTab( 'particular', 'particular', particular );
-		tabbedPanel.addTab( 'model', 'model test', modeltest );
-		tabbedPanel.addTab( 'correction', 'correction', correction );
-		tabbedPanel.addTab( 'measured', 'measured data', measured );
-		tabbedPanel.addTab( 'result', 'result', result );
+		tabbedPanel.addTab( 'particular', 'Particular', particular );
+		tabbedPanel.addTab( 'model', 'Model test', modeltest );
+		tabbedPanel.addTab( 'correction', 'Correction', correction );
+		tabbedPanel.addTab( 'measured', 'Measured data', measured );
+		tabbedPanel.addTab( 'result', 'Result', result );
 		tabbedPanel.select( 'result' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
-
-		
 		
 		this.particularTab();
 		this.modeltestTab();
 		this.measuredTab();
 		this.correctionTab();
-		this.res();
+		this.ressultTab();
 
 	}
 
 	particularTab() {
 
 		const { particular, ship } = this;
+		particular.textInput = [];
 		particular.tables = [];
 
 		let div, table, row;
+
+		div = new UIDiv();
+		div.add( new UIText( 'Ship name:' ).setWidth('140px').setTextAlign( 'center' ).setPadding( '10px 10px 10px 0px' ) );
+		particular.textInput.push( new UIInput('').setWidth('140px').setTextAlign( 'center' ).setPadding( '0px' ) );
+		div.add( particular.textInput[ 0 ] )
+		div.add( new UIText( 'Owner name:' ).setWidth('160px').setTextAlign( 'center' ).setPadding( '20px 10px 10px 20px' ) );
+		particular.textInput.push( new UIInput('').setWidth('160px%').setTextAlign( 'center' ).setPadding( '0px' ) );
+		div.add( particular.textInput[ 1 ] )
+		div.add( new UIText( 'Ship number:' ).setWidth('140px').setTextAlign( 'center' ).setPadding( '10px 10px 10px 10px' ) );
+		particular.textInput.push( new UIInput('').setWidth('140px').setTextAlign( 'center' ).setPadding( '0px' ) );
+		div.add( particular.textInput[ 2 ] )
+		particular.add( div );
 
 		// Ship particulars
 		div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
@@ -63,10 +65,6 @@ class ViewportSTA extends UIDiv{
 		table = new UITable().setWidth('300px');
 		div.add( table );
 		particular.tables.push( table );
-
-		row = table.insertRow();
-		row.insertHeader().textContent = 'Ship No.'
-		row.insertCell().textContent = '' // text format needed
 
 		row = table.insertRow();
 		row.insertHeader().textContent = 'LPP (m)'
@@ -90,7 +88,7 @@ class ViewportSTA extends UIDiv{
 		
 		row = table.insertRow();
 		row.insertHeader().innerHTML = 'Z<sub>ref</sub> (m)';
-		row.insertCell().textContent = 10;
+		row.insertCell().textContent = ship.Zref;
 		
 		row = table.insertRow();
 		row.insertHeader().innerHTML = 'C<sub>B</sub>';
@@ -286,183 +284,103 @@ class ViewportSTA extends UIDiv{
 		div = new UIDiv()//.setPosition( 'absolute' ).setTop( '50%' ).setHeight( '360px' ).setMarginTop( '-360px' ); // vertical center
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		modeltest.add( div );
+		
+		// div.setWidth( '480px' )
+		// div.setHeight( '720px' )
 
-		const canvas = document.createElement('canvas');
-		div.dom.appendChild( canvas );
-		canvas.width = 480;
-		canvas.height = 720;
-		canvas.style.display = 'inline'
-		// canvas.style.border = 'solid'
-
-		const data = {
-
-			datasets: [
-				{
-
-					label: 'Ballast',
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[0],
-					showLine: true,
-					borderWidth: 2,
-					borderDash: [5, 5],
-					//pointStyle: 'circle'
-					pointRadius: 0,
-					// data: ship.mt.vs.map( ( e, i ) => { 
-						
-					// 	return {
-							
-					// 		x: e,
-					// 		y: ship.mt.pb[ i ]
-
-					// 	}
-
-					// } ),
-
-				},
-
-				{
-
-					label: 'Design',
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[1],
-					showLine: true,
-					borderWidth: 2,
-					borderDash: [12, 5],
-					//pointStyle: 'rectRot'
-					pointRadius: 0,
-					
-				},
-
-				{
-
-					label: 'EEDI condition',
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[2],
-					showLine: true,
-					borderWidth: 2,
-					borderDash: [2, 2],
-					//pointStyle: 'triangle'
-					pointRadius: 0,
-
-				}
+		const chartLayout = {
+			title: 'Speed-power curve',
+			width: 480,
+			height: 720,
+			paper_bgcolor: 'rgba(0,0,0,0)',
+			plot_bgcolor: 'rgba(0,0,0,0)',
+			colorway: [
+				'rgb(11,132,165)', //blue
+				'rgb(202,71,47)', //red
+				'rgb(246,200,95)', //yellow
+				'rgb(157,216,102)', //green
+				'rgb(111, 78, 124)', //purple
+				'rgb(255,160,86)', // orange
+				'rgb(141,221,208)' //cyan
 			],
-
-		};
-
-		const config = {
-			
-			type: 'scatter',
-			data: data,
-
-			options: {
-			
-				responsive: false,
-
-				scales: {
-				
-					x: {
-					
-						type: 'linear',
-						position: 'bottom',
-						
-						title: {
-
-							display: true,
-							text: 'Speed [knots]',
-
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-
-						// ticks: {
-
-						// 	callback: function(value, index, ticks) {
-
-						// 		return value.toFixed( 1 ) + ' kts';
-
-						// 	}
-
-						// }
-					
-					},
-
-					y: {
-					
-						type: 'linear',
-						position: 'left',
-						
-						title: {
-
-							display: true,
-							text: 'Power [kW]',
-							
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-
-						// ticks: {
-
-						// 	callback: function(value, index, ticks) {
-
-						// 		return value.toLocaleString() + ' kW';
-
-						// 	}
-
-						// }
-					
-					}
-
-				},
-
-				plugins: {
-
-					title: {
-
-						display: true,
-						text: 'Speed-power curve',
-						
-						font: {
-
-							size: 16,
-							weight: 'bold',
-
-						},
-
-						padding: {
-
-							top: 10,
-							bottom: 10
-
-						}
-
-					},
-
-					// datalabels: {
-
-					// 	anchor: 'start',
-					// 	align: '-45',
-					// 	clamp: true,
-					// 	color: "orange",
-
-					// }
-
-				},
-			
+			font: { //global font
+				color: 'lightgray',
+			},
+			xaxis: {
+			  title: 'Speed [knots]',
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			  tickformat: ".1f",
+			  minallowed: 0,
+			  showline: true,
+			  showgrid: true,
+			  zeroline: false
+			},
+			yaxis: {
+			  title: {
+				text : 'Power [kW]',
+				standoff: 5,
+			  },
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			  tickformat: ",.0f",
+			  minallowed: 0,
+			  showline: true,
+			  showgrid: true,
+			},
+			legend: {
+				x: 0.5,
+				xanchor: 'center',
+				y: 1,
+				orientation: 'h'
 			}
-
 		};
+	
+		const chartData = [
+			{
+				type: 'scatter',
+				name: 'Trial',
+				showlegend: true,
+				line:{
+					dash: 'dash',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Loaded',
+				showlegend: true,
+				line:{
+					dash: 'longdash',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'EEDI',
+				showlegend: true,
+				// mode: 'markers',
+				line:{
+					dash: 'dashdot',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+	
+		];
 
-		modeltest.chart = new Chart( canvas, config );
+		Plotly.newPlot( div.dom, chartData, chartLayout );
+
+		modeltest.chart = {
+			dom: div.dom,
+			data: chartData,
+			layout: chartLayout
+		};
 
 	}
 
@@ -623,7 +541,7 @@ class ViewportSTA extends UIDiv{
 		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 
-		div.add( new UIText( 'Wind resistance coefficient' ).setWidth('100%').setTextAlign( 'center' ) );
+		div.add( new UIText( 'Wind profile' ).setWidth('100%').setTextAlign( 'center' ) );
 		wind.content.add( div );
 
 		wind.tables = [];
@@ -648,95 +566,59 @@ class ViewportSTA extends UIDiv{
 		div = new UIDiv().setPadding( '10px 20px' );
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		wind.content.add( div );
-		const canvas = document.createElement('canvas');
-		div.dom.appendChild( canvas );
-		canvas.width = 480;
-		canvas.height = 680;
-		canvas.style.display = 'inline'
 
-		const data = {
-
-			datasets: [
-				{
-
-					label: 'Ballast',
-					showLine: true,
-					borderWidth: 2,
-					pointStyle: 'circle',
-					// data: 
-
-				},
-
-			],
-
+		const chartLayout = {
+			title: 'Wind resistance coefficient',
+			width: 480,
+			height: 680,
+			paper_bgcolor: 'rgba(0,0,0,0)',
+			plot_bgcolor: 'rgba(0,0,0,0)',
+			font: { //global font
+				color: 'lightgray',
+			},
+			xaxis: {
+			  title: 'Angle [°]',
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			  minallowed: 0,
+			  maxallowed: 360,
+			  showline: true,
+			  showgrid: true,
+			},
+			yaxis: {
+			  title: {
+				text : 'Cx',
+				standoff: 5,
+			  },
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			//   tickformat: ",.0f",
+			  showline: true,
+			  showgrid: true,
+			},
 		};
-
-		const config = {
-			
-			type: 'scatter',
-			data: data,
-
-			options: {
-			
-				responsive: false,
-
-				scales: {
-				
-					x: {
-					
-						type: 'linear',
-						position: 'bottom',
-						
-						title: {
-
-							display: true,
-							text: 'Angle [°]',
-
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-					
-					},
-
-					y: {
-					
-						type: 'linear',
-						position: 'left',
-						
-						title: {
-
-							display: true,
-							text: 'Cx',
-							
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-
-					}
-
+	
+		const chartData = [
+			{
+				type: 'scatter',
+				name: 'cx',
+				showlegend: false,
+				line:{
+					dash: 'solid',
+					width: 2
 				},
+				x: [0, 360],
+				y: [-1, 1]
+			},
+		];
+	
+		Plotly.newPlot( div.dom, chartData, chartLayout )
 
-				plugins: {
-
-					legend: false
-
-				}
-
-			}
-
+		wind.chart = {
+			dom: div.dom,
+			data: chartData,
+			layout: chartLayout
 		};
-
-		wind.chart = new Chart( canvas, config );
 		
 		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
 		wind.content.add( div );
@@ -807,7 +689,7 @@ class ViewportSTA extends UIDiv{
 
 	}
 	
-	res() {
+	ressultTab() {
 
 		const { ship, result } = this;
 
@@ -819,165 +701,197 @@ class ViewportSTA extends UIDiv{
 		//Chart
 		div = new UIDiv();
 		result.add( div );
-		const canvas = document.createElement('canvas');
-		div.dom.appendChild( canvas );
-		canvas.width = 700;
-		canvas.height = 1024;
 
-		const data = {
-
-			datasets: [
-				{
-
-					label: 'Ballast(Model)',
-					showLine: true,
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[0],
-					borderWidth: 1,
-					borderDash: [5, 5],
-					pointRadius: 0,
-					// data:
-
-				},
-
-				{
-
-					label: 'Loaded(Model)',
-					showLine: true,
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[1],
-					borderWidth: 1,
-					borderDash: [12, 5],
-					pointRadius: 0,
-					
-				},
-
-				{
-
-					label: 'Ballast(Sea trial)',
-					showLine: true,
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[2],
-					borderWidth: 3,
-					pointRadius: 0,
-
-				},
-
-				{
-
-					label: 'Loaded(Predicted)',
-					showLine: true,
-					backgroundColor: 'rgba(0, 0, 0, 0.0)',
-					borderColor: colors[3],
-					borderWidth: 3,
-					// backgroundColor: 'lightgreen',
-					// borderColor: 'green',
-					// borderDash: [4, 2],
-					pointRadius: 0,
-
-				},
-
-				{
-
-					label: 'Measured',
-					backgroundColor: colors[4],
-					borderColor: colors[4],
-					borderWidth: 2,
-					borderDash: [2, 2],
-					pointStyle: 'circle',
-					pointRadius: 4,
-
-				},
-
-				{
-
-					label: 'Corrected',
-					backgroundColor: colors[5],
-					borderColor: colors[5],
-					borderWidth: 2,
-					borderDash: [2, 2],
-					pointStyle: 'triangle',
-					pointRadius: 6,
-
-				},
-
-			],
-
-		};
-
-		const config = {
-			
-			type: 'scatter',
-			data: data,
-
-			options: {
-			
-				responsive: false,
-
-				scales: {
-				
-					x: {
-					
-						type: 'linear',
-						position: 'bottom',
-						
-						title: {
-
-							display: true,
-							text: 'Speed [knots]',
-
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-
-					},
-
-					y: {
-					
-						type: 'linear',
-						position: 'left',
-						
-						title: {
-
-							display: true,
-							text: 'Power [kW]',
-							
-							font: {
-
-								size: 14,
-								weight: 'bold',
-
-							}
-
-						},
-
-					}
-
-				},
-
-				plugins: {
-
-					datalabels: {
-
-						anchor: 'start',
-						align: '-45',
-						clamp: true,
-						color: "orange",
-
-					}
-
-				},
-			
+		const chartLayout = {
+			title: {
+				text: 'Speed-power curve',
+				font:{
+					size: 16,
+					weight: 'bold'
+				}
+			},
+			width: 700,
+			height: 1024,
+			paper_bgcolor: 'rgba(0,0,0,0)',
+			plot_bgcolor: 'rgba(0,0,0,0)',
+			colorway: [
+				'rgb(11,132,165)', //blue
+				'rgb(202,71,47)', //red
+				'rgb(246,200,95)', //yellow
+				'rgb(157,216,102)', //green
+				'rgb(111, 78, 124)', //purple
+				'rgb(255,160,86)', // orange
+				'rgb(141,221,208)', //cyan
+				'rgb(228,120,194)', //pink
+				'rgb(128,128,128)' //gray
+			], //Default: [#1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #8c564b, #e377c2, #7f7f7f, #bcbd22, #17becf]
+			font: { //global font
+				color: 'lightgray',
+			},
+			xaxis: {
+			  title: {
+				text: 'Speed [knots]',
+				font:{
+					size: 14,
+					weight: 'bold'
+				}
+			  },
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			  tickformat: ".1f",
+			  minallowed: 0,
+			  showline: true,
+			  showgrid: true,
+			  zeroline: false
+			},
+			yaxis: {
+			  title: {
+				text : 'Power [kW]',
+				standoff: 10,
+				font:{
+					size: 14,
+					weight: 'bold'
+				}
+			  },
+			  color: 'lightgray',
+			  gridcolor: 'gray',
+			  tickformat: ",.0f",
+			  minallowed: 0,
+			  showline: true,
+			  showgrid: true,
+			},
+			legend: {
+				x: 0.5,
+				xanchor: 'center',
+				y: 1,
+				orientation: 'h'
 			}
-
 		};
+	
+		const chartData = [
+			{
+				type: 'scatter',
+				name: 'Ballast(model)',
+				showlegend: true,
+				legendgroup: 'group',
+				line:{
+					dash: 'dash',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Loaded(model)',
+				showlegend: true,
+				legendgroup: 'group2',
+				line:{
+					dash: 'longdash',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Ballast(sea trial)',
+				showlegend: true,
+				legendgroup: 'group',
+				line:{
+					dash: 'solid',
+					width: 3
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Loaded(sea trial)',
+				showlegend: true,
+				legendgroup: 'group2',
+				line:{
+					dash: 'solid',
+					width: 2
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Measured',
+				showlegend: true,
+				legendgroup: 'group',
+				mode: 'markers',
+				marker: {
+					symbol: 'diamond',
+					size: 8
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'Corrected',
+				showlegend: true,
+				legendgroup: 'group',
+				mode: 'markers',
+				marker: {
+					symbol: 'triangle',
+					size: 8,
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'PowerRef',
+				showlegend: false,
+				mode: 'lines',
+				line:{
+					color: 'white',
+					dash: 'solid',
+					width: 1
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'SpeedTrial',
+				showlegend: false,
+				mode: 'lines',
+				line:{
+					color: 'white',
+					dash: 'solid',
+					width: 1
+				},
+				x: [],
+				y: []
+			},
+			{
+				type: 'scatter',
+				name: 'SpeedLoaded',
+				showlegend: false,
+				mode: 'lines',
+				line:{
+					color: 'white',
+					dash: 'solid',
+					width: 1
+				},
+				x: [],
+				y: []
+			},
+	
+		];
 
-		result.chart = new Chart( canvas, config );
+		result.chart = {
+			dom: div.dom,
+			data: chartData,
+			layout: chartLayout
+		}
+
+		Plotly.newPlot( div.dom, chartData, chartLayout, {displayModeBar: false} )
 
 		calButton.dom.addEventListener( 'click', () => {
 			
@@ -1018,9 +932,6 @@ function runClassLib( ship ) {
 function runSTA( ship, result ) { //result: UIDiv
 
 	runClassLib( ship ); // run class library(.dll)
-
-	const chart = result.chart // chart.js
-	const data = chart.config.data
 
 	checkValidity();
 
@@ -1099,7 +1010,7 @@ function runSTA( ship, result ) { //result: UIDiv
 	const res = ship.analysis();
 	console.log( res );
 	const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
-	const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR } = res;
+	const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR, speedAtNCRLoaded } = res;
 
 	row = table.insertRow();
 	row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
@@ -1203,38 +1114,77 @@ function runSTA( ship, result ) { //result: UIDiv
 	row.insertHeader().textContent = ship.sm + ' (%)';
 	row = table.insertRow();
 	row.insertHeader().textContent = "Speed at NCR with s.m.";
-	row.insertHeader().textContent = speedAtNCR.toFixed( 3 ) + ' (knots)';
+	row.insertHeader().textContent = speedAtNCRLoaded.toFixed( 3 ) + ' (knots)';
 
 	// Speed-power chart
-	data.datasets[ 0 ].data = drawCurve( ship.mt.vs, ship.mt.pb )
-
-	data.datasets[ 1 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded )
-
-	data.datasets[ 2 ].data = drawCurve( ship.mt.vs, ship.mt.pb.map( e => e + powerOffset ))
-	console.log( data.datasets[ 2 ].data )
-
-	data.datasets[ 3 ].data = drawCurve( ship.mt.vsLoaded, ship.mt.pbLoaded.map( e => e + powerOffset ) )
-
-	data.datasets[ 4 ].data = drawCurve( ship.sog, ship.power )
-
-	data.datasets[ 5 ].data = drawCurve( stw, pb )
-
-	function drawCurve( vs, pb ) {
-
-		return vs.map( ( v, i ) => { 
-			
-			return {
-				
-				x: v,
-				y: pb[ i ]
+	const mt = ship.mt;
+    const chartData = result.chart.data;
+	const chartLayout = result.chart.layout;
+	chartData[ 0 ].x = mt.vs;
+	chartData[ 0 ].y = mt.pb;
+	chartData[ 1 ].x = mt.vsLoaded;
+	chartData[ 1 ].y = mt.pbLoaded;
+	chartData[ 2 ].x = mt.vs;
+	chartData[ 2 ].y = mt.pb.map( e => e + powerOffset );
+	chartData[ 3 ].x = mt.vsLoaded;
+	chartData[ 3 ].y = mt.pbLoaded.map( e => e + powerOffset );
+	chartData[ 4 ].x = ship.sog;
+	chartData[ 4 ].y = ship.power;
+	chartData[ 5 ].x = stw;
+	chartData[ 5 ].y = pb;
 	
-			}
-	
-		} );
+	let minX = 100;
+	chartData.map( data => minX = Math.min( minX, ...data.x ) );
+	let maxX = 0;
+	chartData.map( data => maxX = Math.max( maxX, ...data.x ) );
+	let minY = 10000;
+	chartData.map( data => minY = Math.min( minY, ...data.y ) );
+	let maxY = 0;
+	chartData.map( data => maxY = Math.max( maxY, ...data.y ) );
 
-	}
+	chartData[ 6 ].x = [ minX, Math.max( speedAtNCR, speedAtNCRLoaded ) ];
+	chartData[ 6 ].y = [ ship.contractPower, ship.contractPower ];
+	chartData[ 7 ].x = [ speedAtNCR, speedAtNCR ];
+	chartData[ 7 ].y = [ minY, ship.contractPower ];
+	chartData[ 8 ].x = [ speedAtNCRLoaded, speedAtNCRLoaded ];
+	chartData[ 8 ].y = [ minY, ship.contractPower ];
 
-	chart.update();
+	chartLayout.xaxis.autorange = false;
+	chartLayout.xaxis.range = [ minX, maxX ];
+	chartLayout.yaxis.autorange = false;
+	chartLayout.yaxis.range = [ minY, maxY ];
+	chartLayout.annotations = [
+        {
+            text: `Contract power: ${ Intl.NumberFormat().format( ship.contractPower ) }`,
+			// text: `NCR Power / ${1 + 0.01 * ship.sm} = ${ ( ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm ) ).toFixed( 0 ) }`,
+            xanchor: 'left',
+			yanchor: 'bottom',
+			showarrow: false,
+			font: {
+				size: 14
+			},
+			x: minX,
+            y: ship.contractPower,
+        },
+		{
+            x: speedAtNCR,
+            y: minY,
+            text: speedAtNCR.toFixed(2),
+            xanchor: 'right',
+			arrowcolor: 'white',
+			arrowwidth: 1 //px
+        },
+		{
+            x: speedAtNCRLoaded,
+            y: minY,
+            text: speedAtNCRLoaded.toFixed(2),
+            xanchor: 'right',
+			arrowcolor: 'white',
+			arrowwidth: 1 //px
+        }
+    ]
+
+    Plotly.newPlot( result.chart.dom, chartData, result.chart.layout, {displayModeBar: false} )
 
 }
 
