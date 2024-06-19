@@ -125,7 +125,9 @@ class UITable extends UIElement { // only number is acceptable in table body
                         for ( let j = ij[ 2 ]; j <= ij[ 3 ]; j ++ ) {
         
                             const cell = row.cells[ j ];
-                            cell.textContent = '';
+                            // if( cell.nodeName == TD )
+                            if ( cell.editable ) cell.textContent = '';
+
                         }
 
                     }
