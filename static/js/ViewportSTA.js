@@ -25,7 +25,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'result' );
+		tabbedPanel.select( 'correction' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 		
@@ -46,16 +46,16 @@ class ViewportSTA extends UIDiv{
 		let div, table, row;
 
 		div = new UIDiv();
-		div.add( new UIText( 'Ship name:' ).setWidth('140px').setTextAlign( 'center' ).setPadding( '10px 10px 10px 0px' ) );
-		particular.textInput.push( new UIInput('').setWidth('140px').setTextAlign( 'center' ).setPadding( '0px' ) );
-		div.add( particular.textInput[ 0 ] )
-		div.add( new UIText( 'Owner name:' ).setWidth('160px').setTextAlign( 'center' ).setPadding( '20px 10px 10px 20px' ) );
-		particular.textInput.push( new UIInput('').setWidth('160px%').setTextAlign( 'center' ).setPadding( '0px' ) );
-		div.add( particular.textInput[ 1 ] )
-		div.add( new UIText( 'Ship number:' ).setWidth('140px').setTextAlign( 'center' ).setPadding( '10px 10px 10px 10px' ) );
-		particular.textInput.push( new UIInput('').setWidth('140px').setTextAlign( 'center' ).setPadding( '0px' ) );
-		div.add( particular.textInput[ 2 ] )
 		particular.add( div );
+
+		[ 'Ship name : ', 'Owner name : ', 'Ship number : ' ].map( txt => {
+
+			div.add( new UIText( txt ).setWidth('16%').setTextAlign( 'center' ).setPadding( '10px 0px' ) );
+			const input = new UIInput('').setWidth('16%').setTextAlign( 'center' ).setPadding( '0px' );
+			div.add( input )
+			particular.textInput.push( input )
+
+		} )
 
 		// Ship particulars
 		div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
@@ -94,22 +94,6 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().innerHTML = 'C<sub>B</sub>';
 		row.insertCell().textContent = ship.cb;
 		
-		row = table.insertRow();
-		row.insertHeader().innerHTML = 'k<sub>yy</sub>';
-		row.insertCell().textContent = ship.kyy;
-		
-		row = table.insertRow();
-		row.insertHeader().innerHTML = 'L<sub>E</sub>';
-		row.insertCell().textContent = ship.le;
-		
-		row = table.insertRow();
-		row.insertHeader().innerHTML = 'L<sub>R</sub>';
-		row.insertCell().textContent = ship.lr;
-		
-		row = table.insertRow();
-		row.insertHeader().innerHTML = 'L<sub>BWL</sub>';
-		row.insertCell().textContent = ship.lbwl;
-
 		// Engine & speed
 		div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		particular.add( div );
@@ -210,12 +194,11 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButton( table ) );
-
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
+		div.add( ...addButton( table ) );
 
 		const n = 16;
 
@@ -235,12 +218,11 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButton( table ) );
-
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
+		div.add( ...addButton( table ) );
 
 		for( let i = 0; i < n; i ++ ) {
 
@@ -258,12 +240,11 @@ class ViewportSTA extends UIDiv{
 		table = new UITable();
 		modeltest.tables.push( table );
 		div.add( table );
-		div.add( ...addButton( table ) );
-
 		row = table.insertRow();
 		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
 		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
+		div.add( ...addButton( table ) );
 
 		for( let i = 0; i < n; i ++ ) {
 
@@ -272,15 +253,6 @@ class ViewportSTA extends UIDiv{
 
 		}
 		
-		// Speed-power chart
-		if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-			
-			Chart.defaults.backgroundColor = 'Black';
-			Chart.defaults.borderColor = 'DimGray';
-			Chart.defaults.color = 'lightgray';
-
-		}
-
 		div = new UIDiv()//.setPosition( 'absolute' ).setTop( '50%' ).setHeight( '360px' ).setMarginTop( '-360px' ); // vertical center
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		modeltest.add( div );
@@ -353,7 +325,7 @@ class ViewportSTA extends UIDiv{
 				name: 'Loaded',
 				showlegend: true,
 				line:{
-					dash: 'longdash',
+					dash: 'dashdot',
 					width: 2
 				},
 				x: [],
@@ -365,7 +337,7 @@ class ViewportSTA extends UIDiv{
 				showlegend: true,
 				// mode: 'markers',
 				line:{
-					dash: 'dashdot',
+					dash: 'dot',
 					width: 2
 				},
 				x: [],
@@ -510,17 +482,17 @@ class ViewportSTA extends UIDiv{
 
 		const { correction, ship } = this;
 		
-		let div, table, row, options;
+		let div, table, row, options, img;
 
-		div = new UIDiv().add( new UIText( 'Correction method' ).setPadding( '10px 0px 5px 0px' ) );
+		div = new UIDiv().add( new UIText( '✔ Reference Guideline: ' ).setPadding( '10px 10px 5px 10px' ) );
 		correction.add( div );
 		
-		options = new UISelect().setDisplay( 'block' ).setOptions( {
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
 			iso2002: 'ISO 15016:2002',
 			iso2015: 'ISO 15016:2015',
-			ittc2017: 'ITTC 2017',
-			ittc2021: 'ITTC 2021'
+			ittc2017: 'ITTC 7.5-04-01-01.1 (2017)',
+			ittc2021: 'ITTC 7.5-04-01-01.1 (2021)'
 
 	 	} );
 		
@@ -529,9 +501,9 @@ class ViewportSTA extends UIDiv{
 		div.add( options );
 		correction.method = options;
 
-		const wind = new UICollapsible( 'wind' );
-		const wave = new UICollapsible( 'wave' );
-		const current = new UICollapsible( 'current' );
+		const wind = new UICollapsible( '• Wind resistance' );
+		const wave = new UICollapsible( '• Wave resistance' );
+		const current = new UICollapsible( '• Current effect' );
 		
 		correction.add( wind, wave, current );
 		
@@ -627,11 +599,12 @@ class ViewportSTA extends UIDiv{
 		wind.useAverage = new UICheckbox().setValue( true )
 		div.add( wind.useAverage );
 
-		// wave
-		div = new UIDiv().add( new UIText( 'ISO 15016:2002' ).setPadding( '10px 0px 5px 0px' ) );
+		// Wave
+		wave.content.add( new UIText( 'Methods to estimate the resistance increase due to waves' ).setPadding( '10px 10px 5px 10px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setPadding( '10px 10px 5px 20px' ) );
 		wave.content.add( div );
 		
-		options = new UISelect().setDisplay( 'block' ).setOptions( {
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
 			fal: 'Faltinsen',
 			fuji: 'Fujii-Takahashi',
@@ -642,10 +615,10 @@ class ViewportSTA extends UIDiv{
 		options.setValue( 'fal' )
 		div.add( options );
 
-		div = new UIDiv().add( new UIText( 'ISO 15016:2015' ).setPadding( '10px 0px 5px 0px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2015 (or later version)' ).setPadding( '10px 10px 5px 20px' ) );
 		wave.content.add( div );
-		
-		options = new UISelect().setDisplay( 'block' ).setOptions( {
+
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
 			sta1: 'STAWAVE-1',
 			sta2: 'STAWAVE-2',
@@ -655,15 +628,112 @@ class ViewportSTA extends UIDiv{
 
 	 	} );
 		
-		options.setValue( 'sta2' )
 		div.add( options );
-		
+		options.setValue( 'nmri' )
+		options.onChange( event => { 
 
-		// current
-		div = new UIDiv().add( new UIText( 'ISO 15016:2002' ).setPadding( '10px 0px 5px 0px' ) );
+			const key = event.target.value;
+			[ 'sta1', 'sta2', 'snnm', 'nmri' ].map( key => wave[ key ].map( e => e.setHidden( true ) ) );
+			if( wave[ key ] ) wave[ key ].map( e => e.setHidden( false ) );
+
+		} );
+		
+		let h;
+
+		wave.sta1 = [];
+		img = new Image(317, 113);
+		img.src = "./static/images/lbwl.jpg";
+		img.style.display = 'block';
+		img.style.margin = "0 auto";
+		div = new UIDiv();
+		div.dom.appendChild( img )
+		h = '<Figure> Length of the bow on the water line to 95% of maximum beams'
+		div.add( new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '5px 0px 20px 0px' ) );
+		wave.sta1.push( waveInput( [ 'L<sub>BWL</sub> : ' ], 0, div ) );
+		wave.content.add( ...wave.sta1 );
+
+		wave.sta2 = [];
+		h = 'Non-dimensional radius of gyration in the lateral direction'
+		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		wave.sta2.push( waveInput( [ 'k<sub>yy</sub> : ' ], h, 0 ) );
+		wave.content.add( ...wave.sta2 );
+
+		wave.snnm = [];
+		img = new Image(490, 140);
+		img.src = "./static/images/le.jpg";
+		img.style.display = 'block';
+		img.style.margin = "0 auto";
+		div = new UIDiv();
+		div.dom.appendChild( img )
+		h = '<Figure> Sketch of the half waterline of a ship and related definitions'
+		div.add( new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '5px 0px 20px 0px' ) );
+		wave.snnm.push( waveInput( [ 'L<sub>R</sub> : ', 'L<sub>E</sub> : ' ], 0, div ) )
+		wave.content.add( ...wave.snnm );
+		
+		wave.nmri = [];
+		h = 'Centre of gravity'
+		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		wave.nmri.push( waveInput( [ 'LCG : ', 'TCG : ', 'VCG : ' ], h, 0 ) );
+
+		h = 'Non-dimensional radius of gyration'
+		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		wave.nmri.push( waveInput( [ 'K<sub>roll</sub> : ', 'K<sub>pitch</sub> : ', 'K<sub>yaw</sub> : ' ], h, 0 ) );
+
+		h = 'Bluntness coefficient (Bf), coefficient of advance speed (Cu)'
+		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		wave.nmri.push( waveInput( [ 'B<sub>f</sub> : ', 'C<sub>u</sub> : '], h, 0 ) );
+		wave.content.add( ...wave.nmri );
+
+		function waveInput( arr, head, tail ) { // array of text keys
+
+			div = new UIDiv().setBorder( '1px solid rgb(96,96,96)' );
+
+			if( head ) div.add( head );
+
+			arr.map( txt => {
+
+				const uiText = new UIText().setWidth('16%').setTextAlign( 'center' ).setPadding( '10px 0px' )
+				const input = new UIInput('').setWidth('16%').setTextAlign( 'center' ).setPadding( '0px' );
+				div.add( uiText ).add( input );
+				uiText.setInnerHTML( txt )
+				wave[ uiText.getValue().replace( ' : ', '' ).toLowerCase() ] = input;
+	
+			} )
+
+			if( tail ) div.add( tail );
+
+			return div;
+
+		}
+
+		wave.tables = [];
+		table = new UITable();
+		wave.tables.push( table );
+		div = new UIDiv().setWidth( '50%' ).setMargin( 'auto' );
+		div.add( new UIText( 'Geometry data' ).setWidth('90%').setTextAlign( 'center' ) );
+		div.add( table );
+		div.add( ...addButton( table ) );
+
+		row = table.insertRow();
+		row.insertHeader().setWidth( '120px' ).textContent = 'Longitudinal position from A.P. (m)'
+		row.insertHeader().setWidth( '120px' ).textContent = 'Half breadth (m)'
+		row.insertHeader().setWidth( '120px' ).textContent = 'Sectional draft (m)'
+		row.insertHeader().setWidth( '120px' ).textContent = 'Sectional Area (m\u00B2)'
+		row = table.insertRow();
+		Array( 4 ).fill().map( () => row.insertCell() );
+
+		wave.content.add( div );
+		wave.nmri.push( div );
+
+		[ 'sta1', 'sta2', 'snnm' ].map( key => wave[ key ].map( e => e.setHidden( true ) ) );
+
+		// Current
+		current.content.add( new UIText( 'Methods to account for the effect of current' ).setPadding( '10px 10px 5px 10px' ) );
+
+		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setPadding( '10px 10px 5px 20px' ) );
 		current.content.add( div );
 		
-		options = new UISelect().setDisplay( 'block' ).setOptions( {
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
 			none: 'no current',
 			curv: 'current curve'
@@ -673,10 +743,10 @@ class ViewportSTA extends UIDiv{
 		options.setValue( 'none' )
 		div.add( options );
 
-		div = new UIDiv().add( new UIText( 'ISO 15016:2015' ).setPadding( '10px 0px 5px 0px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2015 (or later version)' ).setPadding( '10px 10px 5px 20px' ) );
 		current.content.add( div );
 		
-		options = new UISelect().setDisplay( 'block' ).setOptions( {
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
 			none: 'no current',
 			iterative: 'iterative',
@@ -762,9 +832,10 @@ class ViewportSTA extends UIDiv{
 			},
 			legend: {
 				x: 0.5,
-				xanchor: 'center',
 				y: 1,
-				orientation: 'h'
+				xanchor: 'center',
+				orientation: 'h',
+				groupclick: 'toggleitem'
 			}
 		};
 	
@@ -787,7 +858,7 @@ class ViewportSTA extends UIDiv{
 				showlegend: true,
 				legendgroup: 'group2',
 				line:{
-					dash: 'longdash',
+					dash: 'dashdot',
 					width: 2
 				},
 				x: [],
@@ -1200,9 +1271,10 @@ function addButton( table ) {
 
 	const addButton = new UIText( '+' ).setClass( 'item' ).onClick( () => {
 
+		const n = table.rows[ 0 ].cells.length;
 		const row = table.insertRow();
 		const pop = table.history.pop();
-		Array( 3 ).fill().map( ( e, i ) => row.insertCell().textContent = pop? pop[ i ] : '' );
+		Array( n ).fill().map( ( e, i ) => row.insertCell().textContent = pop? pop[ i ] : '' );
 
 	});
 
