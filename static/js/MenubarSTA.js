@@ -605,9 +605,9 @@ function updateViewport( ship, viewport ) {
 
     [ shipName, ownerName, shipNo ].map( ( e, i ) => viewport.particular.textInput[ i ].setValue( e ) );
 
-    const { l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl } = ship;
+    const { l, b, wetted, Ax, Za, Zref, cb } = ship;
     
-    [ l, b, wetted, Ax, Za, Zref, cb, kyy, le, lr, lbwl ].map( ( e, i ) => {
+    [ l, b, wetted, Ax, Za, Zref, cb ].map( ( e, i ) => {
         
         const row = table.rows[ i ];
         row.cells[ 1 ].textContent = e;
@@ -709,10 +709,18 @@ function updateViewport( ship, viewport ) {
     ship.wind.coef.map( ( e, i ) => table.rows[ i + 1 ].cells[ 1 ].textContent = e );
 
     chartData = viewport.correction.wind.chart.data;
-    chartData[0].x = ship.wind.angle
-    chartData[0].y = ship.wind.coef
+    chartData[0].x = ship.wind.angle;
+    chartData[0].y = ship.wind.coef;
 
-    Plotly.newPlot( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout )
+    Plotly.newPlot( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout );
+    
+    [ 'lbwl', 'le', 'lr', 'kyy' ].map( key => {
+        
+        viewport.correction.wave[ key ].setValue( ship[ key ] ? ship[ key ] : 0 );
+
+    } );
+
+    viewport.correction.wave.kpitch = ship.kyy;
 
     // Measured data tab
     table = viewport.measured.table;
