@@ -458,7 +458,7 @@ async function inpOpen( ship, viewport ) {
         ship.rudderPORT = data[ 'RUDDER_MOVE_P' ];
         ship.drift = data[ 'DRIFT' ];
 
-        ship.mt = {
+        Object.assign( ship.mt, {
             vs: data.mtTrial[ 'SPEED' ],
             pb: data.mtTrial[ 'POWER' ],
             rpm: data.mtTrial[ 'RPM' ],
@@ -488,7 +488,7 @@ async function inpOpen( ship, viewport ) {
                 kq: data.pow[ 'KQ' ],
             }
             
-        }
+        } )
 
         ship.arm ={
 
@@ -700,7 +700,7 @@ function updateViewport( ship, viewport ) {
     chartData[ 1 ].y = mt.pbLoaded;
     chartData[ 2 ].x = mt.vsEEDI;
     chartData[ 2 ].y = mt.pbEEDI;
-    Plotly.newPlot( viewport.modeltest.chart.dom, chartData, viewport.modeltest.chart.layout )
+    Plotly.update( viewport.modeltest.chart.dom, chartData, viewport.modeltest.chart.layout )
 
     // Correction tab
     table = viewport.correction.wind.tables[ 0 ];
@@ -712,7 +712,7 @@ function updateViewport( ship, viewport ) {
     chartData[0].x = ship.wind.angle;
     chartData[0].y = ship.wind.coef;
 
-    Plotly.newPlot( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout );
+    Plotly.update( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout );
     
     [ 'lbwl', 'le', 'lr', 'kyy' ].map( key => {
         
