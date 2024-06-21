@@ -79,7 +79,7 @@ class ViewportSTA extends UIDiv{
 		row.insertCell().textContent = ship.wetted;
 		
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Ax (m\u00B2)'
+		row.insertHeader().innerHTML = 'A<sub>X</sub> (m\u00B2)'
 		row.insertCell().textContent = ship.Ax;
 		
 		row = table.insertRow();
@@ -109,10 +109,6 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().textContent = ''
 		row.insertHeader().textContent = 'Power (kW)'
 		row.insertHeader().textContent = 'RPM'
-
-		// row = table.insertRow();
-		// row.insertHeader().textContent = 'MCR'
-		// Array( 2 ).fill().map( () => row.insertCell() );
 
 		row = table.insertRow();
 		row.insertHeader().textContent = 'NCR Load'
@@ -156,7 +152,7 @@ class ViewportSTA extends UIDiv{
 		row.insertCell().textContent = ship.ta;
 		
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Disp. (t)'//'Δ (m\u00B3)'
+		row.insertHeader().innerHTML = '∇ (m\u00B3)';
 		row.insertCell().textContent = ship.disp;
 
 		row = table.insertRow();
@@ -174,6 +170,21 @@ class ViewportSTA extends UIDiv{
 		row = table.insertRow();
 		row.insertHeader().innerHTML = '&#961<sub>air</sub> (kg/m<sup>3</sup>)';
 		row.insertCell().textContent = ship.rhoa;
+		
+		const txt = `
+		<p>• Symbols & abbreviation <p>
+		&nbsp LPP : length between perpendiculars <br>
+		&nbsp B : breadth <br>
+		&nbsp S : wetted surface area <br>
+		&nbsp A<sub>X</sub> : transverse projected area above waterline <br>
+		&nbsp Z<sub>a</sub> : vertical height of anemometer <br>
+		&nbsp Z<sub>ref</sub> : reference height for the wind resistance coefficients <br>
+		&nbsp C<sub>B</sub> : block coefficient <br>
+		&nbsp ∇ : displacement volume in sea trial <br>
+		`
+		div = new UIDiv();
+		div.setInnerHTML( txt );
+		particular.add( div );
 
 	}
 
@@ -186,80 +197,41 @@ class ViewportSTA extends UIDiv{
 		let div, table, row;
 
 		// Trial load condition
-		div = new UIDiv().setPadding( '10px 0px' ); // top and bottom, right and left
-		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-		div.add( new UIText( 'Trial load condition' ).setWidth('100%').setTextAlign( 'center' ) );
-		modeltest.add( div );
 
-		table = new UITable();
-		modeltest.tables.push( table );
-		div.add( table );
-		row = table.insertRow();
-		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
-		div.add( ...addButton( table ) );
+		function addTable( title, n ) {
 
-		const n = 16;
+			table = new UITable();
+			table.title = title;
+			row = table.insertRow();
+			row.insertHeader().setWidth( '35px' ).textContent = 'Speed (knots)'
+			row.insertHeader().setWidth( '35px' ).textContent = 'Power (kW)'
+			row.insertHeader().setWidth( '35px' ).textContent = 'RPM (r/min)'
 
-		for( let i = 0; i < n; i ++ ) {
+			for( let i = 0; i < n; i ++ ) {
 
-			const row = table.insertRow();
-			Array( 3 ).fill().map( () => row.insertCell() );
+				const row = table.insertRow();
+				Array( 3 ).fill().map( () => row.insertCell() );
 
-		}
+			}
 
-		// Contract load condition
-		div = new UIDiv().setPadding( '10px 0px' );
-		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-		div.add( new UIText( 'Contract load condition' ).setWidth('100%').setTextAlign( 'center' ) );
-		modeltest.add( div );
-		
-		table = new UITable();
-		modeltest.tables.push( table );
-		div.add( table );
-		row = table.insertRow();
-		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
-		div.add( ...addButton( table ) );
-
-		for( let i = 0; i < n; i ++ ) {
-
-			const row = table.insertRow();
-			Array( 3 ).fill().map( () => row.insertCell() );
+			div = new UIDiv().setPadding( '10px 0px' );
+			div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+			div.add( new UIText( title ).setWidth('100%').setTextAlign( 'center' ) );
+			div.add( table );
+			div.add( ...addButton( table ) );
+			modeltest.add( div );
+			modeltest.tables.push( table );
 
 		}
 
-		// EEDI load condition
-		div = new UIDiv().setPadding( '10px 25px 10px 0px' ); // top right bottom left
-		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-		div.add( new UIText( 'EEDI load condition' ).setWidth('100%').setTextAlign( 'center' ) );
-		modeltest.add( div );
-		
-		table = new UITable();
-		modeltest.tables.push( table );
-		div.add( table );
-		row = table.insertRow();
-		row.insertHeader().setWidth( '50px' ).textContent = 'Speed (knots)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'Power (kW)'
-		row.insertHeader().setWidth( '50px' ).textContent = 'RPM (r/min)'
-		div.add( ...addButton( table ) );
+		addTable( 'Trial load condition', 16 );
+		addTable( 'Contract load condition', 16 );
+		addTable( 'EEDI load condition', 16 );
 
-		for( let i = 0; i < n; i ++ ) {
-
-			const row = table.insertRow();
-			Array( 3 ).fill().map( () => row.insertCell() );
-
-		}
-		
-		div = new UIDiv()//.setPosition( 'absolute' ).setTop( '50%' ).setHeight( '360px' ).setMarginTop( '-360px' ); // vertical center
+		div = new UIDiv()
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
 		modeltest.add( div );
 		
-		// div.setWidth( '480px' )
-		// div.setHeight( '720px' )
-
 		const chartLayout = {
 			title: 'Speed-power curve',
 			width: 480,
@@ -346,13 +318,44 @@ class ViewportSTA extends UIDiv{
 	
 		];
 
-		Plotly.newPlot( div.dom, chartData, chartLayout );
+		Plotly.newPlot( div.dom, chartData, chartLayout, { displayModeBar: false } );
 
 		modeltest.chart = {
 			dom: div.dom,
 			data: chartData,
 			layout: chartLayout
 		};
+
+		modeltest.tables.map( ( table, k ) => {
+
+			const key = table.title;
+			
+			ship.mt[ key ] = {
+
+				vs: [],
+				pb: [],
+				rpm: []
+
+			};
+
+			table.dom.addEventListener( 'focusout', () => { 
+				
+				const data = table.getColumnWiseData();
+				const index = key == 'Trial load condition' ? 0 : key == 'Contract load condition' ? 1 : 2;
+
+				chartData[ index ].x = data[ 'Speed' ];
+				chartData[ index ].y = data[ 'Power' ];
+
+				ship.mt[ key ].vs = data[ 'Speed' ];
+				ship.mt[ key ].pb = data[ 'Power' ];
+				ship.mt[ key ].rpm = data[ 'RPM' ];
+
+				Plotly.update( div.dom, chartData, chartLayout )
+
+			} );
+
+		} )
+
 
 	}
 
@@ -504,10 +507,12 @@ class ViewportSTA extends UIDiv{
 		const wind = new UICollapsible( '• Wind resistance' );
 		const wave = new UICollapsible( '• Wave resistance' );
 		const current = new UICollapsible( '• Current effect' );
+		const temperature = new UICollapsible( '• Temperature & density' );
+		const displacement = new UICollapsible( '• Displacement' );
 		
-		correction.add( wind, wave, current );
+		correction.add( wind, wave, current, temperature, displacement );
 		
-		Object.assign( correction, { wind, wave, current } )
+		Object.assign( correction, { wind, wave, current, temperature, displacement } )
 
 		// Wind coefficients
 		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
@@ -584,14 +589,30 @@ class ViewportSTA extends UIDiv{
 			},
 		];
 	
-		Plotly.newPlot( div.dom, chartData, chartLayout )
+		Plotly.newPlot( div.dom, chartData, chartLayout, { displayModeBar: false } )
 
 		wind.chart = {
 			dom: div.dom,
 			data: chartData,
 			layout: chartLayout
 		};
-		
+
+		const dom = div.dom;
+
+		wind.tables[ 0 ].dom.addEventListener( 'focusout', () => { 
+				
+			const data = wind.tables[ 0 ].getColumnWiseData();
+
+			chartData[ 0 ].x = data[ 'Angle' ];
+			chartData[ 0 ].y = data[ 'CX' ];
+			console.log( data )
+			ship.wind.angle = data[ 'Angle' ];
+			ship.wind.coef = data[ 'CX' ];
+
+			Plotly.update( dom, chartData, chartLayout )
+
+		} );
+
 		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
 		wind.content.add( div );
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
@@ -601,7 +622,7 @@ class ViewportSTA extends UIDiv{
 
 		// Wave
 		wave.content.add( new UIText( 'Methods to estimate the resistance increase due to waves' ).setPadding( '10px 10px 5px 10px' ) );
-		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setPadding( '10px 10px 5px 20px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
 		wave.content.add( div );
 		
 		options = new UISelect().setDisplay( 'inline' ).setOptions( {
@@ -615,7 +636,7 @@ class ViewportSTA extends UIDiv{
 		options.setValue( 'fal' )
 		div.add( options );
 
-		div = new UIDiv().add( new UIText( '-ISO 15016:2015 (or later version)' ).setPadding( '10px 10px 5px 20px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
 		wave.content.add( div );
 
 		options = new UISelect().setDisplay( 'inline' ).setOptions( {
@@ -653,8 +674,8 @@ class ViewportSTA extends UIDiv{
 		wave.content.add( ...wave.sta1 );
 
 		wave.sta2 = [];
-		h = 'Non-dimensional radius of gyration in the lateral direction'
-		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		h = 'Non-dimensional radius of gyration in the lateral direction (% LPP)'
+		h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
 		wave.sta2.push( waveInput( [ 'k<sub>yy</sub> : ' ], h, 0 ) );
 		wave.content.add( ...wave.sta2 );
 
@@ -672,21 +693,21 @@ class ViewportSTA extends UIDiv{
 		
 		wave.nmri = [];
 		h = 'Centre of gravity'
-		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
 		wave.nmri.push( waveInput( [ 'LCG : ', 'TCG : ', 'VCG : ' ], h, 0 ) );
 
 		h = 'Non-dimensional radius of gyration'
-		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
 		wave.nmri.push( waveInput( [ 'K<sub>roll</sub> : ', 'K<sub>pitch</sub> : ', 'K<sub>yaw</sub> : ' ], h, 0 ) );
 
 		h = 'Bluntness coefficient (Bf), coefficient of advance speed (Cu)'
-		h = new UIText( h ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' );
+		h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
 		wave.nmri.push( waveInput( [ 'B<sub>f</sub> : ', 'C<sub>u</sub> : '], h, 0 ) );
 		wave.content.add( ...wave.nmri );
 
 		function waveInput( arr, head, tail ) { // array of text keys
 
-			div = new UIDiv().setBorder( '1px solid rgb(96,96,96)' );
+			const div = new UIDiv().setBorder( '1px solid rgb(72,72,72)' );
 
 			if( head ) div.add( head );
 
@@ -730,7 +751,7 @@ class ViewportSTA extends UIDiv{
 		// Current
 		current.content.add( new UIText( 'Methods to account for the effect of current' ).setPadding( '10px 10px 5px 10px' ) );
 
-		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setPadding( '10px 10px 5px 20px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
 		current.content.add( div );
 		
 		options = new UISelect().setDisplay( 'inline' ).setOptions( {
@@ -743,7 +764,7 @@ class ViewportSTA extends UIDiv{
 		options.setValue( 'none' )
 		div.add( options );
 
-		div = new UIDiv().add( new UIText( '-ISO 15016:2015 (or later version)' ).setPadding( '10px 10px 5px 20px' ) );
+		div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
 		current.content.add( div );
 		
 		options = new UISelect().setDisplay( 'inline' ).setOptions( {
@@ -756,6 +777,63 @@ class ViewportSTA extends UIDiv{
 		
 		options.setValue( 'iterative' )
 		div.add( options );
+
+		// Temperature
+		let header;
+
+		header = 'At sea trial'
+		header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
+		temperature.st = [];
+		temperature.st.push( rasInput( [ 'Temperature : ', 'Density : ' ], header, 0 ) );
+		temperature.content.add( ...temperature.st );
+
+		header = 'Reference'
+		header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
+		temperature.ref = [];
+		temperature.ref.push( rasInput( [ 'Temperature : ', 'Density : ' ], header, 0 ) );
+		temperature.content.add( ...temperature.ref );
+console.log( temperature )
+		temperature.ref[ 'temperature' ].setValue( '15.0' );
+
+		function rasInput( arr, head, tail ) { // array of text keys
+
+			const div = new UIDiv();//.setBorder( '1px solid rgb(72,72,72)' );
+
+			if( head ) div.add( head );
+
+			arr.map( txt => {
+
+				const uiText = new UIText().setWidth( '120px' ).setPadding( '10px 10px 5px 20px' )
+				const input = new UIText('').setWidth( '120px' ).setPadding( '2px 0px' );
+				div.add( uiText ).add( input );
+				uiText.setInnerHTML( txt )
+				temperature[ uiText.getValue().replace( ' : ', '' ).toLowerCase() ] = input;
+	
+			} )
+
+			if( tail ) div.add( tail );
+
+			return div;
+
+		}
+
+		// Displacement
+		div = new UIDiv();
+		const disp = new UIText('').setWidth( '120px' ).setPadding( '10px 10px 5px 20px' );
+		disp.setInnerHTML( '∇<sub>trial</sub> (m\u00B3)')
+		displacement.st = new UIText( '' ).setWidth( '120px' ).setPadding( '0px' );
+		div.add( disp, displacement.st );
+		displacement.content.add( div );
+
+		const cell = this.particular.tables[ 3 ].rows[ 2 ].cells[ 1 ]; // disp
+		cell.dom.addEventListener( 'blur', e => displacement.st.setValue( e.target.textContent ) )
+
+		div = new UIDiv();
+		const dispm = new UIText('').setWidth( '120px' ).setPadding( '10px 10px 5px 20px' );
+		dispm.setInnerHTML( '∇<sub>model</sub> (m\u00B3)')
+		displacement.mt = new UIInput('').setWidth( '120px' ).setPadding( '2px 0px' );
+		div.add( dispm, displacement.mt );
+		displacement.content.add( div );
 
 	}
 	
@@ -962,7 +1040,7 @@ class ViewportSTA extends UIDiv{
 			layout: chartLayout
 		}
 
-		Plotly.newPlot( div.dom, chartData, chartLayout, {displayModeBar: false} )
+		Plotly.newPlot( div.dom, chartData, chartLayout, { displayModeBar: false } )
 
 		calButton.dom.addEventListener( 'click', () => {
 			
@@ -1255,7 +1333,7 @@ function runSTA( ship, result ) { //result: UIDiv
         }
     ]
 
-    Plotly.newPlot( result.chart.dom, chartData, result.chart.layout, {displayModeBar: false} )
+    Plotly.update( result.chart.dom, chartData, result.chart.layout )
 
 }
 
