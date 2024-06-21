@@ -117,16 +117,15 @@ class UITable extends UIElement { // only number is acceptable in table body
 			switch ( event.key ) {
 
 				case 'Delete':
-                    
+
                     for ( let i = ij[ 0 ]; i <= ij[ 1 ]; i ++ ) {
 
-                        const row = dom.rows[ i ];
-        
+                        const row = this.rows[ i ];
+
                         for ( let j = ij[ 2 ]; j <= ij[ 3 ]; j ++ ) {
-        
+
                             const cell = row.cells[ j ];
-                            // if( cell.nodeName == TD )
-                            if ( cell.editable ) cell.textContent = '';
+                            if ( cell.editable ) cell.textContent = ''; // if( cell.dom.nodeName == TD )
 
                         }
 
@@ -211,7 +210,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
     }
 
-    getData() {
+    getData() { //row-wise
 
         const arr = new Array();
         const rows = this.rows;
@@ -232,12 +231,54 @@ class UITable extends UIElement { // only number is acceptable in table body
 
                 } else {
 
+                    const number = parseFloat( txt.replace( ',', '' ) );
                     // regex of DateTime validator
                     const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
                     const dateTime = txt.match(regex);
-                    arr[ header ][ j - 1 ] = !dateTime ? parseFloat( txt ) : txt;
+                    arr[ header ][ j - 1 ] = !dateTime ? number : txt;
 
                 }
+
+            }
+
+        }
+
+        return arr;
+
+    }
+
+    getColumnWiseData() { //column-wise
+
+        const arr = new Array();
+        const rows = this.rows;
+        const keys = [];
+        
+        const cells = rows[ 0 ].cells;
+
+        for( let j = 0; j < cells.length; j ++ ) {
+
+            const cell = cells[ j ];
+            const txt = cell.textContent;
+            const header = txt.replace( /\s\(.*\)/g, '' )
+            arr[ header ] = new Array();
+            keys.push( header );
+
+        }
+
+        for( let i = 1; i < rows.length; i ++ ) {
+
+            const cells = rows[ i ].cells;
+
+            for( let j = 0; j < cells.length; j ++ ) {
+
+                const key = keys[ j ]
+                const cell = cells[ j ];
+                const txt = cell.textContent;
+                const number = parseFloat( txt.replace( ',', '' ) );
+                // regex of DateTime validator
+                const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
+                const dateTime = txt.match(regex);
+                arr[ key ][ i ] = !dateTime ? number : txt;
 
             }
 
@@ -418,10 +459,10 @@ class UICellElement extends UIElement{
 
 		}
 
+        dom.setAttribute( 'contenteditable', true );
         dom.addEventListener( 'drop', onDrop );
-        dom.addEventListener( 'blur', onBlur, false );
-        dom.addEventListener( 'keydown', onKeyDown, false );
-        dom.setAttribute( 'contenteditable', true ); // editable cell
+        dom.addEventListener( 'blur', onBlur );
+        dom.addEventListener( 'keydown', onKeyDown );
 
         return this;
 
