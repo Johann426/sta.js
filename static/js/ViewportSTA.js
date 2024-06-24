@@ -1,4 +1,4 @@
-import { UIButton, UICheckbox, UIDiv, UIInput, UIInteger, UISelect, UISpan, UITabbedPanel, UIText, UITextArea } from './ui.js';
+import { UIDiv, UITabbedPanel, UIText, UIInput, UISelect, UICheckbox } from './ui.js';
 import { UICollapsible } from './UICollapsible.js';
 import { UITable } from './UITable.js';
 
@@ -28,7 +28,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.select( 'correction' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
-		
+console.log( correction )
 		this.particularTab();
 		this.modeltestTab();
 		this.measuredTab();
@@ -421,59 +421,71 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().textContent = 'Run number'
 		// ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i + 1 );
 
-		row = table.insertRow();
-		row.insertHeader().textContent = 'Date time' //YYYY-MM-DDThh:mm:ss
+		row = table.insertRow().setFontSize( '11px' );
+		row.insertHeader().setFontSize( '14px' ).textContent = 'Date time' //YYYY-MM-DDThh:mm:ss
 		// ship.time.map( e => row.insertCell().setFontSize( '11px' ).textContent = e );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Ship heading (°)'
+		row.insertHeader().textContent = 'Ship heading (°)';
 		// ship.hdg.map( e => row.insertCell().textContent = e );
 		
 		const border = '2px solid rgb(96,96,96)'
 
-		row = table.insertRow().setBorderTop( border )
-		row.insertHeader().textContent = 'Ship speed (knots)'
+		row = table.insertRow().setBorderTop( border );
+		row.insertHeader().textContent = 'Ship speed (knots)';
 		// ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
 
 		row = table.insertRow();//.setBorderLeft( border ).setBorderRight( border );
-		row.insertHeader().textContent = 'RPM (r/min)'
+		row.insertHeader().textContent = 'RPM (r/min)';
 		// ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();//.setBorderLeft( border ).setBorderRight( border ).setBorderBottom( border );
-		row.insertHeader().textContent = 'Power (kW)'
+		row.insertHeader().textContent = 'Power (kW)';
 		// ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
 
-		row = table.insertRow().setBorderTop( border );;
-		row.insertHeader().textContent = 'Wind velocity (m/s)'
+		row = table.insertRow().setBorderTop( border );
+		row.insertHeader().textContent = 'Wind velocity (m/s)';
 		// ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Wind direction (°)'
+		row.insertHeader().textContent = 'Wind direction (°)';
 		// ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
-		row = table.insertRow().setBorderTop( border );;
-		row.insertHeader().textContent = 'Wave height (m)'
+		row = table.insertRow().setBorderTop( border );
+		row.insertHeader().textContent = 'Wave height (m)';
 		// ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Wave direction (°)'
+		row.insertHeader().textContent = 'Wave direction (°)';
 		// ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Wave period (sec)'
+		row.insertHeader().textContent = 'Wave period (sec)';
 		// ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow().setBorderTop( border );
-		row.insertHeader().textContent = 'Swell height (m)'
+		row.insertHeader().textContent = 'Swell height (m)';
 		// ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Swell direction (°)'
+		row.insertHeader().textContent = 'Swell direction (°)';
 		// ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
 
 		row = table.insertRow();
-		row.insertHeader().textContent = 'Swell period (sec)'
+		row.insertHeader().textContent = 'Swell period (sec)';
 		// ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+
+		row = table.insertRow();
+		row.insertHeader().textContent = 'Rudder (°, port)';
+		row.setHidden( true );
+
+		row = table.insertRow();
+		row.insertHeader().textContent = 'Rudder (°, stbd)';
+		row.setHidden( true );
+		
+		row = table.insertRow();
+		row.insertHeader().textContent = 'Drift (°, stbd)';
+		row.setHidden( true );
 
 		table.dom.style.width = '100%';
 
@@ -504,6 +516,44 @@ class ViewportSTA extends UIDiv{
 		div.add( options );
 		correction.method = options;
 
+		// show or hide 2002 option
+		const options2002 = new UIDiv().setPaddingLeft( '10px' );
+		correction.add( options2002 );
+
+		options.onChange( event => { 
+
+			const method = event.target.value;
+			options2002.setHidden( method == 'iso2002' ? false : true )
+			
+			
+		} );
+
+		correction.optionISO2002 = new Object();
+		[ 'steering', 'drift', 'shallow water', 'displacement', 'temperature and salinity', 'current' ].map( txt => {
+
+			const uiText = new UIText( txt ).setPadding( '10px 0px 5px 20px' );
+			const checkBox = new UICheckbox().setValue( true );
+			correction.optionISO2002[ txt.replace( /\s(.*)/, '' ) ] = checkBox;
+			options2002.add( uiText, checkBox );
+
+		} )
+		
+		options2002.add( new UIText( 'n-KQ fairing' ).setPadding( '10px 5px 5px 20px' ) );
+		
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
+
+			falt: 'Least square',
+			fuji: 'Mean',
+			kwon: 'Same',
+
+	 	} );
+		
+		options.setValue( 'falt' )
+		correction.optionISO2002.nKQ = options;
+		options2002.add( options );
+		options2002.setHidden( true );
+
+		// Collapsible elements
 		const wind = new UICollapsible( '• Wind resistance' );
 		const wave = new UICollapsible( '• Wave resistance' );
 		const current = new UICollapsible( '• Current effect' );
@@ -515,9 +565,25 @@ class ViewportSTA extends UIDiv{
 		Object.assign( correction, { wind, wave, current, temperature, displacement } )
 
 		// Wind coefficients
+		div= new UIDiv().add( new UIText( 'Coefficients by ' ).setPadding( '10px 10px 5px 10px' ) );
+		wind.content.add( div );
+		
+		options = new UISelect().setDisplay( 'inline' ).setOptions( {
+
+			windTunnelTest: 'Wind tunnel test',
+			cfd: 'CFD',
+			ittc: 'ITTC data set',
+			formula: 'Regression formula'
+
+	 	} );
+		
+		options.setValue( 'windTunnelTest' )
+
+		div.add( options );
+		wind.method = options;
+
 		div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
 		div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-
 		div.add( new UIText( 'Wind profile' ).setWidth('100%').setTextAlign( 'center' ) );
 		wind.content.add( div );
 
@@ -627,13 +693,14 @@ class ViewportSTA extends UIDiv{
 		
 		options = new UISelect().setDisplay( 'inline' ).setOptions( {
 
-			fal: 'Faltinsen',
+			falt: 'Faltinsen',
 			fuji: 'Fujii-Takahashi',
 			kwon: 'Kwon',
 
 	 	} );
 		
-		options.setValue( 'fal' )
+		options.setValue( 'falt' )
+		wave.method2002 = options;
 		div.add( options );
 
 		div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
@@ -650,6 +717,7 @@ class ViewportSTA extends UIDiv{
 	 	} );
 		
 		div.add( options );
+		wave.method = options;
 		options.setValue( 'nmri' )
 		options.onChange( event => { 
 
@@ -707,7 +775,7 @@ class ViewportSTA extends UIDiv{
 
 		function waveInput( arr, head, tail ) { // array of text keys
 
-			const div = new UIDiv().setBorder( '1px solid rgb(72,72,72)' );
+			const div = new UIDiv(); //.setBorder( '1px solid rgb(72,72,72)' );
 
 			if( head ) div.add( head );
 
@@ -728,10 +796,10 @@ class ViewportSTA extends UIDiv{
 		}
 
 		wave.tables = [];
-		table = new UITable();
+		table = new UITable().setWidth( '50%' ).setMargin( 'auto' );
 		wave.tables.push( table );
-		div = new UIDiv().setWidth( '50%' ).setMargin( 'auto' );
-		div.add( new UIText( 'Geometry data' ).setWidth('90%').setTextAlign( 'center' ) );
+		div = new UIDiv();
+		div.add( new UIText( 'Geometry data' ).setWidth('100%').setTextAlign( 'center' ) );
 		div.add( table );
 		div.add( ...addButton( table ) );
 
@@ -740,8 +808,14 @@ class ViewportSTA extends UIDiv{
 		row.insertHeader().setWidth( '120px' ).textContent = 'Half breadth (m)'
 		row.insertHeader().setWidth( '120px' ).textContent = 'Sectional draft (m)'
 		row.insertHeader().setWidth( '120px' ).textContent = 'Sectional Area (m\u00B2)'
-		row = table.insertRow();
-		Array( 4 ).fill().map( () => row.insertCell() );
+
+		Array( 4 ).fill().map( () => {
+
+			row = table.insertRow();
+			Array( 4 ).fill().map( () => row.insertCell() );
+
+		});
+		
 
 		wave.content.add( div );
 		wave.nmri.push( div );
@@ -783,19 +857,21 @@ class ViewportSTA extends UIDiv{
 
 		header = 'At sea trial'
 		header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
-		temperature.st = [];
-		temperature.st.push( rasInput( [ 'Temperature : ', 'Density : ' ], header, 0 ) );
-		temperature.content.add( ...temperature.st );
+		temperature.content.add( rasInput( [ 'Temperature<sub>trial</sub> : ', '&#961<sub>trial</sub> : ' ], header, 0, temperature ) );
 
 		header = 'Reference'
 		header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
-		temperature.ref = [];
-		temperature.ref.push( rasInput( [ 'Temperature : ', 'Density : ' ], header, 0 ) );
-		temperature.content.add( ...temperature.ref );
-console.log( temperature )
-		temperature.ref[ 'temperature' ].setValue( '15.0' );
+		temperature.content.add( rasInput( [ 'Temperature<sub>ref</sub> : ', '&#961<sub>ref</sub> : ' ], header, 0, temperature ) );
+		temperature[ 'temperatureref' ].setValue( '15.0' );
+		temperature[ 'densityref' ].setValue( Number( 1026 ).toLocaleString() );
 
-		function rasInput( arr, head, tail ) { // array of text keys
+		const tmpsea = this.particular.tables[ 3 ].rows[ 3 ].cells[ 1 ]; // Temperature(sea) in particular tab
+		tmpsea.dom.addEventListener( 'blur', e => temperature[ 'temperaturetrial' ].setValue( e.target.textContent ) )
+
+		const rhosea = this.particular.tables[ 3 ].rows[ 4 ].cells[ 1 ]; // rho(sea) in particular tab
+		rhosea.dom.addEventListener( 'blur', e => temperature[ 'densitytrial' ].setValue( e.target.textContent ) )
+
+		function rasInput( arr, head, tail, parent ) { // array of text keys
 
 			const div = new UIDiv();//.setBorder( '1px solid rgb(72,72,72)' );
 
@@ -803,11 +879,11 @@ console.log( temperature )
 
 			arr.map( txt => {
 
-				const uiText = new UIText().setWidth( '120px' ).setPadding( '10px 10px 5px 20px' )
-				const input = new UIText('').setWidth( '120px' ).setPadding( '2px 0px' );
+				const uiText = new UIText().setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' )
+				const input = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
 				div.add( uiText ).add( input );
 				uiText.setInnerHTML( txt )
-				temperature[ uiText.getValue().replace( ' : ', '' ).toLowerCase() ] = input;
+				parent[ uiText.getValue().replace( ' : ', '' ).replace( 'ρ', 'density' ).toLowerCase() ] = input;
 	
 			} )
 
@@ -825,7 +901,7 @@ console.log( temperature )
 		div.add( disp, displacement.st );
 		displacement.content.add( div );
 
-		const cell = this.particular.tables[ 3 ].rows[ 2 ].cells[ 1 ]; // disp
+		const cell = this.particular.tables[ 3 ].rows[ 2 ].cells[ 1 ]; // disp in particular tab
 		cell.dom.addEventListener( 'blur', e => displacement.st.setValue( e.target.textContent ) )
 
 		div = new UIDiv();
