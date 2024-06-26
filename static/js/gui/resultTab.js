@@ -12,8 +12,14 @@ class ressultTab extends UIDiv {
 
         let div, table, row;
 
-        const calButton = new UIText( 'Calculate result' ).setClass( 'item' );
-        result.add( calButton );
+        // const calButton = new UIText( 'Calculate result' ).setClass( 'item' );
+        // result.add( calButton );
+        
+        // calButton.dom.addEventListener( 'click', () => {
+            
+        //     runClassLib( ship );
+
+        // } );
 
         //Chart
         div = new UIDiv();
@@ -210,12 +216,6 @@ class ressultTab extends UIDiv {
         }
 
         Plotly.newPlot( div.dom, chartData, chartLayout, { displayModeBar: false } )
-
-        calButton.dom.addEventListener( 'click', () => {
-            
-            runClassLib( ship );
-
-        } );
     
     }
 }
