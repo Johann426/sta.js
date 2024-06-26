@@ -3,7 +3,7 @@ import { UITable } from "../UITable.js";
 
 class particularTab extends UIDiv {
 
-    constructor( viewport ) { // this class access to sea temperature, rhos, and disp in correction tab
+    constructor( viewport, ship ) { // this class access to sea temperature, rhos, and disp in correction tab
 
         super();
         
@@ -24,6 +24,14 @@ class particularTab extends UIDiv {
             div.add( input )
             particular.textInput.push( input )
 
+            input.onChange( () => {
+            
+                const key = txt.replace(/(?:^\w|\b\w)/g, ( word, index ) => index == 0 ? word.toLowerCase() : word.toUpperCase() ).replace(/[:]|\s+/g, '')
+                ship[ key ] = input.getValue();
+                console.log( ship )
+            
+            } );
+
         } )
 
         // Ship particulars
@@ -37,31 +45,31 @@ class particularTab extends UIDiv {
 
         row = table.insertRow();
         row.insertHeader().textContent = 'LPP (m)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'l' );
         
         row = table.insertRow();
         row.insertHeader().textContent = 'B (m)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'b' );
         
         row = table.insertRow();
         row.insertHeader().textContent = 'S (m\u00B2)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'wetted' );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'A<sub>X</sub> (m\u00B2)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'Ax' );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'Z<sub>a</sub> (m)';
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'Za' );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'Z<sub>ref</sub> (m)';
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'Zref' );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'C<sub>B</sub>';
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'cb' );
         
         // Engine & speed
         div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
@@ -81,11 +89,11 @@ class particularTab extends UIDiv {
 
         row = table.insertRow();
         row.insertHeader().textContent = 'NCR Load'
-        Array( 2 ).fill().map( () => row.insertCell() );
+        Array( 2 ).fill().map( () => row.insertCell().rowCellTo( ship, 'ncr' ) );
 
         row = table.insertRow();
         row.insertHeader().textContent = 'EEDI Load'
-        Array( 2 ).fill().map( () => row.insertCell() );
+        Array( 2 ).fill().map( () => row.insertCell().rowCellTo( ship, 'eedi' ) );
 
         // Speed
         div.add( new UIText( 'Contract speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
@@ -96,11 +104,11 @@ class particularTab extends UIDiv {
 
         row = table.insertRow();
         row.insertHeader().textContent = 'Sea margin (%)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'sm' );;
 
         row = table.insertRow();
         row.insertHeader().textContent = 'Contract speed at NCR power with sea margin (knots)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'contractSpeed' );
 
         // Draft reading
         div = new UIDiv();
@@ -114,34 +122,37 @@ class particularTab extends UIDiv {
 
         row = table.insertRow();
         row.insertHeader().textContent = 'Draft F.P. (m)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'tf' );
         
         row = table.insertRow();
         row.insertHeader().textContent = 'Draft A.P. (m)'
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'ta' );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = '∇ (m\u00B3)';
         cell = row.insertCell();
+        cell.numberTo( ship, 'disp' );
         cell.dom.addEventListener( 'blur', e => viewport.correction.displacement.st.setValue( e.target.textContent ) );
 
         row = table.insertRow();
         row.insertHeader().innerHTML = 'T<sub>s</sub> (°C)';
         cell = row.insertCell();
+        cell.numberTo( ship, 'temps' );
         cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'temperaturetrial' ].setValue( e.target.textContent ) );
 
         row = table.insertRow();
         row.insertHeader().innerHTML = '&#961<sub>s</sub> (kg/m<sup>3</sup>)';
         cell = row.insertCell();
+        cell.numberTo( ship, 'rhos' );
         cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'densitytrial' ].setValue( e.target.textContent ) );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'T<sub>air</sub> (°C)';
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'tempa' );
 
         row = table.insertRow();
         row.insertHeader().innerHTML = '&#961<sub>air</sub> (kg/m<sup>3</sup>)';
-        row.insertCell();
+        row.insertCell().numberTo( ship, 'rhoa' );
         
         const txt = `
         <p>• Symbols & abbreviation <p>
