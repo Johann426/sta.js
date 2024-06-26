@@ -2,7 +2,7 @@ import { UIDiv, UIText, UIInput, UISelect, UICheckbox } from "../ui.js";
 import { UITable } from "../UITable.js";
 import { runClassLib } from "../ViewportSTA.js";
 
-class ressultTab extends UIDiv {
+class resultTab extends UIDiv {
 
     constructor( ship ) {
 
@@ -220,4 +220,4 @@ class ressultTab extends UIDiv {
     }
 }
 
-export { ressultTab };
+export { resultTab };
