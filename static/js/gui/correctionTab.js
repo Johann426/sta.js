@@ -16,7 +16,7 @@ class correctionTab extends UIDiv {
         div = new UIDiv().add( new UIText( '✔ Reference Guideline: ' ).setPadding( '10px 10px 5px 10px' ) );
         correction.add( div );
         
-        correction.method = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const guideline = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             iso2002: 'ISO 15016:2002',
             iso2015: 'ISO 15016:2015',
@@ -25,14 +25,15 @@ class correctionTab extends UIDiv {
 
         } );
         
-        div.add( correction.method );
-        correction.method.setValue( 'iso2015' );
+        div.add( guideline );
+        guideline.setValue( 'iso2015' );
 
         // show or hide 2002 option
         const options2002 = new UIDiv().setPaddingLeft( '10px' );
         correction.add( options2002 );
+        correction.guideline = guideline;
 
-        correction.method.onChange( event => {
+        guideline.onChange( event => {
 
             const method = event.target.value;
             options2002.setHidden( method == 'iso2002' ? false : true )
@@ -51,7 +52,7 @@ class correctionTab extends UIDiv {
         
         options2002.add( new UIText( 'n-KQ fairing' ).setPadding( '10px 5px 5px 20px' ) );
         
-        correction.optionISO2002.nKQ = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const nkqFair = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             ls: 'Least square',
             mean: 'Mean',
@@ -59,8 +60,9 @@ class correctionTab extends UIDiv {
 
             } );
         
-        correction.optionISO2002.nKQ.setValue( 'ls' )
-        options2002.add( correction.optionISO2002.nKQ );
+        nkqFair.setValue( 'ls' )
+        options2002.add( nkqFair );
+        correction.optionISO2002.nkqFair = nkqFair;
         options2002.setHidden( true );
 
         // Collapsible elements
@@ -71,25 +73,25 @@ class correctionTab extends UIDiv {
         const displacement = new UICollapsible( '• Displacement' );
         
         correction.add( wind, wave, current, temperature, displacement );
-        
-        Object.assign( correction, { wind, wave, current, temperature, displacement } )
+
+        Object.assign( correction, { wind, wave, current, temperature, displacement } );
 
         // Wind coefficients
         div= new UIDiv().add( new UIText( 'Coefficients by ' ).setPadding( '10px 10px 5px 10px' ) );
         wind.content.add( div );
         
-        wind.method = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const windMethod = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             windTunnelTest: 'Wind tunnel test',
             cfd: 'CFD',
             ittc: 'ITTC data set',
             formula: 'Regression formula'
 
-            } );
-        
-            wind.method.setValue( 'windTunnelTest' )
-
-        div.add( wind.method );
+        } );
+    
+        windMethod.setValue( 'windTunnelTest' )
+        div.add( windMethod );
+        correction.wind.method = windMethod;
 
         div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
@@ -199,21 +201,21 @@ class correctionTab extends UIDiv {
         div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         wave.content.add( div );
         
-        wave.method2002 = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const waveMethod2002 = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             falt: 'Faltinsen',
             fuji: 'Fujii-Takahashi',
             kwon: 'Kwon',
 
-        } );
+        } ).setValue( 'falt' );
         
-        div.add( wave.method2002 );
-        wave.method2002.setValue( 'falt' )
+        div.add( waveMethod2002 );
+        correction.wave.method2002 = waveMethod2002;
 
         div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         wave.content.add( div );
 
-        wave.method = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const waveMethod = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             sta1: 'STAWAVE-1',
             sta2: 'STAWAVE-2',
@@ -221,11 +223,12 @@ class correctionTab extends UIDiv {
             test: 'Seakeeping model tests',
             snnm: 'SNNM'
 
-            } );
-        
-        div.add( wave.method );
-        wave.method.setValue( 'nmri' )
-        wave.method.onChange( event => { 
+        } ).setValue( 'nmri' );
+    
+        div.add( waveMethod );
+        correction.wave.method = waveMethod;
+
+        waveMethod.onChange( event => { 
 
             const key = event.target.value;
             [ 'sta1', 'sta2', 'snnm', 'nmri' ].map( key => wave[ key ].map( e => e.setHidden( true ) ) );
@@ -334,30 +337,30 @@ class correctionTab extends UIDiv {
         div = new UIDiv().add( new UIText( '-ISO 15016:2002' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         current.content.add( div );
         
-        current.method2002 = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const currentMethod2002 = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             none: 'no current',
             data: 'input value',
             curv: 'current curve'
 
-        } );
+        } ).setValue( 'none' );
         
-        current.method2002.setValue( 'none' )
-        div.add( current.method2002 );
+        div.add( currentMethod2002 );
+        correction.current.method2002 = currentMethod2002;
 
         div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         current.content.add( div );
         
-        current.method = new UISelect().setDisplay( 'inline' ).setOptions( {
+        const currentMethod = new UISelect().setDisplay( 'inline' ).setOptions( {
 
             none: 'no current',
             iterative: 'iterative',
             mom: 'mean of means'
 
-        } );
+        } ).setValue( 'iterative' );
         
-        current.method.setValue( 'iterative' )
-        div.add( current.method );
+        div.add( currentMethod );
+        correction.current.method = currentMethod;
 
         // Temperature
         let header;
