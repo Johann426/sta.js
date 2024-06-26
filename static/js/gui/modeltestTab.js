@@ -1,4 +1,4 @@
-import { UIDiv, UIText } from "../ui.js";
+import { UIDiv, UIInput } from "../ui.js";
 import { UITable } from "../UITable.js";
 import { addButton } from "../ViewportSTA.js";
 
@@ -12,40 +12,10 @@ class modeltestTab extends UIDiv {
         modeltest.setPosition( 'relative' )
         modeltest.tables = [];
 
-        let div, table, row;
+        const titles = [ 'Trial load condition', 'Contract load condition', 'EEDI load condition' ];
+        titles.map( title => addTable( title, 16 ) );
 
-        // Trial load condition
-        function addTable( title, n ) {
-
-            table = new UITable();
-            table.title = title;
-            row = table.insertRow();
-            row.insertHeader().setWidth( '35px' ).textContent = 'Speed (knots)'
-            row.insertHeader().setWidth( '35px' ).textContent = 'Power (kW)'
-            row.insertHeader().setWidth( '35px' ).textContent = 'RPM (r/min)'
-
-            for( let i = 0; i < n; i ++ ) {
-
-                const row = table.insertRow();
-                Array( 3 ).fill().map( () => row.insertCell() );
-
-            }
-
-            div = new UIDiv().setPadding( '10px 0px' );
-            div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-            div.add( new UIText( title ).setWidth('100%').setTextAlign( 'center' ) );
-            div.add( table );
-            div.add( ...addButton( table ) );
-            modeltest.add( div );
-            modeltest.tables.push( table );
-
-        }
-
-        addTable( 'Trial load condition', 16 );
-        addTable( 'Contract load condition', 16 );
-        addTable( 'EEDI load condition', 16 );
-
-        div = new UIDiv()
+        const div = new UIDiv()
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
         modeltest.add( div );
         
@@ -143,35 +113,76 @@ class modeltestTab extends UIDiv {
             layout: chartLayout
         };
 
-        modeltest.tables.map( ( table, k ) => {
+        // Trial load condition
+        function addTable( title, n ) {
 
-            const key = table.title;
-            
+            const key = title.match( /^\w+/ )[ 0 ].toLowerCase();
+
             ship.mt[ key ] = {
 
-                vs: [],
-                pb: [],
-                rpm: []
+                vs: new Array(),
+                pb: new Array(),
+                rpm: new Array()
 
             };
 
-            table.dom.addEventListener( 'focusout', () => { 
-                
-                const data = table.getColumnWiseData();
-                const index = key == 'Trial load condition' ? 0 : key == 'Contract load condition' ? 1 : 2;
+            const table = new UITable();
+            table.title = title;
+            const row = table.insertRow();
+            row.insertHeader().setWidth( '35px' ).textContent = 'Speed (knots)'
+            row.insertHeader().setWidth( '35px' ).textContent = 'Power (kW)'
+            row.insertHeader().setWidth( '35px' ).textContent = 'RPM (r/min)'
 
-                chartData[ index ].x = data[ 'Speed' ];
-                chartData[ index ].y = data[ 'Power' ];
+            for( let i = 0; i < n; i ++ ) {
 
-                ship.mt[ key ].vs = data[ 'Speed' ];
-                ship.mt[ key ].pb = data[ 'Power' ];
-                ship.mt[ key ].rpm = data[ 'RPM' ];
+                const row = table.insertRow();
+                row.insertCell().dom.addEventListener( 'blur', e => { //event handler sending value in column cell to reference object and chart
 
-                Plotly.update( div.dom, chartData, chartLayout )
+                    const index = e.target.parentNode.rowIndex - 1; // -1: considering header cell
+                    const txt = e.target.textContent;
+                    const num = parseFloat( txt.replace( ',', '' ) );
 
-            } );
+                    ship.mt[ key ].vs[ index ] = num;
+                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].x[ index ] = num;
+                    Plotly.update( div.dom, chartData, chartLayout )
+            
+                } );
 
-        } );
+                row.insertCell().dom.addEventListener( 'blur', e => {
+                        
+                    const index = e.target.parentNode.rowIndex - 1;
+                    const txt = e.target.textContent;
+                    const num = parseFloat( txt.replace( ',', '' ) );
+
+                    ship.mt[ key ].pb[ index ] = num;
+                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].y[ index ] = num;
+                    Plotly.update( div.dom, chartData, chartLayout )
+            
+                } );
+
+                row.insertCell().dom.addEventListener( 'blur', e => {
+                        
+                    const index = e.target.parentNode.rowIndex - 1;
+                    const txt = e.target.textContent;
+                    const num = parseFloat( txt.replace( ',', '' ) );
+
+                    ship.mt[ key ].rpm[ index ] = num;
+                    // chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].x[ index ] = num;
+                    // Plotly.update( div.dom, chartData, chartLayout )
+            
+                } );
+
+            }
+
+            const div0 = new UIDiv().setPadding( '10px 0px' );
+            div0.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+            div0.add( new UIInput( title ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+            div0.add( table );
+            div0.add( ...addButton( table ) );
+            modeltest.add( div0 );
+            modeltest.tables.push( table );
+
+        }
 
     }
 
