@@ -1,11 +1,10 @@
-import { UIDiv, UITabbedPanel, UIText, UIInput, UISelect, UICheckbox } from './ui.js';
-import { UICollapsible } from './UICollapsible.js';
+import { UIDiv, UITabbedPanel, UIText } from './ui.js';
 import { UITable } from './UITable.js';
 import { particularTab } from './gui/particularTab.js';
 import { modeltestTab } from './gui/modeltestTab.js';
 import { measuredTab } from './gui/measuredTab.js';
 import { correctionTab } from './gui/correctionTab.js';
-import { ressultTab } from './gui/ressultTab.js';
+import { resultTab } from './gui/resultTab.js';
 
 class ViewportSTA extends UIDiv{
 
@@ -18,11 +17,11 @@ class ViewportSTA extends UIDiv{
 		const tabbedPanel = new UITabbedPanel();
 		this.add( tabbedPanel );
 		
-		const particular = new particularTab( this );
+		const particular = new particularTab( this, ship );
 		const modeltest = new modeltestTab( ship );
-		const correction = new correctionTab( this );
-		const measured = new measuredTab();
-		const result = new ressultTab( ship );
+		const correction = new correctionTab( this, ship );
+		const measured = new measuredTab( ship );
+		const result = new resultTab( ship );
 		
 		tabbedPanel.setId( 'tabbedPanel' )
 		tabbedPanel.addTab( 'particular', 'Particular', particular );
@@ -30,10 +29,52 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'correction' );
+		tabbedPanel.select( 'result' );
 
 		console.log( correction )
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
+
+	}
+
+	readTable() {
+
+		const { modeltest, measured, ship } = this;
+
+		modeltest.tables.map( ( table, k ) => {
+
+			const data = table.getColumnWiseData();
+			const key = k == 0 ? 'trial' : k == 2 ? 'eedi' : 'contract';
+		
+			ship.mt[ key ].vs = data.Speed;
+			ship.mt[ key ].pb = data.Power;
+			ship.mt[ key ].rpm = data.RPM;
+
+		} );
+
+		const data = measured.table.getData();
+
+		ship.load = data[ 'Engine load' ];
+		ship.time = data[ 'Date time' ];
+		ship.hdg = data[ 'Ship heading' ];
+		ship.sog = data[ 'Ship speed' ];
+		ship.rpmPORT = data[ 'rpm port' ];
+		ship.rpmSTBD = data[ 'rpm stbd' ];
+		ship.rpm = data[ 'RPM' ];
+		ship.powerPORT = data[ 'power port' ];
+		ship.powerSTBD = data[ 'power stbd' ];
+		ship.power = data[ 'Power' ];
+		ship.wind_v = data[ 'Wind velocity' ];
+		ship.wind_d = data[ 'Wind direction' ];
+		ship.wave.height = data[ 'Wave height' ];
+		ship.wave.angle = data[ 'Wave direction' ];
+		ship.wave.period = data[ 'Wave period' ];
+		ship.swell.height = data[ 'Wave height' ];
+		ship.swell.angle = data[ 'Wave direction' ];
+		ship.swell.period = data[ 'Wave period' ];
+		ship.drift = data[ 'Drift' ];
+		ship.rudderPORT = data[ 'rudder port' ];
+		ship.rudderSTBD = data[ 'rudder stbd' ];
+		ship.rudder = data[ 'Rudder' ];
 
 	}
 
@@ -66,9 +107,9 @@ function runClassLib( ship ) {
 
 function runSTA( ship, result ) { //result: UIDiv
 
-	runClassLib( ship ); // run class library(.dll)
+	checkValidity( ship );
 
-	checkValidity();
+	runClassLib( ship ); // run class library(.dll)
 
 	// Temperature to density
 	// wind resistance
@@ -77,177 +118,119 @@ function runSTA( ship, result ) { //result: UIDiv
 	// current correction
 	// speed-power
 	
-	let table, row;
+	const table = result.table;
 
 	// Measured data
-	table = new UITable();
-	result.add( table );
+	const { load, time, hdg, sog, rpm, power, wind_v, wind_d } = ship;
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Engine load (%)'
-	ship.load.map( e => row.insertCell().textContent = e );
+    [ load, time, hdg, sog, rpm, power, wind_v, wind_d ].map( ( arr, i ) => {
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Run number'
-	ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i );
+		const row = table.rows[ i ];
+		arr.map( e => row.insertCell().textContent = e );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Heading (°)'
-	ship.hdg.map( e => row.insertCell().textContent = e );
+	} );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Speed over ground (knots)'
-	ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
+	[ ship.wave, ship.swell ].map( ( wave, j ) => {
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Shaft speed (rpm)'
-	ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+		const { height, angle, period } = wave;
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Shaft power (kW)'
-	ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
+		[ height, angle, period ].map( ( arr, i ) => {
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wind velocity (m/s)'
-	ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+			const row = table.rows[ i + 8 + j * 3 ];
+			arr.map( e => row.insertCell().textContent = e );
+	
+		} );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wind direction (°)'
-	ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave height (m)'
-	ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave direction (°)'
-	ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave period (sec)'
-	ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell height (m)'
-	ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell direction (°)'
-	ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell period (sec)'
-	ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
+	} )
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Results
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	const res = ship.analysis();
+	const res = ship.analysis( ship.mt.trial, ship.mt.contract );
 	console.log( res );
 	const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
 	const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR, speedAtNCRLoaded } = res;
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
+	let row;
+
+	row = table.rows[ 14 ];
 	vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
+	row = table.rows[ 15 ];
 	dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
+	row = table.rows[ 16 ];
 	vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "True wind direction at anemometer height (°)";
+	row = table.rows[ 17 ];
 	dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
+	row = table.rows[ 18 ];
 	vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
+	row = table.rows[ 19 ];
 	dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
+	row = table.rows[ 20 ];
 	vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
+	row = table.rows[ 21 ];
 	vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Relative wind direction at reference height (°)";
+	row = table.rows[ 22 ];
 	dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Wind coefficient";
+	row = table.rows[ 23 ];
 	caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "RAA (kN)";
+	row = table.rows[ 24 ];
 	raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave motion (kN) ';
+	row = table.rows[ 25 ];
 	wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave reflection (kN) ';
+	row = table.rows[ 26 ];
 	wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Wave total (kN) ';
+	row = table.rows[ 27 ];
 	wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell motion (kN) ';
+	row = table.rows[ 28 ];
 	swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell reflection (kN) ';
+	row = table.rows[ 29 ];
 	swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'Swell total (kN) ';
+	row = table.rows[ 30 ];
 	swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'RAW (kN) ';
+	row = table.rows[ 31 ];
 	raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = 'RAS (kN) ';
+	row = table.rows[ 32 ];
 	ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "ΔR (kN)";
+	row = table.rows[ 33 ];
 	delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "PD (kW)";
+	row = table.rows[ 34 ];
 	pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "Vs (knots)";
+	row = table.rows[ 35 ];
 	stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
 
-	row = table.insertRow();
-	row.insertHeader().textContent = "PB (kW)";
+	row = table.rows[ 36 ];
 	pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
 
-	table = new UITable();
-	result.add( table );
-	row = table.insertRow();
+	const table2 = new UITable();
+	result.add( table2 );
+	row = table2.insertRow();
 	row.insertHeader().textContent = "NCR";
 	row.insertHeader().textContent = ship.ncr[ 1 ] + ' (kW)';
-	row = table.insertRow();
+	row = table2.insertRow();
 	row.insertHeader().textContent = "Sea Margin";
 	row.insertHeader().textContent = ship.sm + ' (%)';
-	row = table.insertRow();
+	row = table2.insertRow();
 	row.insertHeader().textContent = "Speed at NCR with s.m.";
 	row.insertHeader().textContent = speedAtNCRLoaded.toFixed( 3 ) + ' (knots)';
 
@@ -255,14 +238,14 @@ function runSTA( ship, result ) { //result: UIDiv
 	const mt = ship.mt;
     const chartData = result.chart.data;
 	const chartLayout = result.chart.layout;
-	chartData[ 0 ].x = mt.vs;
-	chartData[ 0 ].y = mt.pb;
-	chartData[ 1 ].x = mt.vsLoaded;
-	chartData[ 1 ].y = mt.pbLoaded;
-	chartData[ 2 ].x = mt.vs;
-	chartData[ 2 ].y = mt.pb.map( e => e + powerOffset );
-	chartData[ 3 ].x = mt.vsLoaded;
-	chartData[ 3 ].y = mt.pbLoaded.map( e => e + powerOffset );
+	chartData[ 0 ].x = mt.trial.vs;
+	chartData[ 0 ].y = mt.trial.pb;
+	chartData[ 1 ].x = mt.contract.vs;
+	chartData[ 1 ].y = mt.contract.pb;
+	chartData[ 2 ].x = mt.trial.vs;
+	chartData[ 2 ].y = mt.trial.pb.map( e => e + powerOffset );
+	chartData[ 3 ].x = mt.contract.vs;
+	chartData[ 3 ].y = mt.contract.pb.map( e => e + powerOffset );
 	chartData[ 4 ].x = ship.sog;
 	chartData[ 4 ].y = ship.power;
 	chartData[ 5 ].x = stw;
@@ -323,10 +306,22 @@ function runSTA( ship, result ) { //result: UIDiv
 
 }
 
-function checkValidity() {
+function checkValidity( ship ) {
 
-	console.warn( 'not implemented' );
+	[ 'trial', 'contract', 'eedi' ].map( condition => {
 
+		const obj = ship.mt[ condition ];
+
+		[ 'vs', 'pb', 'rpm' ].map( key => {
+
+			const arr = obj[ key ];
+			// obj[ key ] = arr.filter( v => Boolean( v ) || v === 0 );
+			obj[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+		} )
+
+	} )
+	
 }
 
 function addButton( table ) {
