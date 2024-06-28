@@ -21,8 +21,8 @@ class modeltestTab extends UIDiv {
         
         const chartLayout = {
             title: 'Speed-power curve',
-            width: 480,
-            height: 720,
+            width: 420,
+            height: 620,
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
             colorway: [
@@ -136,14 +136,15 @@ class modeltestTab extends UIDiv {
             for( let i = 0; i < n; i ++ ) {
 
                 const row = table.insertRow();
-                row.insertCell().dom.addEventListener( 'blur', e => { //event handler sending value in column cell to reference object and chart
+                
+                row.insertCell().dom.addEventListener( 'blur', e => { // event handler sending value in column cell to reference object and chart
 
                     const index = e.target.parentNode.rowIndex - 1; // -1: considering header cell
                     const txt = e.target.textContent;
                     const num = parseFloat( txt.replace( ',', '' ) );
 
-                    ship.mt[ key ].vs[ index ] = num;
-                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].x[ index ] = num;
+                    // ship.mt[ key ].vs[ index ] = num;
+                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].x[ index ] = num; // speed
                     Plotly.update( div.dom, chartData, chartLayout )
             
                 } );
@@ -154,8 +155,8 @@ class modeltestTab extends UIDiv {
                     const txt = e.target.textContent;
                     const num = parseFloat( txt.replace( ',', '' ) );
 
-                    ship.mt[ key ].pb[ index ] = num;
-                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].y[ index ] = num;
+                    // ship.mt[ key ].pb[ index ] = num;
+                    chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].y[ index ] = num; // power
                     Plotly.update( div.dom, chartData, chartLayout )
             
                 } );
@@ -166,9 +167,7 @@ class modeltestTab extends UIDiv {
                     const txt = e.target.textContent;
                     const num = parseFloat( txt.replace( ',', '' ) );
 
-                    ship.mt[ key ].rpm[ index ] = num;
-                    // chartData[ key == 'trial' ? 0 : key == 'eedi' ? 2 : 1 ].x[ index ] = num;
-                    // Plotly.update( div.dom, chartData, chartLayout )
+                    // ship.mt[ key ].rpm[ index ] = num; // rpm
             
                 } );
 
