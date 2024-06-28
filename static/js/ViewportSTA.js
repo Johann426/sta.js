@@ -29,52 +29,108 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'result' );
+		tabbedPanel.select( 'model' );
 
 		console.log( correction )
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
 	}
 
-	readTable() {
+	readModelTest() {
 
-		const { modeltest, measured, ship } = this;
+		const { modeltest, ship } = this;
 
 		modeltest.tables.map( ( table, k ) => {
 
 			const data = table.getColumnWiseData();
 			const key = k == 0 ? 'trial' : k == 2 ? 'eedi' : 'contract';
 		
-			ship.mt[ key ].vs = data.Speed;
-			ship.mt[ key ].pb = data.Power;
-			ship.mt[ key ].rpm = data.RPM;
+			ship.mt[ key ].vs = data.speed;
+			ship.mt[ key ].pb = data.power;
+			ship.mt[ key ].rpm = data.rpm;
 
 		} );
 
+	}
+
+	readMeasured() {
+
+		const { measured, ship } = this;
+
 		const data = measured.table.getData();
 
-		ship.load = data[ 'Engine load' ];
-		ship.time = data[ 'Date time' ];
-		ship.hdg = data[ 'Ship heading' ];
-		ship.sog = data[ 'Ship speed' ];
-		ship.rpmPORT = data[ 'rpm port' ];
-		ship.rpmSTBD = data[ 'rpm stbd' ];
-		ship.rpm = data[ 'RPM' ];
-		ship.powerPORT = data[ 'power port' ];
-		ship.powerSTBD = data[ 'power stbd' ];
-		ship.power = data[ 'Power' ];
-		ship.wind_v = data[ 'Wind velocity' ];
-		ship.wind_d = data[ 'Wind direction' ];
-		ship.wave.height = data[ 'Wave height' ];
-		ship.wave.angle = data[ 'Wave direction' ];
-		ship.wave.period = data[ 'Wave period' ];
-		ship.swell.height = data[ 'Wave height' ];
-		ship.swell.angle = data[ 'Wave direction' ];
-		ship.swell.period = data[ 'Wave period' ];
-		ship.drift = data[ 'Drift' ];
-		ship.rudderPORT = data[ 'rudder port' ];
-		ship.rudderSTBD = data[ 'rudder stbd' ];
-		ship.rudder = data[ 'Rudder' ];
+		ship.load = data[ 'engineload' ];
+		ship.time = data[ 'datetime' ];
+		ship.hdg = data[ 'shipheading' ];
+		ship.sog = data[ 'shipspeed' ];
+		ship.rpmPORT = data[ 'rpmport' ];
+		ship.rpmSTBD = data[ 'rpmstbd' ];
+		ship.rpm = data[ 'rpm' ];
+		ship.powerPORT = data[ 'powerport' ];
+		ship.powerSTBD = data[ 'powerstbd' ];
+		ship.power = data[ 'power' ];
+		ship.wind_v = data[ 'windvelocity' ];
+		ship.wind_d = data[ 'winddirection' ];
+		ship.wave.height = data[ 'waveheight' ];
+		ship.wave.angle = data[ 'wavedirection' ];
+		ship.wave.period = data[ 'waveperiod' ];
+		ship.swell.height = data[ 'waveheight' ];
+		ship.swell.angle = data[ 'wavedirection' ];
+		ship.swell.period = data[ 'waveperiod' ];
+		ship.drift = data[ 'drift' ];
+		ship.rudderPORT = data[ 'rudderport' ];
+		ship.rudderSTBD = data[ 'rudderstbd' ];
+		ship.rudder = data[ 'rudder' ];
+
+	}
+
+	readCorrection() {
+
+		const { correction, ship } = this;
+		const { wind, wave, current, temperature, displacement } = correction;
+
+		// Guideline
+		ship.st.guideline = correction.guideline.getValue();
+		
+		// Current
+		ship.st.currentMethod = current.method.getValue();
+		ship.st.currentMethod2002 = current.method2002.getValue();
+
+		// Wind
+		ship.st.windMethod = wind.method.getValue();
+		ship.st.windAverage = wind.useAverage.getValue();
+		const cx = wind.table.getColumnWiseData();
+		ship.wind.angle = cx.angle;
+		ship.wind.coef = cx.cx;
+		
+		// Wave
+		ship.st.waveMethod = wave.method.getValue();
+		ship.st.waveMethod2002 = wave.method2002.getValue();
+		const table = wave.table;
+		console.warn( 'nmri table not implemented' );
+
+		[ 'lbwl', 'le', 'lr', 'kyy', 'lcg', 'tcg', 'vcg', 'kroll', 'kpitch', 'kyaw', 'bf', 'cu' ].map( key => {
+			
+			const txt = wave[ key ].getValue();
+			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+
+		} );
+
+		// Temperature
+		[ 'rhos', 'rho0', 'temps', 'temp0' ].map( key => {
+			
+			const txt = temperature[ key ].getValue();
+			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+
+		} );
+
+		// Displacement
+		[ 'disp', 'dispm' ].map( key => {
+			
+			const txt = displacement[ key ].getValue();
+			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+
+		} );
 
 	}
 
