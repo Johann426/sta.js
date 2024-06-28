@@ -1,11 +1,11 @@
-import { UIDiv, UIText, UIInput, UISelect, UICheckbox } from "../ui.js";
+import { UIDiv, UIText, UIInput, UISelect, UICheckbox, UISpan, UIRow } from "../ui.js";
 import { UICollapsible } from "../UICollapsible.js";
 import { UITable } from "../UITable.js";
 import { addButton } from "../ViewportSTA.js";
 
 class correctionTab extends UIDiv {
 
-    constructor( viewport ) { // this class access to visibility of rudder & drift in measured tab
+    constructor( viewport, ship ) { // this class access to visibility of rudder & drift in measured tab
 
         super();
 
@@ -35,8 +35,8 @@ class correctionTab extends UIDiv {
 
         guideline.onChange( event => {
 
-            const method = event.target.value;
-            options2002.setHidden( method == 'iso2002' ? false : true )
+            options2002.setHidden( event.target.value == 'iso2002' ? false : true );
+            ship.st.guideline = guideline.getValue();
             
         } );
 
@@ -93,20 +93,20 @@ class correctionTab extends UIDiv {
         div.add( windMethod );
         correction.wind.method = windMethod;
 
+        windMethod.onChange( () => ship.st.windMethod = windMethod.getValue() );
+
         div = new UIDiv().setPadding( '10px 20px' ); // top and bottom, right and left
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
         div.add( new UIText( 'Wind profile' ).setWidth('100%').setTextAlign( 'center' ) );
         wind.content.add( div );
 
-        wind.tables = [];
-
         table = new UITable();
-        wind.tables.push( table );
+        wind.table = table;
         div.add( table );
 
         row = table.insertRow();
-        row.insertHeader().setPadding( '2px 10px' ).textContent = 'Angle (°)'
-        row.insertHeader().setPadding( '2px 10px' ).innerHTML = 'C<sub>X</sub>'
+        row.insertHeader().setWidth( '80px' ).setPadding( '2px 10px' ).textContent = 'Angle (°)'
+        row.insertHeader().setWidth( '80px' ).setPadding( '2px 10px' ).innerHTML = 'C<sub>X</sub>'
 
         for ( let i = 0; i <= 36; i ++ ) {
 
@@ -176,7 +176,7 @@ class correctionTab extends UIDiv {
 
         const dom = div.dom;
 
-        wind.tables[ 0 ].dom.addEventListener( 'focusout', () => { 
+        wind.table.dom.addEventListener( 'focusout', () => { 
                 
             const data = wind.tables[ 0 ].getColumnWiseData();
 
@@ -211,6 +211,7 @@ class correctionTab extends UIDiv {
         
         div.add( waveMethod2002 );
         correction.wave.method2002 = waveMethod2002;
+        waveMethod2002.onChange( () => ship.st.waveMethod2002 = waveMethod2002.getValue() );
 
         div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         wave.content.add( div );
@@ -227,12 +228,14 @@ class correctionTab extends UIDiv {
     
         div.add( waveMethod );
         correction.wave.method = waveMethod;
+        waveMethod.onChange( () => ship.st.waveMethod = waveMethod.getValue() );
 
-        waveMethod.onChange( event => { 
+        waveMethod.onChange( () => { 
 
-            const key = event.target.value;
+            const value = waveMethod.getValue();
+            ship.st.waveMethod = value;
             [ 'sta1', 'sta2', 'snnm', 'nmri' ].map( key => wave[ key ].map( e => e.setHidden( true ) ) );
-            if( wave[ key ] ) wave[ key ].map( e => e.setHidden( false ) );
+            if( wave[ value ] ) wave[ value ].map( e => e.setHidden( false ) );
 
         } );
         
@@ -251,7 +254,7 @@ class correctionTab extends UIDiv {
         wave.content.add( ...wave.sta1 );
 
         wave.sta2 = [];
-        h = 'Non-dimensional radius of gyration in the lateral direction (% LPP)'
+        h = 'Non-dimensional radius of gyration in lateral direction (% LPP)'
         h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
         wave.sta2.push( waveInput( [ 'k<sub>yy</sub> : ' ], h, 0 ) );
         wave.content.add( ...wave.sta2 );
@@ -294,8 +297,10 @@ class correctionTab extends UIDiv {
                 const input = new UIInput('').setWidth('16%').setTextAlign( 'center' ).setPadding( '0px' );
                 div.add( uiText ).add( input );
                 uiText.setInnerHTML( txt )
-                wave[ uiText.getValue().replace( ' : ', '' ).toLowerCase() ] = input;
-    
+                const key = uiText.getValue().replace( ' : ', '' ).toLowerCase();
+                wave[ key ] = input;
+                input.dom.addEventListener( 'blur', () => ship[ key ] = parseFloat( input.getValue() ) ); // send input value to ship[ key ]
+
             } )
 
             if( tail ) div.add( tail );
@@ -304,16 +309,16 @@ class correctionTab extends UIDiv {
 
         }
 
-        wave.tables = [];
         table = new UITable().setWidth( '50%' ).setMargin( 'auto' );
-        wave.tables.push( table );
+        wave.table = table;
         div = new UIDiv();
         div.add( new UIText( 'Geometry data' ).setWidth('100%').setTextAlign( 'center' ) );
         div.add( table );
-        div.add( ...addButton( table ) );
+        const span = new UIRow().add( ...addButton( table ) ).setWidth('50%').setMargin( 'auto' );
+        div.add( span );
 
         row = table.insertRow();
-        row.insertHeader().setWidth( '120px' ).textContent = 'Longitudinal position from A.P. (m)'
+        row.insertHeader().setWidth( '120px' ).textContent = 'Longitudinal x position (m)'
         row.insertHeader().setWidth( '120px' ).textContent = 'Half breadth (m)'
         row.insertHeader().setWidth( '120px' ).textContent = 'Sectional draft (m)'
         row.insertHeader().setWidth( '120px' ).textContent = 'Sectional Area (m\u00B2)'
@@ -324,7 +329,6 @@ class correctionTab extends UIDiv {
             Array( 4 ).fill().map( () => row.insertCell() );
 
         });
-        
 
         wave.content.add( div );
         wave.nmri.push( div );
@@ -347,6 +351,7 @@ class correctionTab extends UIDiv {
         
         div.add( currentMethod2002 );
         correction.current.method2002 = currentMethod2002;
+        currentMethod2002.onChange( () => ship.st.currentMethod2002 = currentMethod2002.getValue() );
 
         div = new UIDiv().add( new UIText( '-ISO 15016:2015, or later ver.' ).setWidth( '200px' ).setPadding( '10px 10px 5px 20px' ) );
         current.content.add( div );
@@ -361,6 +366,7 @@ class correctionTab extends UIDiv {
         
         div.add( currentMethod );
         correction.current.method = currentMethod;
+        currentMethod.onChange( () => ship.st.currentMethod = currentMethod.getValue() );
 
         // Temperature
         let header;
@@ -372,8 +378,8 @@ class correctionTab extends UIDiv {
         header = 'Reference'
         header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
         temperature.content.add( rasInput( [ 'Temperature<sub>ref</sub> : ', '&#961<sub>ref</sub> : ' ], header, 0, temperature ) );
-        temperature[ 'temperatureref' ].setValue( '15.0' );
-        temperature[ 'densityref' ].setValue( Number( 1026 ).toLocaleString() );
+        temperature[ 'temp0' ].setValue( '15.0' );
+        temperature[ 'rho0' ].setValue( Number( 1026 ).toLocaleString() );
 
         function rasInput( arr, head, tail, parent ) { // array of text keys
 
@@ -383,11 +389,12 @@ class correctionTab extends UIDiv {
 
             arr.map( txt => {
 
-                const uiText = new UIText().setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' )
-                const input = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+                const uiText = new UIText().setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
+                const input = new UIInput('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
                 div.add( uiText ).add( input );
-                uiText.setInnerHTML( txt )
-                parent[ uiText.getValue().replace( ' : ', '' ).replace( 'ρ', 'density' ).toLowerCase() ] = input;
+                uiText.setInnerHTML( txt );
+                const key = uiText.getValue().replace( ' : ', '' ).replace( 'Temperature', 'temp' ).replace( 'ρ', 'rho' );
+                parent[ key.replace( 'trial', 's' ).replace( 'ref', '0' ) ] = input;
     
             } )
 
@@ -399,17 +406,19 @@ class correctionTab extends UIDiv {
 
         // Displacement
         div = new UIDiv();
-        const disp = new UIText('').setWidth( '120px' ).setPadding( '10px 10px 5px 20px' );
+        div.add( new UIText( 'At sea trial' ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' ) );
+        const disp = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
         disp.setInnerHTML( '∇<sub>trial</sub> (m\u00B3)')
-        displacement.st = new UIText( '' ).setWidth( '120px' ).setPadding( '0px' );
-        div.add( disp, displacement.st );
+        displacement.disp = new UIInput( '' ).setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+        div.add( disp, displacement.disp );
         displacement.content.add( div );
 
         div = new UIDiv();
-        const dispm = new UIText('').setWidth( '120px' ).setPadding( '10px 10px 5px 20px' );
+        div.add( new UIText( 'Reference model test' ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' ) );
+        const dispm = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
         dispm.setInnerHTML( '∇<sub>model</sub> (m\u00B3)')
-        displacement.mt = new UIInput('').setWidth( '120px' ).setPadding( '2px 0px' );
-        div.add( dispm, displacement.mt );
+        displacement.dispm = new UIInput('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+        div.add( dispm, displacement.dispm );
         displacement.content.add( div );
     
     }
