@@ -3,7 +3,7 @@ import { UITable } from "../UITable.js";
 
 class measuredTab extends UIDiv {
 
-    constructor() {
+    constructor( ship ) {
 
         super();
 
@@ -34,13 +34,6 @@ class measuredTab extends UIDiv {
 
         options.onChange( () => {
             
-            // for ( let i = 0; i < table.rows.length; i ++ ) {
-
-            //     const row = table.rows[ i ];
-            //     if( row.isHidden() ) console.log( 'row no.', i, 'is hidden' );
-                
-            // }
-
             [ 7, 10, 22 ].map( index => {
 
                 const row = table.rows[ index ];
@@ -68,13 +61,82 @@ class measuredTab extends UIDiv {
             const rows = table.rows;
             const n = rows.length;
             
-            for( let i = 0; i < n; i ++ ) {
+            for( let i = 1; i < n; i ++ ) {
 
                 const row = rows[ i ];
                 const cells = row.cells;
-                Array( 2 ).fill().map( () => i == 1 ? row.insertHeader().textContent = cells.length - 1 : row.insertCell().textContent = measured.history.pop() );
+                Array( 2 ).fill().map( () => row.insertCell().textContent = measured.history.pop() );
 
             }
+
+            Array( 2 ).fill().map( () => rows[ 0 ].insertHeader().textContent = rows[ 0 ].cells.length - 1 );
+            
+            // [ 'load', 'time', 'hdg', 'sog', 'rpmPORT', 'rpmSTBD', 'rpm', 'powerPORT', 'powerSTBD', 'power', 'wind_v', 'wind_d' ].map( ( key, i ) => {
+
+            //     const row = rows[ i + 1 ];
+
+            //     Array( 2 ).fill().map( () => {
+
+            //         const cell = row.insertCell();
+            //         cell.rowCellTo( ship, key );
+            //         const value = measured.history.pop();
+                    
+            //         if ( value ) {
+
+            //             ship[ key ].push( value )
+            //             cell.textContent = value;
+
+            //         }
+
+            //     } );
+
+            // } );
+
+            // [ ship.wave, ship.swell ].map( ( obj, j ) => {
+
+            //     [ 'height', 'angle', 'period' ].map( ( key, i ) => {
+
+            //         const row = rows[ i + 13 + j * 3 ];
+
+            //         Array( 2 ).fill().map( () => {
+
+            //             const cell = row.insertCell();
+            //             cell.rowCellTo( obj, key );
+            //             const value = measured.history.pop();
+
+            //             if ( value ) {
+
+            //                 obj[ key ].push( value )
+            //                 cell.textContent = value;
+
+            //             }
+
+            //         } );
+
+            //     } );
+
+            // } );
+            
+            // [ 'drift', 'rudderPORT', 'rudderSTBD', 'rudder' ].map( ( key, i ) => {
+
+            //     const row = rows[ i + 19 ];
+
+            //     Array( 2 ).fill().map( () => {
+
+            //         const cell = row.insertCell();
+            //         cell.rowCellTo( ship, key );
+            //         const value = measured.history.pop();
+
+            //         if ( value ) {
+
+            //             ship[ key ].push( value )
+            //             cell.textContent = value;
+
+            //         }
+
+            //     } );
+
+            // } );
 
             [ 5, 6, 8, 9, 20, 21 ].map( index => { 
 
@@ -103,11 +165,59 @@ class measuredTab extends UIDiv {
 
                 if ( cells.length >= 5 ) {
 
-                    Array( 2 ).fill().map( () => i == 1 ? row.removeCell( - 1 ) : measured.history.push( row.removeCell( - 1 ).textContent ) );
+                    Array( 2 ).fill().map( () => i == 0 ? row.removeCell( - 1 ) : measured.history.push( row.removeCell( - 1 ).textContent ) );
 
                 }
 
             }
+
+            // [ 'rudder', 'rudderSTBD', 'rudderPORT', 'drift' ].map( ( key, i ) => {
+
+            //     const row = rows[ n - 1 - i ];
+
+            //     Array( 2 ).fill().map( () => {
+                    
+            //         const nm1 = row.cells.length - 1;
+            //         measured.history.push( ship[ key ].splice( nm1 - 1, 1 ) ); //-1 considering header
+            //         row.removeCell( - 1 );
+                    
+            //     } );
+
+            // } );
+
+            // [ ship.swell, ship.wave ].map( ( obj, j ) => {
+
+            //     [ 'period', 'angle', 'height' ].map( ( key, i ) => {
+
+            //         const row = rows[ n - 5 - i - j * 3 ];
+
+            //         Array( 2 ).fill().map( () => {
+                    
+            //             const nm1 = row.cells.length - 1;
+            //             measured.history.push( obj[ key ].splice( nm1 - 1, 1 ) );
+            //             row.removeCell( - 1 );
+                    
+            //         } );
+
+            //     } );
+
+            // } );
+
+            // [ 'wind_d' , 'wind_v', 'power', 'powerSTBD', 'powerPORT', 'rpm', 'rpmSTBD', 'rpmPORT', 'sog', 'hdg', 'time', 'load' ].map( ( key, i ) => {
+
+            //     const row = rows[ n - 11 - i ];
+
+            //     Array( 2 ).fill().map( () => {
+                    
+            //         const nm1 = row.cells.length - 1;
+            //         measured.history.push( ship[ key ].splice( nm1 - 1, 1 ) );
+            //         row.removeCell( - 1 );
+                    
+            //     } );
+
+            // } );
+
+            // Array( 2 ).fill().map( () => rows[ 0 ].removeCell( - 1 ) );
 
         } );
 
@@ -170,16 +280,16 @@ class measuredTab extends UIDiv {
         div.add( table );
 
         row = table.insertRow();
-        row.insertHeader().setWidth( '100px' ).textContent = 'Engine load (%)'
+        row.insertHeader().setWidth( '135px' ).textContent = 'Run number'
 
         row = table.insertRow();
-        row.insertHeader().textContent = 'Run number'
+        row.insertHeader().textContent = 'Engine load (%)'
 
         row = table.insertRow().setFontSize( '11px' );
         row.insertHeader().setFontSize( '14px' ).textContent = 'Date time' //YYYY-MM-DDThh:mm:ss
 
         row = table.insertRow();
-        row.insertHeader().textContent = 'Ship heading (°)';
+        row.insertHeader().textContent = 'Heading (°)';
         
         const border = '2px solid rgb(96,96,96)'
 
