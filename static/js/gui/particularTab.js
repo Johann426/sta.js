@@ -107,7 +107,7 @@ class particularTab extends UIDiv {
         row.insertCell().numberTo( ship, 'sm' );;
 
         row = table.insertRow();
-        row.insertHeader().textContent = 'Contract speed at NCR power with sea margin (knots)'
+        row.insertHeader().textContent = 'Speed at NCR with sea margin (knots)'
         row.insertCell().numberTo( ship, 'contractSpeed' );
 
         // Draft reading
@@ -132,19 +132,19 @@ class particularTab extends UIDiv {
         row.insertHeader().innerHTML = '∇ (m\u00B3)';
         cell = row.insertCell();
         cell.numberTo( ship, 'disp' );
-        cell.dom.addEventListener( 'blur', e => viewport.correction.displacement.st.setValue( e.target.textContent ) );
+        cell.dom.addEventListener( 'blur', e => viewport.correction.displacement.disp.setValue( e.target.textContent ) );
 
         row = table.insertRow();
         row.insertHeader().innerHTML = 'T<sub>s</sub> (°C)';
         cell = row.insertCell();
         cell.numberTo( ship, 'temps' );
-        cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'temperaturetrial' ].setValue( e.target.textContent ) );
+        cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'temps' ].setValue( e.target.textContent ) );
 
         row = table.insertRow();
         row.insertHeader().innerHTML = '&#961<sub>s</sub> (kg/m<sup>3</sup>)';
         cell = row.insertCell();
         cell.numberTo( ship, 'rhos' );
-        cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'densitytrial' ].setValue( e.target.textContent ) );
+        cell.dom.addEventListener( 'blur', e => viewport.correction.temperature[ 'rhos' ].setValue( e.target.textContent ) );
         
         row = table.insertRow();
         row.insertHeader().innerHTML = 'T<sub>air</sub> (°C)';
@@ -163,7 +163,7 @@ class particularTab extends UIDiv {
         &nbsp Z<sub>a</sub> : vertical height of anemometer <br>
         &nbsp Z<sub>ref</sub> : reference height for the wind resistance coefficients <br>
         &nbsp C<sub>B</sub> : block coefficient <br>
-        &nbsp ∇ : displacement volume in sea trial <br>
+        &nbsp ∇ : displacement volume <br>
         `
         div = new UIDiv();
         div.setInnerHTML( txt );
