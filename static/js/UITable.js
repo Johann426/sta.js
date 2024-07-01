@@ -8,12 +8,13 @@ class UITable extends UIElement { // only number is acceptable in table body
         this.rows = [];
         const dom = this.dom;
         const index = [];
-        let ij;
+        const ij = [ 0, 0, 0, 0 ];
         
         const onPointerDown = function ( event ) {
 
             const rowIndex = event.target.parentNode.rowIndex;
             const cellIndex = event.target.cellIndex;
+            ij.fill( 0 );
             index[ 0 ] = rowIndex;
             index[ 1 ] = cellIndex;
             removeClass();
@@ -51,7 +52,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
             }
 
-            ij = [ is, ie, js, je ];
+            [ is, ie, js, je ].map( ( e, i ) => ij[ i ] = e );
 
         }
 
@@ -145,6 +146,26 @@ class UITable extends UIElement { // only number is acceptable in table body
 
     }
 
+    clear() {
+
+        const rows = this.rows;
+
+        for ( let i = 0; i < rows.length; i ++ ) {
+
+            const row = rows[ i ];
+
+            for ( let j = 0; j < row.cells.length; j ++ ) {
+
+                const cell = row.cells[ j ];
+                
+                if ( cell.editable ) cell.textContent = ''; // if( cell.dom.nodeName == TD )
+
+            }
+
+        }
+
+    }
+
     insertRow( i = - 1 ) {
 
         const { dom, rows } = this;
@@ -226,7 +247,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
                 if( j == 0 ) {
 
-                    header = txt.replace( /\s\(.*\)/g, '' )
+                    header = txt.replace( /\s+/g, '' ).replace( /\(.*\)/g, '' ).toLowerCase() // exclude any character(s) in parentheses as well as white space
                     arr[ header ] = new Array();
 
                 } else {
@@ -259,7 +280,7 @@ class UITable extends UIElement { // only number is acceptable in table body
 
             const cell = cells[ j ];
             const txt = cell.textContent;
-            const header = txt.replace( /\s\(.*\)/g, '' )
+            const header = txt.replace( /\s+/g, '' ).replace( /\(.*\)/g, '' ).toLowerCase() // exclude any character(s) in parentheses as well as white space
             arr[ header ] = new Array();
             keys.push( header );
 
@@ -332,7 +353,7 @@ class UIRowElement extends UIElement {
 
 }
 
-class UICellElement extends UIElement{
+class UICellElement extends UIElement{ // text or number or date time
 
     constructor( type = 'td' ) {
 
@@ -414,7 +435,8 @@ class UICellElement extends UIElement{
             if( txt != '' && !dateTime ) {
 
                 const number = parseFloat( txt.replace( ',', '' ) );
-			    dom.textContent = number.toFixed( this.decimal ).replace( /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',' ); // thousand seperator
+			    // dom.textContent = number.toLocaleString();
+                dom.textContent = number.toFixed( this.decimal ); //.replace( /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',' ); // record dicimal point with thousand seperator //use .toLocaleString()
 
             }
 
@@ -432,28 +454,29 @@ class UICellElement extends UIElement{
 
 				case 'Enter':
                     event.preventDefault();
+                    event.target.blur();
                     if( rowIndex < tb.rows.length - 1  ) tb.rows[ rowIndex + 1 ].cells[ cellIndex ].focus()
 					break;
 
-                case 'ArrowLeft':
-					event.preventDefault();
-                    if( cellIndex > 0  ) tb.rows[ rowIndex ].cells[ cellIndex - 1 ].focus()
-					break;
+                // case 'ArrowLeft':
+				// 	event.preventDefault();
+                //     if( cellIndex > 0  ) tb.rows[ rowIndex ].cells[ cellIndex - 1 ].focus()
+				// 	break;
 
-				case 'ArrowUp':
-					event.preventDefault();
-					if( rowIndex > 0  ) tb.rows[ rowIndex - 1 ].cells[ cellIndex ].focus()
-					break;
+				// case 'ArrowUp':
+				// 	event.preventDefault();
+				// 	if( rowIndex > 0  ) tb.rows[ rowIndex - 1 ].cells[ cellIndex ].focus()
+				// 	break;
 
-                case 'ArrowRight':
-					event.preventDefault();
-					if( cellIndex < row.cells.length - 1 ) tb.rows[ rowIndex ].cells[ cellIndex + 1 ].focus()
-					break;
+                // case 'ArrowRight':
+				// 	event.preventDefault();
+				// 	if( cellIndex < row.cells.length - 1 ) tb.rows[ rowIndex ].cells[ cellIndex + 1 ].focus()
+				// 	break;
 
-				case 'ArrowDown':
-					event.preventDefault();
-					if( rowIndex < tb.rows.length - 1  ) tb.rows[ rowIndex + 1 ].cells[ cellIndex ].focus()
-					break;
+				// case 'ArrowDown':
+				// 	event.preventDefault();
+				// 	if( rowIndex < tb.rows.length - 1  ) tb.rows[ rowIndex + 1 ].cells[ cellIndex ].focus()
+				// 	break;
                 
 			}
 
@@ -465,6 +488,56 @@ class UICellElement extends UIElement{
         dom.addEventListener( 'keydown', onKeyDown );
 
         return this;
+
+    }
+
+    //Call by reference function(obj, key) to send targeted dom text content
+    numberTo( obj, key ) {
+
+        this.dom.addEventListener( 'blur', e => {
+            
+            const txt = e.target.textContent;
+            obj[ key ] = parseFloat( txt.replace( ',', '' ) );
+
+        } );
+
+    }
+
+    textTo( obj, key ) {
+
+        this.dom.addEventListener( 'blur', e => {
+            
+            obj[ key ] = e.target.textContent;
+            
+        } );
+        
+    }
+
+    columnCellTo( obj, key ) { //to send data in column cell to reference object
+
+        this.dom.addEventListener( 'blur', e => {
+            
+            const index = e.target.parentNode.rowIndex - 1; // -1: considering header cell
+            const txt = e.target.textContent;
+            const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/; // date and time
+
+            obj[ key ][ index ] = txt.match( regex ) ? txt : parseFloat( txt.replace( ',', '' ) );
+
+        } );
+
+    }
+
+    rowCellTo( obj, key ) { //to send data in column cell to reference object
+
+        this.dom.addEventListener( 'blur', e => {
+            
+            const index = e.target.cellIndex - 1; // -1: considering header cell
+            const txt = e.target.textContent;
+            const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/; // date and time
+
+            obj[ key ][ index ] = txt.match( regex ) ? txt : parseFloat( txt.replace( ',', '' ) );
+
+        } );
 
     }
 
