@@ -10,7 +10,35 @@ class Ship {
 
 	constructor( guideline = 'ISO 15016:2015') {
 
-		this.guideline = guideline; // 'ISO 15016:2002' | 'ISO 15016:2015' | 'ITTC 7.5-04-01-01.1 (2017)' | 'ITTC 7.5-04-01-01.1 (2021)'
+		this.mt = new Object();
+		this.st = new Object();
+		this.ncr = new Array( 2 ); // power & rpm
+		this.eedi = new Array( 2 ); // power & rpm
+
+		this.wind = {
+
+			angle: new Array(),
+			coef: new Array()
+
+		};
+
+		[ 'load', 'time', 'hdg', 'sog', 'rpmPORT', 'rpmSTBD', 'rpm', 'powerPORT', 'powerSTBD', 'power', 'wind_v', 'wind_d', 'drift', 'rudderPORT', 'rudderSTBD', 'rudder' ].map( key => this[ key ] = new Array() );
+
+		this.wave = {
+
+			height: new Array(),
+			angle: new Array(),
+			period: new Array()
+
+		}
+
+		this.swell = {
+
+			height: new Array(),
+			angle: new Array(),
+			period: new Array()
+
+		}
 
 	}
 
@@ -620,7 +648,7 @@ class Ship {
 
 	}
 
-	analysis() {
+	analysis( ballast, design ) {
 
         const ship = this;
         const nm1 = ship.hdg.length - 1;
@@ -652,7 +680,7 @@ class Ship {
         const stw = ship.currentCorrection( time, ship.sog.map( e => e * 1852 / 3600 ), pid );
 
         // speed-power curve
-        const pmt = f( ship.mt.vs, ship.mt.pb, stw );
+        const pmt = f( ballast.vs, ballast.pb, stw );
         let dif = 0;
 
 		// difference in power between trial and model
@@ -666,7 +694,8 @@ class Ship {
 
 		const ncrPower = ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm );
 
-        const speedAtNCR = f( ship.mt.pbLoaded.map( e => e + dif ), ship.mt.vsLoaded, [ ncrPower ] );
+        const speedAtNCR = f( ballast.pb.map( e => e + dif ), ballast.vs, [ ncrPower ] );
+		const speedAtNCRLoaded = f( design.pb.map( e => e + dif ), design.vs, [ ncrPower ] );
 
         return {
 
@@ -691,6 +720,7 @@ class Ship {
             pb: pb,
 			powerOffset: dif,
 			speedAtNCR: speedAtNCR[ 0 ],
+			speedAtNCRLoaded: speedAtNCRLoaded[ 0 ]
 
         }
         
