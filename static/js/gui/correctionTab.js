@@ -71,10 +71,11 @@ class correctionTab extends UIDiv {
         const current = new UICollapsible( '• Current effect' );
         const temperature = new UICollapsible( '• Temperature & density' );
         const displacement = new UICollapsible( '• Displacement' );
+        const shallowWater = new UICollapsible( '• Shallow waver effect' );
         
-        correction.add( wind, wave, current, temperature, displacement );
+        correction.add( wind, wave, current, temperature, displacement, shallowWater );
 
-        Object.assign( correction, { wind, wave, current, temperature, displacement } );
+        Object.assign( correction, { wind, wave, current, temperature, displacement, shallowWater } );
 
         // Wind coefficients
         div= new UIDiv().add( new UIText( 'Coefficients by ' ).setPadding( '10px 10px 5px 10px' ) );
@@ -178,10 +179,10 @@ class correctionTab extends UIDiv {
 
         wind.table.dom.addEventListener( 'focusout', () => { 
                 
-            const data = wind.tables[ 0 ].getColumnWiseData();
+            const data = wind.table.getColumnWiseData();
 
-            chartData[ 0 ].x = data[ 'Angle' ];
-            chartData[ 0 ].y = data[ 'CX' ];
+            chartData[ 0 ].x = data[ 'angle' ];
+            chartData[ 0 ].y = data[ 'cx' ];
             // ship.wind.angle = data[ 'Angle' ];
             // ship.wind.coef = data[ 'CX' ];
 
@@ -373,13 +374,13 @@ class correctionTab extends UIDiv {
 
         header = 'At sea trial'
         header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
-        temperature.content.add( rasInput( [ 'Temperature<sub>trial</sub> : ', '&#961<sub>trial</sub> : ' ], header, 0, temperature ) );
+        temperature.content.add( rasInput( [ 'Temperature<sub>trial</sub>', '&#961<sub>trial</sub>' ], header, 0, temperature ) );
 
         header = 'Reference'
         header = new UIText( header ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' );
-        temperature.content.add( rasInput( [ 'Temperature<sub>ref</sub> : ', '&#961<sub>ref</sub> : ' ], header, 0, temperature ) );
+        temperature.content.add( rasInput( [ 'Temperature<sub>ref</sub>', '&#961<sub>ref</sub>' ], header, 0, temperature ) );
         temperature[ 'temp0' ].setValue( '15.0' );
-        temperature[ 'rho0' ].setValue( Number( 1026 ).toLocaleString() );
+        temperature[ 'rho0' ].setValue( 1026 ); //.toLocaleString() thousand seperator
 
         function rasInput( arr, head, tail, parent ) { // array of text keys
 
@@ -393,7 +394,7 @@ class correctionTab extends UIDiv {
                 const input = new UIInput('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
                 div.add( uiText ).add( input );
                 uiText.setInnerHTML( txt );
-                const key = uiText.getValue().replace( ' : ', '' ).replace( 'Temperature', 'temp' ).replace( 'ρ', 'rho' );
+                const key = uiText.getValue().replace( 'Temperature', 'temp' ).replace( 'ρ', 'rho' ); //.replace( ' : ', '' )
                 parent[ key.replace( 'trial', 's' ).replace( 'ref', '0' ) ] = input;
     
             } )
@@ -421,6 +422,23 @@ class correctionTab extends UIDiv {
         div.add( dispm, displacement.dispm );
         displacement.content.add( div );
     
+        // Shallow waver
+        div = new UIDiv();
+        div.add( new UIText( 'Midship section area under water' ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' ) );
+        const Am = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
+        Am.setInnerHTML( 'A<sub>M</sub> (m\u00B2)')
+        shallowWater.Am = new UIInput( '' ).setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+        div.add( Am, shallowWater.Am );
+        shallowWater.content.add( div );
+
+        div = new UIDiv();
+        div.add( new UIText( 'Water depth' ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' ) );
+        const depth = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
+        depth.setInnerHTML( 'depth (m)')
+        shallowWater.depth = new UIInput( '' ).setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+        div.add( depth, shallowWater.depth );
+        shallowWater.content.add( div );
+
     }
 
 }
