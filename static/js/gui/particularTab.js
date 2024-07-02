@@ -155,7 +155,7 @@ class particularTab extends UIDiv {
         row.insertCell().numberTo( ship, 'rhoa' );
         
         const txt = `
-        <p>• Symbols & abbreviation <p>
+        <p>• Symbols & abbreviation </p>
         &nbsp LPP : length between perpendiculars <br>
         &nbsp B : breadth <br>
         &nbsp S : wetted surface area <br>
