@@ -29,11 +29,24 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'model' );
+		tabbedPanel.select( 'correction' );
 
 		console.log( correction )
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
+	}
+
+	clear() {
+
+		const { particular, modeltest, correction, measured, result } = this;
+
+		particular.tables.map( table => table.clear() );
+		modeltest.tables.map( table => table.clear() );
+		correction.wind.table.clear();
+		correction.wave.table.clear();
+		measured.table.clear();
+		result.table.clear();
+		
 	}
 
 	readModelTest() {
