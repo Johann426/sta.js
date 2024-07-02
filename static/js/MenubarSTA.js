@@ -47,7 +47,7 @@ class MenubarSTA extends UIDiv {
 		item.setTextContent( 'Import File(.inp)' );
 
 		item.onClick( () => {
-
+            
             inpOpen( ship, viewport );
 
         } );
@@ -131,6 +131,20 @@ class MenubarSTA extends UIDiv {
 		item.onClick( () => {
 
 			console.warn( 'not implemented' )
+
+		} );
+
+        items.add( item );
+
+        item = new UIRow();
+		item.setClass( 'item' );
+		item.setTextContent( 'read table' );
+		item.onClick( () => {
+
+            viewport.readModelTest();
+            viewport.readMeasured();
+			viewport.readCorrection();
+            console.log( ship );
 
 		} );
 
@@ -264,12 +278,12 @@ async function inpOpen( ship, viewport ) {
             const key = row.shift();
             const val = row.pop();
             data[ key ] = val;
-            
+           
         })
 
         data['<SHIP_CONDITION_DATA>'].map( row => {
 
-            const key = row.shift();
+            const key = row.shift().replace( 'DISPLACEMENT', 'dispm' ); // duplicate name of 'DISPLACEMENT' in <SEA_TRIAL_CONDITION>
             const val = row.pop();
             data[ key ] = val;
             
@@ -292,6 +306,31 @@ async function inpOpen( ship, viewport ) {
             
         })
 
+        data['<NMRI_WAVE>'].slice( 0, 8 ).map( row => {
+
+            const key = row.shift();
+            const val = row.pop();
+            data[ key ] = val;
+            
+        })
+
+        keys = data['<NMRI_WAVE>'][ 8 ];
+        keys.map( key => data[ key ] = new Array() );
+
+        data['<NMRI_WAVE>'].slice( 9 ).map( row => {
+
+            row.map( ( val, i ) => val ? data[ keys[ i ] ].push( val ) : null );
+
+        } );
+
+        data['<SPEED_TRIAL_ANALY_METHODS>'].map( row => {
+
+            const key = row.shift();
+            const val = row.pop();
+            data[ key ] = val;
+            
+        })
+
         part = data['<SPEED_TRIAL_MEASURED_DATA>']
         keys = part.shift();
         keys.map( key => data[ key ] = new Array() );
@@ -302,7 +341,8 @@ async function inpOpen( ship, viewport ) {
 
         } );
 
-        part = data['<OWN_WIND_FORCE_COEFFI>'][ 1 ][ 0 ] == 'null' ? data['<STANDARD_WIND_FORCE_COEFFI>'] : data['<OWN_WIND_FORCE_COEFFI>']
+        // part = data['<OWN_WIND_FORCE_COEFFI>'][ 1 ][ 0 ] == 'null' ? data['<STANDARD_WIND_FORCE_COEFFI>'] : data['<OWN_WIND_FORCE_COEFFI>']
+        part = data['METHOD_2015_WIND_RESIST'] == 0 ? data['<OWN_WIND_FORCE_COEFFI>'] : data['<STANDARD_WIND_FORCE_COEFFI>'];
         data.wind = new Object();
         keys = part.shift();
         keys.map( key => data.wind[ key ] = new Array() );
@@ -391,7 +431,6 @@ async function inpOpen( ship, viewport ) {
             row.map( ( val, i ) => val ? data.arm[ keys[ i ] ].push( val ) : null );
 
         } );
-
         
         ship.shipName = data[ 'SHIP_NAME' ];
         ship.ownerName = data[ 'OWNER_NAME' ];
@@ -400,18 +439,33 @@ async function inpOpen( ship, viewport ) {
         ship.tf = data[ 'DRAFT_FORE' ];
         ship.ta = data[ 'DRAFT_AFT' ];
         ship.disp = data[ 'DISPLACEMENT' ];
+        ship.dispm = data[ 'dispm' ];
         ship.wetted = data[ 'WETTED_SURFACE' ];
-        ship.rhos = data[ 'WATER_DEN' ];
-        ship.cb = data[ 'CB' ];
-        ship.kyy = data[ 'RADIUS_GYRATION_Y' ];
-        ship.le = data[ 'LE' ];
-        ship.lr = data[ 'LR' ];
-        ship.lbwl = data[ 'L_BWL' ];
         ship.Za = data[ 'ANEMO_HEIGHT' ];
         ship.Zref = 10; //data[ '' ]
         ship.Ax = data[ 'TRANS_PROJECT_AREA' ];
-        ship.rhoa  = data[ '' ];
-        
+        ship.Am = ( parseFloat( data[ 'CM' ] ) * parseFloat( data[ 'BREADTH' ] ) * 0.5 * ( parseFloat( data[ 'DRAFT_M_P'] ) + parseFloat( data[ 'DRAFT_M_S'] ) ) ).toFixed( 1 );
+        ship.lbwl = data[ 'L_BWL' ];
+        ship.le = data[ 'LE' ];
+        ship.lr = data[ 'LR' ];
+        ship.cb = data[ 'CB' ];
+        ship.cm = data[ 'CM' ];
+        ship.kyy = data[ 'RADIUS_GYRATION_Y' ];
+        ship.lcg = data[ 'XG' ];
+        ship.tcg = data[ 'YG' ];
+        ship.vcg = data[ 'ZG' ];
+        ship.kroll = data[ 'Kxx' ];
+        ship.kpitch = data[ 'Kyy' ];
+        ship.kyaw = data[ 'Kzz' ];
+        ship.bf = data[ 'Bf' ];
+        ship.cu = data[ 'Cu' ];
+        ship.nmriGeom = {
+            x: data[ 'SX' ],
+            bhalf: data[ 'SB' ],
+            draft: data[ 'SD' ],
+            area: data[ 'AREA' ],
+        }
+
         ship.contractCondition = data[ 'CONTRACT_CONDITION' ];
         ship.contractPower = data[ 'CONTRACT_POWER_SM' ];
         ship.contractSpeed = data[ 'CONTRACT_SPEED' ];
@@ -426,10 +480,27 @@ async function inpOpen( ship, viewport ) {
         ship.time = data[ 'INNING_TIME' ].map( e => e.replace( '_', ' ' ) );
         ship.hdg = data[ 'DIR_OF_RUN' ];
         ship.sog = data[ 'SPEED_MEASURED' ];
-        ship.rpm = data[ 'SHAFT_RPM_MEASURED_S' ].map( e => parseFloat( e ) );
-        data[ 'SHAFT_RPM_MEASURED_P' ].map( ( e, i ) => ship.rpm[ i ] = 0.5 * ( ship.rpm[ i ] + parseFloat( e ) ) );
-        ship.power = data[ 'SHAFT_POWER_MEASURED_S' ].map( e => parseFloat( e ) );
-        data[ 'SHAFT_POWER_MEASURED_P' ].map( ( e, i ) => ship.power[ i ] += parseFloat( e ) );
+
+        ship.rpmSTBD = data[ 'SHAFT_RPM_MEASURED_S' ].map( e => parseFloat( e ) );
+        ship.rpmPORT = data[ 'SHAFT_RPM_MEASURED_P' ].map( e => parseFloat( e ) );
+        ship.powerSTBD = data[ 'SHAFT_POWER_MEASURED_S' ].map( e => parseFloat( e ) );
+        ship.powerPORT = data[ 'SHAFT_POWER_MEASURED_P' ].map( e => parseFloat( e ) );
+        ship.rudderSTBD = data[ 'RUDDER_MOVE_S' ].map( e => parseFloat( e ) );
+        ship.rudderPORT = data[ 'RUDDER_MOVE_P' ].map( e => parseFloat( e ) );
+
+        if( ship.noProp == 1 ) {
+
+            ship.rpm = data[ 'SHAFT_RPM_MEASURED_S' ].map( e => parseFloat( e ) );
+            ship.power = data[ 'SHAFT_POWER_MEASURED_S' ].map( e => parseFloat( e ) );
+            ship.rudder = data[ 'RUDDER_MOVE_S' ].map( e => parseFloat( e ) );
+
+        } else {
+
+            ship.rpm = ship.rpmSTBD.map( ( e, i ) => Math.round( 0.5 * ( ship.rpmPORT[ i ] + e ) * 100 ) / 100 );
+            ship.power = ship.powerSTBD.map( ( e, i ) => ship.powerPORT[ i ] + e );
+            ship.rudder = ship.rudderSTBD.map( ( e, i ) => Math.round( 0.5 * ( ship.rudderPORT[ i ] + e ) * 100 ) / 100 );
+
+        }
 
         ship.wind_v = data[ 'WIND_VELOCITY' ];
         ship.wind_d = data[ 'WIND_DIR' ];
@@ -453,21 +524,34 @@ async function inpOpen( ship, viewport ) {
             period: data[ 'SWELL_PERIOD' ],
 
         }
-
-        ship.rudderSTBD = data[ 'RUDDER_MOVE_S' ];
-        ship.rudderPORT = data[ 'RUDDER_MOVE_P' ];
+       
         ship.drift = data[ 'DRIFT' ];
 
         Object.assign( ship.mt, {
-            vs: data.mtTrial[ 'SPEED' ],
-            pb: data.mtTrial[ 'POWER' ],
-            rpm: data.mtTrial[ 'RPM' ],
-            vsLoaded: data.mtLoaded[ 'Design' ][ 'SPEED' ],
-            pbLoaded: data.mtLoaded[ 'Design' ][ 'POWER' ],
-            rpmLoaded: data.mtLoaded[ 'Design' ][ 'RPM' ],
-            vsEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'SPEED' ] : undefined,
-            pbEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'POWER' ] : undefined,
-            rpmEEDI: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'RPM' ] : undefined,
+            
+            trial: {
+
+                vs: data.mtTrial[ 'SPEED' ],
+                pb: data.mtTrial[ 'POWER' ],
+                rpm: data.mtTrial[ 'RPM' ]
+
+            },
+
+            contract: {
+
+                vs: data.mtLoaded[ 'Design' ][ 'SPEED' ],
+                pb: data.mtLoaded[ 'Design' ][ 'POWER' ],
+                rpm: data.mtLoaded[ 'Design' ][ 'RPM' ]
+
+            },
+
+            eedi: {
+
+                vs: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'SPEED' ] : new Array(),
+                pb: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'POWER' ] : new Array(),
+                rpm: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'RPM' ] : new Array(),
+
+            },
             
             res: {
                 vs: data.mtCoef[ 'SPEED' ],
@@ -499,26 +583,118 @@ async function inpOpen( ship, viewport ) {
 
         }
 
+        ship.temp0 = data[ 'WATER_TEMP_SD' ]
+        ship.temps = data[ 'WATER_TEMP' ];
+        ship.tempa  = data[ 'AIR_TEMP' ][ 0 ];
+        ship.rho0 = data[ 'WATER_DEN_SD' ]
+        ship.rhos =  data[ 'WATER_DEN' ]
         ship.rhoa = data[ 'AIR_DEN' ][ 0 ];
-        ship.rhos0 = data[ 'WATER_DEN_SD' ];
-        ship.temp0 = data[ 'WATER_TEMP_SD' ];
+        ship.waterDepth = data[ 'WATER_DEPTH' ];
 
-        const { hdg, sog, rpm, power, wind_v, wind_d, wave, swell } = ship;
-        toArryDataFloat( hdg, sog, rpm, power, wind_v, wind_d )
+        // correction guideline
+        ship.st.guideline = 'iso2015';
+
+        switch( data[ 'METHOD_2015_WIND_RESIST' ] ) {
+
+            case '0': //own wind tennel test
+                // 
+                ship.st.windMethod = 'windTunnelTest'
+                break;
+            case '1': //standard wind tunnel result
+                ship.st.windMethod = 'windTunnelTest'
+                break
+            case '2': //ITTC
+                ship.st.windMethod = 'ittc'
+                break;
+            case '3': //Fujiwara
+                ship.st.windMethod = 'formula'
+                break;
+            default:
+                ship.st.windMethod = 'windTunnelTest'
+
+        };
+        
+        switch( data[ 'METHOD_2002_DIFFRACTION' ] ) {
+
+            case '0':
+                ship.st.waveMethod2002 = 'none'
+                break;
+            case '1':
+                ship.st.waveMethod2002 = 'falt'
+                break
+            case '2':
+                ship.st.waveMethod2002 = 'kwon'
+                break;
+            case '2':
+                ship.st.waveMethod2002 = 'fuji'
+                break;
+
+        };
+        
+        switch( data[ 'METHOD_2015_WAVE_RESIST' ] ) {
+
+            case '1':
+                ship.st.waveMethod = 'sta2'
+                break;
+            case '2':
+                ship.st.waveMethod = 'sta1'
+                break
+            case '3': // Theoretical method with simplified tank tests in short waves
+                ship.st.waveMethod = 'nmri'
+                break;
+            case '4': // Theoretical method with fitting formula for the reflection waves
+                ship.st.waveMethod = 'nmri'
+                break;
+            case '5':
+                ship.st.waveMethod = 'test'
+                break;
+            case '6':
+                ship.st.waveMethod = 'snnm'
+                break;                
+
+        };
+
+        switch( data[ 'METHOD_2002_CURRENT' ] ) {
+
+            case '0':
+                ship.st.currentMethod2002 = 'none';
+                break;
+            case '1':
+                ship.st.currentMethod2002 = 'data';
+                break
+            case '2':
+                ship.st.currentMethod2002 = 'curv';
+                break;
+
+        };
+
+        switch( data[ 'METHOD_2015_CURRENT' ] ) {
+
+            case '1':
+                ship.st.currentMethod = 'iterative';
+                break;
+            case '2':
+                ship.st.currentMethod = 'mom';
+                break
+
+        };
+
+        const { load, hdg, sog, rpm, power, wind_v, wind_d, wave, swell } = ship;
+        toArryDataFloat( load, hdg, sog, rpm, power, wind_v, wind_d )
         toArryDataFloat( wave.angle, wave.height, wave.period )
         toArryDataFloat( swell.angle, swell.height, swell.period )
 
-        const { rudderSTBD, rudderPORT, drift } = ship;
-        toArryDataFloat( rudderSTBD, rudderPORT, drift );
+        const { rudder, drift } = ship;
+        toArryDataFloat( rudder, drift );
 
         const { mcr, ncr } = ship;
         toArryDataFloat( mcr, ncr );
 
         const { wind, mt } = ship;
         toArryDataFloat( wind.angle, wind.coef );
-        toArryDataFloat( mt.vs, mt.pb, mt.rpm );
-        toArryDataFloat( mt.vsLoaded, mt.pbLoaded, mt.rpmLoaded );
-        mt.vsEEDI ? toArryDataFloat( mt.vsEEDI, mt.pbEEDI, mt.rpmEEDI ) : null;
+        toArryDataFloat( mt.trial.vs, mt.trial.pb, mt.trial.rpm );
+        toArryDataFloat( mt.contract.vs, mt.contract.pb, mt.contract.rpm );
+        toArryDataFloat( mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm );
         toArryDataFloat( mt.res.vs, mt.res.cts );
         toArryDataFloat( mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad );
         toArryDataFloat( mt.pow.j, mt.pow.kt, mt.pow.kq );
@@ -534,18 +710,35 @@ async function inpOpen( ship, viewport ) {
         ship.tf = parseFloat( ship.tf );
         ship.ta = parseFloat( ship.ta );
         ship.disp = parseFloat( ship.disp );
+        ship.dispm = parseFloat( ship.dispm );
         ship.wetted = parseFloat( ship.wetted );
         ship.rhos = parseFloat( ship.rhos );
         ship.cb = parseFloat( ship.cb );
         ship.kyy = parseFloat( ship.kyy );
         ship.Za = parseFloat( ship.Za );
         ship.Ax = parseFloat( ship.Ax );
-        if( ship.le ) ship.le = parseFloat( ship.le );
-        if( ship.lr ) ship.lr = parseFloat( ship.lr );
-        if( ship.lbwl ) ship.lbwl = parseFloat( ship.lbwl );
-        ship.rhos0 = parseFloat( ship.rhos0 );
-        ship.temp0 = parseFloat( ship.temp0 );
+        ship.Am = parseFloat( ship.Am );
+        ship.rho0 = parseFloat( ship.rho0 );
+        ship.rhos = parseFloat( ship.rhos );
         ship.rhoa = parseFloat( ship.rhoa );
+        ship.temp0 = parseFloat( ship.temp0 );
+        ship.temps = parseFloat( ship.temps );
+        ship.tempa = parseFloat( ship.tempa );
+        ship.lbwl = ship.lbwl == 'null' ? '' : parseFloat( ship.lbwl );
+        ship.le = ship.le == 'null' ? '' : parseFloat( ship.le );
+        ship.lr = ship.lr == 'null' ? '' : parseFloat( ship.lr );
+        ship.lcg = ship.lcg == 'null' ? '' : parseFloat( ship.lcg );
+        ship.tcg = ship.tcg == 'null' ? '' : parseFloat( ship.tcg );
+        ship.vcg = ship.vcg == 'null' ? '' : parseFloat( ship.vcg );
+        ship.kroll = ship.kroll == 'null' ? '' : parseFloat( ship.kroll );
+        ship.kpitch = ship.kpitch == 'null' ? '' : parseFloat( ship.kpitch );
+        ship.kyaw = ship.kyaw == 'null' ? '' : parseFloat( ship.kyaw );
+        ship.bf = ship.bf == 'null' ? '' : parseFloat( ship.bf );
+        ship.cu = ship.cu == 'null' ? '' : parseFloat( ship.cu );
+        ship.waterDepth = ship.waterDepth == 'null' ? '' : parseFloat( ship.waterDepth );
+
+        const { nmriGeom } = ship;
+        toArryDataFloat( nmriGeom.x , nmriGeom.bhalf, nmriGeom.draft, nmriGeom.area );
 
         function toArryDataFloat( ...args ) {
 
@@ -596,7 +789,9 @@ async function inpOpen( ship, viewport ) {
 
 function updateViewport( ship, viewport ) {
 
-    let table, div, chartData;
+    viewport.clear();
+
+    let table, chartData;
 
     // Particulars tab
     table = viewport.particular.tables[ 0 ];
@@ -638,12 +833,14 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.particular.tables[ 3 ];
 
-    const { tf, ta, disp, tempSea, rhos, tempAir, rhoa  } = ship;
+    const { tf, ta, disp, temps, rhos, tempa, rhoa  } = ship;
     
-    [ tf, ta, disp, tempSea, rhos, tempAir, rhoa ].map( ( e, i ) => {
+    [ tf, ta, disp, temps, rhos, tempa, rhoa ].map( ( e, i ) => {
         
         const row = table.rows[ i ];
-        row.cells[ 1 ].textContent = e;
+        const cell = row.cells[ 1 ];
+        cell.textContent = e;
+        cell.dom.dispatchEvent( new Event( 'blur' ) );
 
     } );
 
@@ -651,7 +848,7 @@ function updateViewport( ship, viewport ) {
     const mt = ship.mt;
     table = viewport.modeltest.tables[ 0 ];
 
-    [ mt.vs, mt.pb, mt.rpm ].map( ( arr, i ) => {
+    [ mt.trial.vs, mt.trial.pb, mt.trial.rpm ].map( ( arr, i ) => {
         
         arr.map( ( e, j ) => { 
 
@@ -664,7 +861,7 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.modeltest.tables[ 1 ];
 
-    [ mt.vsLoaded, mt.pbLoaded, mt.rpmLoaded ].map( ( arr, i ) => {
+    [ mt.contract.vs, mt.contract.pb, mt.contract.rpm ].map( ( arr, i ) => {
         
         arr.map( ( e, j ) => { 
 
@@ -677,7 +874,7 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.modeltest.tables[ 2 ];
 
-    [ mt.vsEEDI, mt.pbEEDI, mt.rpmEEDI ].map( ( arr, i ) => {
+    [ mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm ].map( ( arr, i ) => {
         
         if ( arr ) {
 
@@ -694,16 +891,33 @@ function updateViewport( ship, viewport ) {
 
     //Speed-power curve
     chartData = viewport.modeltest.chart.data;
-    chartData[ 0 ].x = mt.vs;
-    chartData[ 0 ].y = mt.pb;
-    chartData[ 1 ].x = mt.vsLoaded;
-    chartData[ 1 ].y = mt.pbLoaded;
-    chartData[ 2 ].x = mt.vsEEDI;
-    chartData[ 2 ].y = mt.pbEEDI;
+    chartData[ 0 ].x = mt.trial.vs;
+    chartData[ 0 ].y = mt.trial.pb;
+    chartData[ 1 ].x = mt.contract.vs;
+    chartData[ 1 ].y = mt.contract.pb;
+    chartData[ 2 ].x = mt.eedi.vs;
+    chartData[ 2 ].y = mt.eedi.pb;
     Plotly.update( viewport.modeltest.chart.dom, chartData, viewport.modeltest.chart.layout )
 
     // Correction tab
-    table = viewport.correction.wind.tables[ 0 ];
+    const correction = viewport.correction;
+    correction.guideline.setValue( ship.st.guideline );
+    correction.wind.method.setValue( ship.st.windMethod );
+    correction.wave.method.setValue( ship.st.waveMethod );
+    correction.wave.method2002.setValue( ship.st.waveMethod2002 );
+    correction.current.method.setValue( ship.st.currentMethod );
+    correction.current.method2002.setValue( ship.st.currentMethod2002 );
+
+    triggerChange( correction.wave.method.dom );
+
+    function triggerChange( element ) {
+
+        const changeEvent = new Event( 'change' );
+        element.dispatchEvent( changeEvent );
+
+    }
+
+    table = viewport.correction.wind.table;
 
     ship.wind.angle.map( ( e, i ) => table.rows[ i + 1 ].cells[ 0 ].textContent = e );
     ship.wind.coef.map( ( e, i ) => table.rows[ i + 1 ].cells[ 1 ].textContent = e );
@@ -716,30 +930,48 @@ function updateViewport( ship, viewport ) {
     
     [ 'lbwl', 'le', 'lr', 'kyy' ].map( key => {
         
-        viewport.correction.wave[ key ].setValue( ship[ key ] ? ship[ key ] : 0 );
+        viewport.correction.wave[ key ].setValue( ship[ key ] );
 
     } );
 
-    viewport.correction.wave.kpitch = ship.kyy;
+    // viewport.correction.wave.kpitch.setValue( ship.kyy );
+
+    [ 'lcg', 'tcg', 'vcg', 'kroll', 'kpitch', 'kyaw', 'bf', 'cu' ].map( key => {
+        
+        viewport.correction.wave[ key ].setValue( ship[ key ] );
+
+    } );
+
+    table = viewport.correction.wave.table;
+
+    const nmriGeom = ship.nmriGeom;
+
+    [ nmriGeom.x, nmriGeom.bhalf, nmriGeom.draft, nmriGeom.area ].map( ( arr, i ) => {
+        
+        arr.map( ( e, j ) => { 
+
+            const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+            row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
+
+        } )
+
+    } );
+
+    viewport.correction.displacement.dispm.setValue( ship.dispm );
+    viewport.correction.shallowWater.Am.setValue( ship.Am );
+    viewport.correction.shallowWater.depth.setValue( ship.waterDepth );
 
     // Measured data tab
     table = viewport.measured.table;
 
-    ship.load.map( ( e, i ) => {
+    const { load, time, hdg, sog, rpmPORT, rpmSTBD, rpm, powerPORT, powerSTBD, power, wind_v, wind_d, wave, swell } = ship;
 
-        const row = table.rows[ 0 ];
-        row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e : row.insertCell().textContent = e;
+    const row0 = table.rows[ 0 ];
+    hdg.map( ( e, i ) => row0.cells[ i + 1 ] ? row0.cells[ i + 1 ].textContent = i + 1 : row0.insertHeader().textContent = i + 1 );
 
-    } );
+    [ load, time, hdg, sog, rpmPORT, rpmSTBD, rpm, powerPORT, powerSTBD, power, wind_v, wind_d ].map( ( arr, i ) => {
 
-    const runNo = table.rows[ 1 ];
-    table.rows[ 0 ].cells.slice( 1 ).map( ( e, i ) => runNo.cells[ i + 1 ] ?  runNo.cells[ i + 1 ].textContent = i + 1 : runNo.insertHeader().textContent = i + 1 );
-
-    const { time, hdg, sog, rpm, power, wind_v, wind_d, wave, swell } = ship;
-
-    [ time, hdg, sog, rpm, power, wind_v, wind_d ].map( ( arr, i ) => {
-
-        const row = table.rows[ i + 2 ];
+        const row = table.rows[ i + 1 ];
         
         arr.map( ( e, j ) => {
 
@@ -753,7 +985,7 @@ function updateViewport( ship, viewport ) {
 
         [ wave.height, wave.angle, wave.period ].map( ( arr, i ) => {
 
-            const row = table.rows[ 9 + 3 * k + i ];
+            const row = table.rows[ 13 + 3 * k + i ];
 
             arr.map( ( e, j ) => {
 
@@ -764,7 +996,21 @@ function updateViewport( ship, viewport ) {
         } );
 
     } );
-    
+
+    const { drift, rudderPORT, rudderSTBD, rudder } = ship;
+
+    [ drift, rudderPORT, rudderSTBD, rudder ].map( ( arr, i ) => {
+
+        const row = table.rows[ i + 19 ];
+        
+        arr.map( ( e, j ) => {
+
+            row.cells[ j + 1 ] ? row.cells[ j + 1 ].textContent = e : row.insertCell().textContent = e;
+
+        } );
+
+    } );
+
 }
 
 
