@@ -299,7 +299,7 @@ class UITable extends UIElement { // only number is acceptable in table body
                 // regex of DateTime validator
                 const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/;
                 const dateTime = txt.match(regex);
-                arr[ key ][ i ] = !dateTime ? number : txt;
+                arr[ key ][ i - 1 ] = !dateTime ? number : txt;
 
             }
 
@@ -436,7 +436,7 @@ class UICellElement extends UIElement{ // text or number or date time
 
                 const number = parseFloat( txt.replace( ',', '' ) );
 			    // dom.textContent = number.toLocaleString();
-                dom.textContent = number.toFixed( this.decimal ); //.replace( /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',' ); // record dicimal point with thousand seperator //use .toLocaleString()
+                dom.textContent = number.toFixed( this.decimal ); //.replace( /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',' ); // record dicimal point with thousand seperator
 
             }
 
@@ -512,58 +512,6 @@ class UICellElement extends UIElement{ // text or number or date time
         } );
         
     }
-
-    columnCellTo( obj, key ) { //to send data in column cell to reference object
-
-        this.dom.addEventListener( 'blur', e => {
-            
-            const index = e.target.parentNode.rowIndex - 1; // -1: considering header cell
-            const txt = e.target.textContent;
-            const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/; // date and time
-
-            obj[ key ][ index ] = txt.match( regex ) ? txt : parseFloat( txt.replace( ',', '' ) );
-
-        } );
-
-    }
-
-    rowCellTo( obj, key ) { //to send data in column cell to reference object
-
-        this.dom.addEventListener( 'blur', e => {
-            
-            const index = e.target.cellIndex - 1; // -1: considering header cell
-            const txt = e.target.textContent;
-            const regex = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/; // date and time
-
-            obj[ key ][ index ] = txt.match( regex ) ? txt : parseFloat( txt.replace( ',', '' ) );
-
-        } );
-
-    }
-
-}
-
-function tableToArray( table ) {
-
-    const res =[];
-    const rows = table.rows;
-
-    for ( let i = 0; i < rows.length; i ++ ) {
-
-        const cells = rows[ i ].cells;
-        const arr = [];
-
-        for ( let j = 0; j < cells.length; j ++ ) {
-
-            arr.push( cells[ j ].textContent );
-        
-        }
-
-        res.push( arr );
-
-    }
-
-    return res;
 
 }
 
