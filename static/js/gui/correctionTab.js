@@ -435,8 +435,8 @@ class correctionTab extends UIDiv {
         div.add( new UIText( 'Water depth' ).setDisplay( 'block' ).setPadding( '10px 0px 5px 5px' ) );
         const depth = new UIText('').setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '10px 10px 5px 20px' );
         depth.setInnerHTML( 'depth (m)')
-        shallowWater.depth = new UIInput( '' ).setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
-        div.add( depth, shallowWater.depth );
+        shallowWater.h = new UIInput( '' ).setWidth( '16%' ).setTextAlign( 'center' ).setPadding( '2px 0px' );
+        div.add( depth, shallowWater.h );
         shallowWater.content.add( div );
 
     }
