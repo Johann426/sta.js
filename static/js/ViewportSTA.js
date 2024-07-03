@@ -74,7 +74,7 @@ class ViewportSTA extends UIDiv{
 
 		ship.load = data[ 'engineload' ];
 		ship.time = data[ 'datetime' ];
-		ship.hdg = data[ 'shipheading' ];
+		ship.hdg = data[ 'heading' ];
 		ship.sog = data[ 'shipspeed' ];
 		ship.rpmPORT = data[ 'rpmport' ];
 		ship.rpmSTBD = data[ 'rpmstbd' ];
@@ -87,9 +87,9 @@ class ViewportSTA extends UIDiv{
 		ship.wave.height = data[ 'waveheight' ];
 		ship.wave.angle = data[ 'wavedirection' ];
 		ship.wave.period = data[ 'waveperiod' ];
-		ship.swell.height = data[ 'waveheight' ];
-		ship.swell.angle = data[ 'wavedirection' ];
-		ship.swell.period = data[ 'waveperiod' ];
+		ship.swell.height = data[ 'swellheight' ];
+		ship.swell.angle = data[ 'swelldirection' ];
+		ship.swell.period = data[ 'swellperiod' ];
 		ship.drift = data[ 'drift' ];
 		ship.rudderPORT = data[ 'rudderport' ];
 		ship.rudderSTBD = data[ 'rudderstbd' ];
@@ -100,7 +100,7 @@ class ViewportSTA extends UIDiv{
 	readCorrection() {
 
 		const { correction, ship } = this;
-		const { wind, wave, current, temperature, displacement } = correction;
+		const { wind, wave, current, temperature, displacement, shallowWater } = correction;
 
 		// Guideline
 		ship.st.guideline = correction.guideline.getValue();
@@ -115,7 +115,7 @@ class ViewportSTA extends UIDiv{
 		const cx = wind.table.getColumnWiseData();
 		ship.wind.angle = cx.angle;
 		ship.wind.coef = cx.cx;
-		
+
 		// Wave
 		ship.st.waveMethod = wave.method.getValue();
 		ship.st.waveMethod2002 = wave.method2002.getValue();
@@ -141,6 +141,14 @@ class ViewportSTA extends UIDiv{
 		[ 'disp', 'dispm' ].map( key => {
 			
 			const txt = displacement[ key ].getValue();
+			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+
+		} );
+
+		// Shallow water
+		[ 'Am', 'h' ].map( key => {
+			
+			const txt = shallowWater[ key ].getValue();
 			ship[ key ] = txt ? parseFloat( txt ) : undefined;
 
 		} );
