@@ -118,6 +118,9 @@ class MenubarSTA extends UIDiv {
 		item.setTextContent( 'Calculate' );
 		item.onClick( () => {
 
+            viewport.readModelTest();
+            viewport.readMeasured();
+			viewport.readCorrection();
             runSTA( ship, viewport.result );
 
 		} );
@@ -131,20 +134,6 @@ class MenubarSTA extends UIDiv {
 		item.onClick( () => {
 
 			console.warn( 'not implemented' )
-
-		} );
-
-        items.add( item );
-
-        item = new UIRow();
-		item.setClass( 'item' );
-		item.setTextContent( 'read table' );
-		item.onClick( () => {
-
-            viewport.readModelTest();
-            viewport.readMeasured();
-			viewport.readCorrection();
-            console.log( ship );
 
 		} );
 
@@ -589,7 +578,7 @@ async function inpOpen( ship, viewport ) {
         ship.rho0 = data[ 'WATER_DEN_SD' ]
         ship.rhos =  data[ 'WATER_DEN' ]
         ship.rhoa = data[ 'AIR_DEN' ][ 0 ];
-        ship.waterDepth = data[ 'WATER_DEPTH' ];
+        ship.h = data[ 'WATER_DEPTH' ];
 
         // correction guideline
         ship.st.guideline = 'iso2015';
@@ -735,7 +724,7 @@ async function inpOpen( ship, viewport ) {
         ship.kyaw = ship.kyaw == 'null' ? '' : parseFloat( ship.kyaw );
         ship.bf = ship.bf == 'null' ? '' : parseFloat( ship.bf );
         ship.cu = ship.cu == 'null' ? '' : parseFloat( ship.cu );
-        ship.waterDepth = ship.waterDepth == 'null' ? '' : parseFloat( ship.waterDepth );
+        ship.h = ship.h == 'null' ? '' : parseFloat( ship.h );
 
         const { nmriGeom } = ship;
         toArryDataFloat( nmriGeom.x , nmriGeom.bhalf, nmriGeom.draft, nmriGeom.area );
@@ -959,7 +948,7 @@ function updateViewport( ship, viewport ) {
 
     viewport.correction.displacement.dispm.setValue( ship.dispm );
     viewport.correction.shallowWater.Am.setValue( ship.Am );
-    viewport.correction.shallowWater.depth.setValue( ship.waterDepth );
+    viewport.correction.shallowWater.h.setValue( ship.h );
 
     // Measured data tab
     table = viewport.measured.table;
