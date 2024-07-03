@@ -374,7 +374,7 @@ class Ship {
 		return {
 
 			vwr: vwind, 							// Relative wind velocity at anemometer height (m/s)
-			dwr: dwind.map( e => e * 180 / pi ), 	// Relative wind direction at anemometer height (°)
+			dwr: dwind, 	// Relative wind direction at anemometer height (°)
 			vwt: vwt, 								// True wind velocity at anemometer height (m/s)
 			dwt: dwt.map( e => e * 180 / pi ), 		// True wind direction at anemometer height (°)
 			vwtAve: vwtAve, 						// True wind velocity at anemometer height, double run averaged (m/s)
@@ -653,7 +653,7 @@ class Ship {
         const ship = this;
         const nm1 = ship.hdg.length - 1;
         const { rhoa, Ax, rhos, rhos0, temp0 } = ship;
-        const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rhoa, Ax, ship.wind ) 
+        const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa, } = ship.RAA( ship.hdg, ship.sog, ship.wind_v, ship.wind_d, ship.Za, ship.Zref, rhoa, Ax, ship.wind );
         const { wave, swell } = ship.RAW( ship.sog, ship.wave, ship.swell );
         const raw = [];
 
