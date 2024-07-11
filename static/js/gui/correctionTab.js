@@ -359,7 +359,6 @@ class correctionTab extends UIDiv {
         
         const currentMethod = new UISelect().setDisplay( 'inline' ).setOptions( {
 
-            none: 'no current',
             iterative: 'iterative',
             mom: 'mean of means'
 
