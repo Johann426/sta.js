@@ -1,4 +1,5 @@
 import { UIDiv, UIInput } from "../ui.js";
+import { UICollapsible } from "../UICollapsible.js";
 import { UITable } from "../UITable.js";
 import { addButton } from "../ViewportSTA.js";
 
@@ -9,15 +10,22 @@ class modeltestTab extends UIDiv {
         super();
 
         const modeltest = this;
-        modeltest.setPosition( 'relative' )
         modeltest.tables = [];
 
+        const sp = new UICollapsible( '• Speed-power chart' );
+        const coef = new UICollapsible( '• Other coefficients' );
+        
+        modeltest.add( sp, coef );
+
+        Object.assign( modeltest, { sp, coef } );
+
+        // speed-power table(and chart)
         const titles = [ 'Trial load condition', 'Contract load condition', 'EEDI load condition' ];
         titles.map( title => addTable( title, 16 ) );
 
-        const div = new UIDiv()
+        let div = new UIDiv().setPosition( 'relative' );
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-        modeltest.add( div );
+        sp.content.add( div );
         
         const chartLayout = {
             title: 'Speed-power curve',
@@ -113,7 +121,6 @@ class modeltestTab extends UIDiv {
             layout: chartLayout
         };
 
-        // Trial load condition
         function addTable( title, n ) {
 
             const key = title.match( /^\w+/ )[ 0 ].toLowerCase();
@@ -178,10 +185,64 @@ class modeltestTab extends UIDiv {
             div0.add( new UIInput( title ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
             div0.add( table );
             div0.add( ...addButton( table ) );
-            modeltest.add( div0 );
             modeltest.tables.push( table );
+            sp.content.add( div0 );
 
         }
+
+        // other coefficients from resistance, pow, and self-propulsion test
+        let table, row;
+        table = new UITable();
+        row = table.insertRow();
+        const arr1 = [ 'Vs', 'CT0', 'wtm', 't', 'etar', 'etad' ];
+        
+        arr1.map( header => {
+
+            row.insertHeader().setWidth( '35px' ).textContent = header;
+            
+
+        } );
+
+        for( let i = 0; i < 16; i ++ ) {
+
+            const row = table.insertRow();
+            arr1.map( () => row.insertCell() );
+
+        }
+
+        div = new UIDiv().setPosition( 'relative' );
+        div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+        div.add( new UIInput( 'Res & s-p test' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+        div.add( table );
+        div.add( ...addButton( table ) );
+        modeltest.tables.push( table );
+        coef.content.add( div );
+
+        table = new UITable();
+        row = table.insertRow();
+        const arr2 = [ 'J', 'KT', 'KQ' ];
+        
+        arr2.map( header => {
+
+            row.insertHeader().setWidth( '35px' ).textContent = header;
+            
+
+        } );
+
+        for( let i = 0; i < 20; i ++ ) {
+
+            const row = table.insertRow();
+            arr2.map( () => row.insertCell() );
+
+        }
+
+        div = new UIDiv().setPosition( 'relative' );
+        div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+        div.add( new UIInput( 'Propeller open water' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+        div.add( table );
+        div.add( ...addButton( table ) );
+        modeltest.tables.push( table );
+        coef.content.add( div );
 
     }
 
