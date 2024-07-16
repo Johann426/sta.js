@@ -29,9 +29,8 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'correction' );
+		tabbedPanel.select( 'result' );
 
-		console.log( correction )
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
 	}
@@ -45,7 +44,7 @@ class ViewportSTA extends UIDiv{
 		correction.wind.table.clear();
 		correction.wave.table.clear();
 		measured.table.clear();
-		result.table.clear();
+		result.tables.map( table => table.clear() );
 		
 	}
 
@@ -53,7 +52,7 @@ class ViewportSTA extends UIDiv{
 
 		const { modeltest, ship } = this;
 
-		modeltest.tables.map( ( table, k ) => {
+		modeltest.tables.slice( 0, 3 ).map( ( table, k ) => {
 
 			const data = table.getColumnWiseData();
 			const key = k == 0 ? 'trial' : k == 2 ? 'eedi' : 'contract';
@@ -63,6 +62,25 @@ class ViewportSTA extends UIDiv{
 			ship.mt[ key ].rpm = data.rpm;
 
 		} );
+
+		const res = modeltest.tables[ 3 ].getColumnWiseData();
+		ship.mt.res.vs = res.vs;
+		ship.mt.res.cts = res.ct0;
+
+		const sp = modeltest.tables[ 4 ].getColumnWiseData();
+		ship.mt.sp.vs = sp.vs;
+		ship.mt.sp.wtm = sp.wtm;
+		ship.mt.sp.t = sp.t;
+		ship.mt.sp.etar = sp.etar;
+		ship.mt.sp.etad = sp.etad;
+		ship.mt.sp.xip = sp.xip;
+		ship.mt.sp.xin = sp.xin;
+		ship.mt.sp.xiv = sp.xiv;
+
+		const pow = modeltest.tables[ 5 ].getColumnWiseData();
+		ship.mt.pow.j = pow.j;
+		ship.mt.pow.kt = pow.kt;
+		ship.mt.pow.kq = pow.kq;
 
 	}
 
@@ -119,21 +137,28 @@ class ViewportSTA extends UIDiv{
 		// Wave
 		ship.st.waveMethod = wave.method.getValue();
 		ship.st.waveMethod2002 = wave.method2002.getValue();
-		const table = wave.table;
-		console.warn( 'nmri table not implemented' );
 
 		[ 'lbwl', 'le', 'lr', 'kyy', 'lcg', 'tcg', 'vcg', 'kroll', 'kpitch', 'kyaw', 'bf', 'cu' ].map( key => {
 			
 			const txt = wave[ key ].getValue();
-			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+			ship[ key ] = txt ? parseFloat( txt ) : '';
 
 		} );
 
+		const data = wave.table.getColumnWiseData();
+
+		ship.nmriGeom = {
+			x: data[ 'longitudinalxposition' ],
+			bhalf: data[ 'halfbreadth' ],
+			draft: data[ 'sectionaldraft' ],
+			area: data[ 'sectionalarea' ]
+		};
+
 		// Temperature
 		[ 'rhos', 'rho0', 'temps', 'temp0' ].map( key => {
-			
+
 			const txt = temperature[ key ].getValue();
-			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+			ship[ key ] = txt ? parseFloat( txt ) : '';
 
 		} );
 
@@ -141,7 +166,7 @@ class ViewportSTA extends UIDiv{
 		[ 'disp', 'dispm' ].map( key => {
 			
 			const txt = displacement[ key ].getValue();
-			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+			ship[ key ] = txt ? parseFloat( txt ) : '';
 
 		} );
 
@@ -149,7 +174,7 @@ class ViewportSTA extends UIDiv{
 		[ 'Am', 'h' ].map( key => {
 			
 			const txt = shallowWater[ key ].getValue();
-			ship[ key ] = txt ? parseFloat( txt ) : undefined;
+			ship[ key ] = txt ? parseFloat( txt ) : '';
 
 		} );
 
@@ -175,35 +200,108 @@ function runClassLib( ship ) {
 				console.log( response );
 			}, 
 			error: function(error) { 
-				console.log(error); 
-			} 
+				console.log(error);
+			}
 		});
 	} 
+
+}
+
+function resTable( res, table ) {
+
+	const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
+	const { wave, swell, raw, ras, delr, pid, stw, pb } = res;
+
+	let row;
+
+	row = table.rows[ 14 ];
+	vwr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 15 ];
+	dwr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 16 ];
+	vwt.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 17 ];
+	dwt.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 18 ];
+	vwtAve.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 19 ];
+	dwtAve.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 20 ];
+	vwtRef.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 21 ];
+	vwrRef.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 22 ];
+	dwrRef.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 23 ];
+	caa.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 24 ];
+	raa.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 3 ) : row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+	row = table.rows[ 25 ];
+	wave.rawm.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 26 ];
+	wave.rawr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 27 ];
+	wave.total.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 28 ];
+	swell.rawm.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 29 ];
+	swell.rawr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 30 ];
+	swell.total.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
+
+	row = table.rows[ 31 ];
+	raw.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 32 ];
+	ras.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 33 ];
+	delr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 2 ) : row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
+
+	row = table.rows[ 34 ];
+	pid.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 0 ) : row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
+
+	row = table.rows[ 35 ];
+	stw.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 3 ) : row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
+
+	row = table.rows[ 36 ];
+	pb.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e.toFixed( 0 ) : row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
 
 }
 
 function runSTA( ship, result ) { //result: UIDiv
 
 	checkValidity( ship );
-
-	runClassLib( ship ); // run class library(.dll)
-
-	// Temperature to density
-	// wind resistance
-	// wave resistance
-	// water temperature salinity
-	// current correction
-	// speed-power
 	
-	const table = result.table;
+	result.tables.map( table => table.clear() );
 
 	// Measured data
 	const { load, time, hdg, sog, rpm, power, wind_v, wind_d } = ship;
 
     [ load, time, hdg, sog, rpm, power, wind_v, wind_d ].map( ( arr, i ) => {
 
-		const row = table.rows[ i ];
-		arr.map( e => row.insertCell().textContent = e );
+		result.tables.map( table => {
+
+			const row = table.rows[ i ];
+			arr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e : row.insertCell().textContent = e );
+
+		} );
 
 	} );
 
@@ -213,92 +311,34 @@ function runSTA( ship, result ) { //result: UIDiv
 
 		[ height, angle, period ].map( ( arr, i ) => {
 
-			const row = table.rows[ i + 8 + j * 3 ];
-			arr.map( e => row.insertCell().textContent = e );
+			result.tables.map( table => {
+
+				const row = table.rows[ i + 8 + j * 3 ];
+				arr.map( ( e, i ) => row.cells[ i + 1 ] ? row.cells[ i + 1 ].textContent = e : row.insertCell().textContent = e );
+
+			} );
 	
 		} );
 
-	} )
+	} );
 
-	/////////////////////////////////////////////////////////////////////////////////////////////
-	// Results
-	/////////////////////////////////////////////////////////////////////////////////////////////
 	const res = ship.analysis( ship.mt.trial, ship.mt.contract );
-	console.log( res );
-	const { vwr, dwr, vwt, dwt, vwtAve, dwtAve, vwtRef, vwrRef, dwrRef, caa, raa } = res;
-	const { wave, swell, raw, ras, delr, pid, stw, pb, powerOffset, speedAtNCR, speedAtNCRLoaded } = res;
+	
+	const { stw, pb, powerOffset, speedAtNCR, speedAtNCRLoaded } = res;
+
+	resTable( res, result.tables[ 0 ] );
+
+	// Temperature to density
+	// wind resistance
+	// wave resistance
+	// water temperature salinity
+	// current correction
+	// speed-power
+	runClassLib( ship ); // run class library(.dll)
+
+	// resTable( res, result.tables[ 1 ] );
 
 	let row;
-
-	row = table.rows[ 14 ];
-	vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 15 ];
-	dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 16 ];
-	vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 17 ];
-	dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 18 ];
-	vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 19 ];
-	dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 20 ];
-	vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 21 ];
-	vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 22 ];
-	dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 23 ];
-	caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 24 ];
-	raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-	row = table.rows[ 25 ];
-	wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 26 ];
-	wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 27 ];
-	wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 28 ];
-	swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 29 ];
-	swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 30 ];
-	swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-	row = table.rows[ 31 ];
-	raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 32 ];
-	ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 33 ];
-	delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-	row = table.rows[ 34 ];
-	pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-
-	row = table.rows[ 35 ];
-	stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-	row = table.rows[ 36 ];
-	pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-
 	const table2 = new UITable();
 	result.add( table2 );
 	row = table2.insertRow();
@@ -310,6 +350,8 @@ function runSTA( ship, result ) { //result: UIDiv
 	row = table2.insertRow();
 	row.insertHeader().textContent = "Speed at NCR with s.m.";
 	row.insertHeader().textContent = speedAtNCRLoaded.toFixed( 3 ) + ' (knots)';
+
+	
 
 	// Speed-power chart
 	const mt = ship.mt;
@@ -383,7 +425,7 @@ function runSTA( ship, result ) { //result: UIDiv
 
 }
 
-function checkValidity( ship ) {
+function checkValidity( ship ) { // Check every data read from table
 
 	[ 'trial', 'contract', 'eedi' ].map( condition => {
 
@@ -397,8 +439,54 @@ function checkValidity( ship ) {
 
 		} )
 
-	} )
+	} );
+
+	[ 'vs', 'cts' ].map( key => {
+
+		const arr = ship.mt.res[ key ];
+		ship.mt.res[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+	} );
+
+	[ 'vs', 'wtm', 't', 'etar', 'etad', 'xip', 'xin', 'xiv' ].map( key => {
+
+		const arr = ship.mt.sp[ key ];
+		ship.mt.sp[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+	} );
+
+	[ 'j', 'kt', 'kq' ].map( key => {
+
+		const arr = ship.mt.pow[ key ];
+		ship.mt.pow[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+	} );
+
+	[ 'x', 'bhalf', 'draft', 'area' ].map( key => {
+
+		const arr = ship.nmriGeom[ key ];
+		ship.nmriGeom[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+	} );
+
+	[ 'load', 'time', 'hdg', 'sog', 'rpm', 'power', 'wind_v', 'wind_d', 'drift', 'rudder' ].map( key => {
+
+		const arr = ship[ key ];
+		ship[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+	} );
 	
+	[ ship.wave, ship.swell ].map( wave => {
+
+		[ 'period', 'angle', 'height' ].map( key => {
+
+			const arr = wave[ key ];
+			wave[ key ] = arr.filter( v => !Number.isNaN( v ) );
+
+		})
+
+	} );
+
 }
 
 function addButton( table ) {
