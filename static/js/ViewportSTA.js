@@ -182,13 +182,13 @@ class ViewportSTA extends UIDiv{
 
 }
 
-function runClassLib( ship ) {
+function runClassLib( ship, result ) {
 
 	console.log( 'it depends on class library in server method' )
 
-	sendData( ship )
+	sendData( ship );
 
-	function sendData( value ) { 
+	async function sendData( value ) { 
 		
 		$.ajax({ 
 			url: '/process',
@@ -198,12 +198,14 @@ function runClassLib( ship ) {
 			success: function(response) {
 				console.log('success');
 				console.log( response );
+				resTable( response, result.tables[ 1 ] );
 			}, 
 			error: function(error) { 
 				console.log(error);
 			}
 		});
-	} 
+
+	}
 
 }
 
@@ -334,10 +336,8 @@ function runSTA( ship, result ) { //result: UIDiv
 	// water temperature salinity
 	// current correction
 	// speed-power
-	runClassLib( ship ); // run class library(.dll)
-
-	// resTable( res, result.tables[ 1 ] );
-
+	runClassLib( ship, result ); // run class library(.dll)
+	
 	let row;
 	const table2 = new UITable();
 	result.add( table2 );
