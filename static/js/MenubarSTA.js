@@ -552,7 +552,11 @@ async function inpOpen( ship, viewport ) {
                 wtm: data.mtCoef[ 'WTM' ],
                 t: data.mtCoef[ 'THDF' ],
                 etar: data.mtCoef[ 'ETAR' ],
-                etad: data.mtCoef[ 'ETAD' ]
+                etad: data.mtCoef[ 'ETAD' ],
+                xip: data.mtCoef[ 'SPEED' ].map( () => data[ 'XI_P' ] ),
+                xin: data.mtCoef[ 'SPEED' ].map( () => data[ 'XI_N' ] ),
+                xiv: data.mtCoef[ 'SPEED' ].map( () => data[ 'XI_V' ] ),
+
             },
 
             pow: {
@@ -685,7 +689,7 @@ async function inpOpen( ship, viewport ) {
         toArryDataFloat( mt.contract.vs, mt.contract.pb, mt.contract.rpm );
         toArryDataFloat( mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm );
         toArryDataFloat( mt.res.vs, mt.res.cts );
-        toArryDataFloat( mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad );
+        toArryDataFloat( mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad, mt.sp.xip, mt.sp.xin, mt.sp.xiv );
         toArryDataFloat( mt.pow.j, mt.pow.kt, mt.pow.kq );
 
         const { arm } = ship;
@@ -789,9 +793,9 @@ function updateViewport( ship, viewport ) {
 
     [ shipName, ownerName, shipNo ].map( ( e, i ) => viewport.particular.textInput[ i ].setValue( e ) );
 
-    const { l, b, wetted, Ax, Za, Zref, cb } = ship;
+    const { l, b, wetted, Ax, Za, Zref, cb, Am } = ship;
     
-    [ l, b, wetted, Ax, Za, Zref, cb ].map( ( e, i ) => {
+    [ l, b, wetted, Ax, Za, Zref, cb, Am ].map( ( e, i ) => {
         
         const row = table.rows[ i ];
         row.cells[ 1 ].textContent = e;
@@ -864,6 +868,57 @@ function updateViewport( ship, viewport ) {
     table = viewport.modeltest.tables[ 2 ];
 
     [ mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm ].map( ( arr, i ) => {
+        
+        if ( arr ) {
+
+            arr.map( ( e, j ) => { 
+
+                const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+                row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
+
+            } )
+
+        }
+
+    } );
+
+    table = viewport.modeltest.tables[ 3 ];
+
+    [ mt.res.vs, mt.res.cts ].map( ( arr, i ) => {
+        
+        if ( arr ) {
+
+            arr.map( ( e, j ) => { 
+
+                const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+                row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
+
+            } )
+
+        }
+
+    } );
+
+    table = viewport.modeltest.tables[ 4 ];
+
+    [ mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad, mt.sp.xip, mt.sp.xin, mt.sp.xiv ].map( ( arr, i ) => {
+        
+        if ( arr ) {
+
+            arr.map( ( e, j ) => { 
+
+                const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
+                row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
+
+            } )
+
+        }
+
+    } );
+
+    table = viewport.modeltest.tables[ 5 ];
+
+    [ mt.pow.j, mt.pow.kt, mt.pow.kq ].map( ( arr, i ) => {
         
         if ( arr ) {
 
