@@ -188,7 +188,7 @@ function runClassLib( ship, result ) {
 
 	sendData( ship );
 
-	async function sendData( value ) { 
+	async function sendData( value ) {
 		
 		$.ajax({ 
 			url: '/process',
@@ -343,7 +343,7 @@ function runSTA( ship, result ) { //result: UIDiv
 	result.add( table2 );
 	row = table2.insertRow();
 	row.insertHeader().textContent = "NCR";
-	row.insertHeader().textContent = ship.ncr[ 1 ] + ' (kW)';
+	row.insertHeader().textContent = ship.ncr[ 0 ] + ' (kW)';
 	row = table2.insertRow();
 	row.insertHeader().textContent = "Sea Margin";
 	row.insertHeader().textContent = ship.sm + ' (%)';
@@ -427,6 +427,9 @@ function runSTA( ship, result ) { //result: UIDiv
 
 function checkValidity( ship ) { // Check every data read from table
 
+	ship.nLoadCond = 0;
+	ship.loadConds = [];
+
 	[ 'trial', 'contract', 'eedi' ].map( condition => {
 
 		const obj = ship.mt[ condition ];
@@ -437,9 +440,16 @@ function checkValidity( ship ) { // Check every data read from table
 			// obj[ key ] = arr.filter( v => Boolean( v ) || v === 0 );
 			obj[ key ] = arr.filter( v => !Number.isNaN( v ) );
 
-		} )
+		})
 
-	} );
+		if ( obj.vs.length != 0 ) {
+
+			ship.nLoadCond++;
+			ship.loadConds.push(condition);
+
+		}
+
+	});
 
 	[ 'vs', 'cts' ].map( key => {
 
