@@ -692,10 +692,9 @@ class Ship {
 
         dif /= ( nm1 + 1 );
 
-		const ncrPower = ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm );
-
-        const speedAtNCR = f( ballast.pb.map( e => e + dif ), ballast.vs, [ ncrPower ] );
-		const speedAtNCRLoaded = f( design.pb.map( e => e + dif ), design.vs, [ ncrPower ] );
+	const ncrPower =  ship.contractPower; //ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm );
+	const speedAtNCR = f( ballast.pb.map( e => e + dif ), ballast.vs, [ ncrPower ] );
+	const speedAtNCRLoaded = f( design.pb.map( e => e + dif ), design.vs, [ ncrPower ] );
 
         return {
 
