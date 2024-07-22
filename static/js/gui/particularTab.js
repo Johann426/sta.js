@@ -71,6 +71,10 @@ class particularTab extends UIDiv {
         row.insertHeader().innerHTML = 'C<sub>B</sub>';
         row.insertCell().numberTo( ship, 'cb' );
         
+        row = table.insertRow();
+        row.insertHeader().innerHTML = 'A<sub>M</sub> (m\u00B2)';
+        row.insertCell().numberTo( ship, 'Am' );
+
         // Engine & speed
         div = new UIDiv().setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
         particular.add( div );
@@ -88,27 +92,34 @@ class particularTab extends UIDiv {
         row.insertHeader().textContent = 'RPM'
 
         row = table.insertRow();
+        row.insertHeader().textContent = 'MCR Load'
+        row.insertCell().numberTo( ship.mcr, '0' );
+        row.insertCell().numberTo( ship.mcr, '1' );
+
+        row = table.insertRow();
         row.insertHeader().textContent = 'NCR Load'
-        Array( 2 ).fill().map( () => row.insertCell().rowCellTo( ship, 'ncr' ) );
+        row.insertCell().numberTo( ship.ncr, '0' );
+        row.insertCell().numberTo( ship.ncr, '1' );
 
         row = table.insertRow();
         row.insertHeader().textContent = 'EEDI Load'
-        Array( 2 ).fill().map( () => row.insertCell().rowCellTo( ship, 'eedi' ) );
+        row.insertCell().numberTo( ship.eedi, '0' );
+        row.insertCell().numberTo( ship.eedi, '1' );
 
         // Speed
-        div.add( new UIText( 'Contract speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
+        div.add( new UIText( 'Contract speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '3px 0px 5px 0px' ) );
 
         table = new UITable().setWidth('360px');
         div.add( table );
         particular.tables.push( table );
 
         row = table.insertRow();
-        row.insertHeader().textContent = 'Sea margin (%)'
-        row.insertCell().numberTo( ship, 'sm' );;
+        row.insertHeader().textContent = 'Speed (knots)'
+        row.insertCell().numberTo( ship, 'contractSpeed' );
 
         row = table.insertRow();
-        row.insertHeader().textContent = 'Speed at NCR with sea margin (knots)'
-        row.insertCell().numberTo( ship, 'contractSpeed' );
+        row.insertHeader().textContent = 'Target power (kW)'
+        row.insertCell().numberTo( ship, 'targetPower' );
 
         // Draft reading
         div = new UIDiv();
@@ -164,6 +175,7 @@ class particularTab extends UIDiv {
         &nbsp Z<sub>ref</sub> : reference height for the wind resistance coefficients <br>
         &nbsp C<sub>B</sub> : block coefficient <br>
         &nbsp ∇ : displacement volume <br>
+        &nbsp A<sub>M</sub> : midship section area <br>
         `
         div = new UIDiv();
         div.setInnerHTML( txt );
