@@ -119,7 +119,7 @@ class particularTab extends UIDiv {
 
         row = table.insertRow();
         row.insertHeader().textContent = 'Target power (kW)'
-        row.insertCell().numberTo( ship, 'targetPower' );
+        row.insertCell().numberTo( ship, 'contractPower' );
 
         // Draft reading
         div = new UIDiv();
