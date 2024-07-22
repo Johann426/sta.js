@@ -29,7 +29,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'result' );
+		tabbedPanel.select( 'particular' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
