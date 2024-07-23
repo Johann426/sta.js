@@ -107,7 +107,7 @@ class particularTab extends UIDiv {
         row.insertCell().numberTo( ship.eedi, '1' );
 
         // Speed
-        div.add( new UIText( 'Contract speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '3px 0px 5px 0px' ) );
+        div.add( new UIText( 'Design speed' ).setWidth('100%').setTextAlign( 'center' ).setPadding( '3px 0px 5px 0px' ) );
 
         table = new UITable().setWidth('360px');
         div.add( table );
