@@ -1,7 +1,7 @@
 
 pip install pyinstaller
 
-pyinstaller -w -F --add-data "templates;templates" --add-data "static;static" server.py
+pyinstaller -w -F --add-data "templates;templates" --add-data "static;static" app.py
 
 F - Bundles everything in a single file
 w - Avoid displaying a console
@@ -9,3 +9,11 @@ w - Avoid displaying a console
 
 
 build, dist forders will be created
+
+
+
+
+
+Preferred option:
+
+pyinstaller32 -F --add-data "templates;templates" --add-data "static;static" --add-data "dll;dll" app.py
