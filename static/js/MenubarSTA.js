@@ -90,9 +90,8 @@ class MenubarSTA extends UIDiv {
         } );
 
         items.add( item );
-        items.add( new UIHorizontalRule().setClass( 'divider' ) );
 
-		
+        items.add( new UIHorizontalRule().setClass( 'divider' ) );
 
         return menu;
 
@@ -386,25 +385,24 @@ async function inpOpen( ship, viewport ) {
         } );
 
         part = data['<SPEED_POWER_RPM_OTHER>']
-        data.mtLoaded = new Object();
+        data.mtOther = new Object();
         
         part.shift(); // drop no
-        data.mtLoaded.size = part.shift().filter( ( e ) => e !== '' ).slice( 1 );
-        data.mtLoaded.condition = part.shift().filter( ( e ) => e !== '' ).slice( 1 );
-        data.mtLoaded.condition.map( key => data.mtLoaded[ key ] = new Object() )
+        data.mtOther.size = part.shift().filter( ( e ) => e !== '' ).slice( 1 );
+        data.mtOther.condition = part.shift().filter( ( e ) => e !== '' ).slice( 1 ).map( e => e.toLowerCase() );
         
-        data.mtLoaded.size.map( ( n, j ) => {
+        data.mtOther.size.map( ( n, j ) => {
 
-            const cond = data.mtLoaded.condition[ j ];
+            const cond = data.mtOther.condition[ j ];
 
             keys = part.shift();
-            data.mtLoaded[ cond ] = new Object();
-            keys.map( key => data.mtLoaded[ cond ][ key ] = new Array() );
+            data.mtOther[ cond ] = new Object();
+            keys.map( key => data.mtOther[ cond ][ key ] = new Array() );
             
             for( let k = 0; k < n; k ++ ) {
 
                 const row = part.shift();
-                row.map( ( val, i ) => val ? data.mtLoaded[ cond ][ keys[ i ] ].push( val ) : null );
+                row.map( ( val, i ) => val ? data.mtOther[ cond ][ keys[ i ] ].push( val ) : null );
 
             }
 
@@ -462,8 +460,7 @@ async function inpOpen( ship, viewport ) {
         ship.noProp = data[ 'NO_PROP' ];
         ship.mcr = [ data[ 'MCR_POWER_KW' ], data[ 'MCR_RPM' ] ];
         ship.ncr = [ data[ 'NCR_POWER_KW' ], data[ 'NCR_RPM' ] ];
-        ship.eedi = [ data[ 'MCR_POWER_KW' ] * 0.75, 0 ];
-        ship.sm = 100 * ( data[ 'NCR_POWER_KW' ] / data[ 'CONTRACT_POWER_SM' ] - 1 ).toFixed( 3 );
+        ship.eedi = [ data[ 'MCR_POWER_KW' ] * 0.75, data[ 'MCR_RPM' ] * 0.75 ** ( 1 / 3 ) ];
 
         ship.load = data[ 'ENG_LOAD' ];
         ship.time = data[ 'INNING_TIME' ].map( e => e.replace( '_', ' ' ) );
@@ -525,23 +522,6 @@ async function inpOpen( ship, viewport ) {
                 rpm: data.mtTrial[ 'RPM' ]
 
             },
-
-            contract: {
-
-                vs: data.mtLoaded[ 'Design' ][ 'SPEED' ],
-                pb: data.mtLoaded[ 'Design' ][ 'POWER' ],
-                rpm: data.mtLoaded[ 'Design' ][ 'RPM' ]
-
-            },
-
-            eedi: {
-
-                vs: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'SPEED' ] : new Array(),
-                pb: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'POWER' ] : new Array(),
-                rpm: data.mtLoaded[ 'EEDI' ] ? data.mtLoaded[ 'EEDI' ][ 'RPM' ] : new Array(),
-
-            },
-            
             res: {
                 vs: data.mtCoef[ 'SPEED' ],
                 cts: data.mtCoef[ 'CTS' ]
@@ -563,6 +543,20 @@ async function inpOpen( ship, viewport ) {
                 j: data.pow[ 'J' ],
                 kt: data.pow[ 'KT' ],
                 kq: data.pow[ 'KQ' ],
+            }
+            
+        } )
+
+        ship.otherCondition = data.mtOther.condition;
+
+        ship.otherCondition.map( cond =>{
+
+            ship.mt[ cond ] = {
+    
+                vs: data.mtOther[ cond ][ 'SPEED' ],
+                pb: data.mtOther[ cond ][ 'POWER' ],
+                rpm: data.mtOther[ cond ][ 'RPM' ]
+
             }
             
         } )
@@ -680,14 +674,15 @@ async function inpOpen( ship, viewport ) {
         const { rudder, drift } = ship;
         toArryDataFloat( rudder, drift );
 
-        const { mcr, ncr } = ship;
-        toArryDataFloat( mcr, ncr );
+        const { mcr, ncr, eedi } = ship;
+        toArryDataFloat( mcr, ncr, eedi );
 
         const { wind, mt } = ship;
         toArryDataFloat( wind.angle, wind.coef );
+        
         toArryDataFloat( mt.trial.vs, mt.trial.pb, mt.trial.rpm );
-        toArryDataFloat( mt.contract.vs, mt.contract.pb, mt.contract.rpm );
-        toArryDataFloat( mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm );
+        ship.otherCondition.map( cond => toArryDataFloat( mt[ cond ].vs, mt[ cond ].pb, mt[ cond ].rpm ) );
+
         toArryDataFloat( mt.res.vs, mt.res.cts );
         toArryDataFloat( mt.sp.vs, mt.sp.wtm, mt.sp.t, mt.sp.etar, mt.sp.etad, mt.sp.xip, mt.sp.xin, mt.sp.xiv );
         toArryDataFloat( mt.pow.j, mt.pow.kt, mt.pow.kq );
@@ -697,6 +692,7 @@ async function inpOpen( ship, viewport ) {
 
         ship.noProp = parseFloat( ship.noProp );
         ship.contractSpeed = parseFloat( ship.contractSpeed );
+        ship.contractPower = parseFloat( ship.contractPower );
 
         ship.l = parseFloat( ship.l );
         ship.b = parseFloat( ship.b );
@@ -707,7 +703,7 @@ async function inpOpen( ship, viewport ) {
         ship.wetted = parseFloat( ship.wetted );
         ship.rhos = parseFloat( ship.rhos );
         ship.cb = parseFloat( ship.cb );
-        ship.kyy = parseFloat( ship.kyy );
+        ship.cm = parseFloat( ship.cm );
         ship.Za = parseFloat( ship.Za );
         ship.Ax = parseFloat( ship.Ax );
         ship.Am = parseFloat( ship.Am );
@@ -717,6 +713,7 @@ async function inpOpen( ship, viewport ) {
         ship.temp0 = parseFloat( ship.temp0 );
         ship.temps = parseFloat( ship.temps );
         ship.tempa = parseFloat( ship.tempa );
+        ship.kyy = parseFloat( ship.kyy );
         ship.lbwl = ship.lbwl == 'null' ? '' : parseFloat( ship.lbwl );
         ship.le = ship.le == 'null' ? '' : parseFloat( ship.le );
         ship.lr = ship.lr == 'null' ? '' : parseFloat( ship.lr );
@@ -804,9 +801,9 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.particular.tables[ 1 ];
 
-    const { ncr, eedi } = ship;
+    const { mcr, ncr } = ship;
 
-    [ ncr, eedi ].map( ( arr, i ) => {
+    [ mcr, ncr ].map( ( arr, i ) => {
 
         const row = table.rows[ i + 1 ];
         arr ? arr.map( ( e, j ) => row.cells[ j + 1 ].textContent = e ) : null;
@@ -815,9 +812,9 @@ function updateViewport( ship, viewport ) {
 
     table = viewport.particular.tables[ 2 ];
 
-    const { sm, contractSpeed } = ship;
+    const { contractSpeed, contractPower } = ship;
 
-    [ sm, contractSpeed ].map( ( e, i ) => {
+    [ contractSpeed, contractPower ].map( ( e, i ) => {
 
         const row = table.rows[ i ];
         row.cells[ 1 ].textContent = e;
@@ -852,33 +849,24 @@ function updateViewport( ship, viewport ) {
 
     } );
 
-    table = viewport.modeltest.tables[ 1 ];
+    ship.otherCondition.map( ( cond, i ) => {
 
-    [ mt.contract.vs, mt.contract.pb, mt.contract.rpm ].map( ( arr, i ) => {
+        if ( i > 1 ) return;
+
+        table = viewport.modeltest.tables[ 1 + i ];
+
+        [ mt[ cond ].vs, mt[ cond ].pb, mt[ cond ].rpm ].map( ( arr, i ) => {
         
-        arr.map( ( e, j ) => { 
-
-            const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
-            row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
-
-        } )
-
-    } );
-
-    table = viewport.modeltest.tables[ 2 ];
-
-    [ mt.eedi.vs, mt.eedi.pb, mt.eedi.rpm ].map( ( arr, i ) => {
-        
-        if ( arr ) {
-
             arr.map( ( e, j ) => { 
-
+    
                 const row = table.rows[ j + 1 ] ? table.rows[ j + 1 ] : table.insertRow();
                 row.cells[ i ] ? row.cells[ i ].textContent = e : row.insertCell().textContent = e;
-
+    
             } )
+    
+        } );
 
-        }
+        viewport.modeltest.conditions[ 1 + i ].setValue( cond + ' load condition' );
 
     } );
 
@@ -937,10 +925,16 @@ function updateViewport( ship, viewport ) {
     chartData = viewport.modeltest.chart.data;
     chartData[ 0 ].x = mt.trial.vs;
     chartData[ 0 ].y = mt.trial.pb;
-    chartData[ 1 ].x = mt.contract.vs;
-    chartData[ 1 ].y = mt.contract.pb;
-    chartData[ 2 ].x = mt.eedi.vs;
-    chartData[ 2 ].y = mt.eedi.pb;
+    
+    ship.otherCondition.map( ( cond, i ) => {
+
+        if ( i > 1 ) return;
+        chartData[ 1 + i ].name = cond;
+        chartData[ 1 + i ].x = mt[ cond ].vs;
+        chartData[ 1 + i ].y = mt[ cond ].pb;
+        
+    } );
+
     Plotly.update( viewport.modeltest.chart.dom, chartData, viewport.modeltest.chart.layout )
 
     // Correction tab
