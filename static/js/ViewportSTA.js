@@ -5,6 +5,7 @@ import { modeltestTab } from './gui/modeltestTab.js';
 import { measuredTab } from './gui/measuredTab.js';
 import { correctionTab } from './gui/correctionTab.js';
 import { resultTab } from './gui/resultTab.js';
+import { f } from './Interpolation.js';
 
 class ViewportSTA extends UIDiv{
 
@@ -29,7 +30,7 @@ class ViewportSTA extends UIDiv{
 		tabbedPanel.addTab( 'correction', 'Correction', correction );
 		tabbedPanel.addTab( 'measured', 'Measured data', measured );
 		tabbedPanel.addTab( 'result', 'Result', result );
-		tabbedPanel.select( 'particular' );
+		tabbedPanel.select( 'result' );
 
 		Object.assign( this, { particular, modeltest, measured, correction, result } )
 
@@ -52,14 +53,15 @@ class ViewportSTA extends UIDiv{
 
 		const { modeltest, ship } = this;
 
-		modeltest.tables.slice( 0, 3 ).map( ( table, k ) => {
+		// The speed-power curve for other stipulated condition(s) is obtained from the results of trial condition,
+		// and the model tests shall be carried out at both trial condition as well as other condition(s).
+		[ 'trial' ].concat( ship.otherCondition ).map( ( cond, i ) => {
 
+			const table = modeltest.tables[ i ];
 			const data = table.getColumnWiseData();
-			const key = k == 0 ? 'trial' : k == 2 ? 'eedi' : 'contract';
-		
-			ship.mt[ key ].vs = data.speed;
-			ship.mt[ key ].pb = data.power;
-			ship.mt[ key ].rpm = data.rpm;
+			ship.mt[ cond ].vs = data.speed;
+			ship.mt[ cond ].pb = data.power;
+			ship.mt[ cond ].rpm = data.rpm;
 
 		} );
 
@@ -190,19 +192,33 @@ function runClassLib( ship, result ) {
 
 	async function sendData( value ) {
 		
-		$.ajax({ 
+		$.ajax({
+
 			url: '/process',
 			type: 'POST',
 			contentType: 'application/json',
 			data: JSON.stringify( value ),
+
 			success: function(response) {
-				console.log('success');
+
 				console.log( response );
+
+				ship.st.result = response;
+
 				resTable( response, result.tables[ 1 ] );
-			}, 
-			error: function(error) { 
+
+				const st = { sog: ship.sog, shaftPower: ship.power, stw: ship.st.result.stw, pb: ship.st.result.pb };
+
+				resChart( ship.mt, st, ship.contractPower, result.chart, result.condition.getValue() );
+
+			},
+
+			error: function(error) {
+
 				console.log(error);
+
 			}
+
 		});
 
 	}
@@ -287,6 +303,121 @@ function resTable( res, table ) {
 
 }
 
+function resChart( mt, st, targetPower, chart, loaded = 'trial' ) { // Speed-power curve
+
+	const { sog, shaftPower, stw, pb } = st; // trial result
+
+	// speed-power curve
+	const nm1 = pb.length - 1;
+	const pmt = f( mt.trial.vs, mt.trial.pb, stw );
+	let dif = 0;
+
+	// difference in power between trial and model
+	for ( let i = 0; i <= nm1; i ++ ) {
+
+		dif += pb[ i ] - pmt[ i ]; 
+
+	}
+
+	dif /= ( nm1 + 1 );
+
+	const powerOffset = dif;
+	const speedAtNCR = f( mt.trial.pb.map( e => e + dif ), mt.trial.vs, [ targetPower ] )[ 0 ];
+	const speedAtNCRLoaded = f( mt[ loaded ].pb.map( e => e + dif ), mt[ loaded ].vs, [ targetPower ] )[ 0 ];
+
+	const chartData = chart.data;
+	const chartLayout = chart.layout;
+
+	function averaged( arr ) {
+
+		const n = arr.length / 2
+		const ave = [];
+	
+		for ( let i = 0; i < arr.length / 2; i ++ ) {
+
+			ave.push( 0.5 * ( arr[ i * 2 ] + arr[ i * 2 + 1 ] ) );
+
+		}
+
+		return ave;
+
+	}
+
+	chartData[ 0 ].x = sog;
+	chartData[ 0 ].y = shaftPower;
+	chartData[ 1 ].x = averaged( sog );
+	chartData[ 1 ].y = averaged( shaftPower );
+	chartData[ 2 ].x = stw;
+	chartData[ 2 ].y = pb;
+	chartData[ 3 ].x = averaged( stw );
+	chartData[ 3 ].y = averaged( pb );
+
+	chartData[ 4 ].x = mt.trial.vs;
+	chartData[ 4 ].y = mt.trial.pb;
+	chartData[ 5 ].x = mt.trial.vs;
+	chartData[ 5 ].y = mt.trial.pb.map( e => e + powerOffset );
+	chartData[ 6 ].name = loaded + '(model test)';
+	chartData[ 6 ].x = loaded == 'trial' ? [] : mt[ loaded ].vs;
+	chartData[ 6 ].y = loaded == 'trial' ? [] : mt[ loaded ].pb;
+	chartData[ 7 ].name = loaded  + '(adjusted curve by trial result)';
+	chartData[ 7 ].x = loaded == 'trial' ? [] : mt[ loaded ].vs;
+	chartData[ 7 ].y = loaded == 'trial' ? [] : mt[ loaded ].pb.map( e => e + powerOffset );
+
+	let minX = 100;
+	chartData.map( data => minX = Math.min( minX, ...data.x ) );
+	let maxX = 0;
+	chartData.map( data => maxX = Math.max( maxX, ...data.x ) );
+	let minY = 10000;
+	chartData.map( data => minY = Math.min( minY, ...data.y ) );
+	let maxY = 0;
+	chartData.map( data => maxY = Math.max( maxY, ...data.y ) );
+
+	chartData[ 8 ].x = [ minX, Math.max( speedAtNCR, speedAtNCRLoaded ) ];
+	chartData[ 8 ].y = [ targetPower, targetPower ];
+	chartData[ 9 ].x = [ speedAtNCR, speedAtNCR ];
+	chartData[ 9 ].y = [ minY, targetPower ];
+	chartData[ 10 ].x = loaded == 'trial' ? [] : [ speedAtNCRLoaded, speedAtNCRLoaded ];
+	chartData[ 10 ].y = loaded == 'trial' ? [] : [ minY, targetPower ];
+
+	chartLayout.xaxis.autorange = false;
+	chartLayout.xaxis.range = [ minX, maxX ];
+	chartLayout.yaxis.autorange = false;
+	chartLayout.yaxis.range = [ minY, maxY ];
+	chartLayout.annotations = [
+		{
+			text: `Contract power: ${ Intl.NumberFormat().format( targetPower ) }`,
+			// text: `NCR Power / ${1 + 0.01 * ship.sm} = ${ ( ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm ) ).toFixed( 0 ) }`,
+			xanchor: 'left',
+			yanchor: 'bottom',
+			showarrow: false,
+			font: {
+				size: 14
+			},
+			x: minX,
+			y: targetPower,
+		},
+		{
+			x: speedAtNCR,
+			y: minY,
+			text: speedAtNCR.toFixed(2),
+			xanchor: 'left',
+			arrowcolor: 'white',
+			arrowwidth: 1 //px
+		},
+		{
+			x: speedAtNCRLoaded,
+			y: minY,
+			text: loaded == 'trial' ? '' : speedAtNCRLoaded.toFixed(2),
+			xanchor: 'right',
+			arrowcolor: 'white',
+			arrowwidth: 1 //px
+		}
+	]
+
+	Plotly.update( chart.dom, chartData, chart.layout )
+
+}
+
 function runSTA( ship, result ) { //result: UIDiv
 
 	checkValidity( ship );
@@ -324,132 +455,59 @@ function runSTA( ship, result ) { //result: UIDiv
 
 	} );
 
-	const res = ship.analysis( ship.mt.trial, ship.mt.contract );
-	
-	const { stw, pb, powerOffset, speedAtNCR, speedAtNCRLoaded } = res;
+	const conditions = [ 'trial' ].concat( ship.otherCondition );
+
+	const options = new Object();
+
+	conditions.map( key => options[ key ] = key + ' load condition' )
+
+	result.condition.setOptions( options );
+
+	result.condition.setValue( 'trial' );
+
+	const res = ship.analysis( ship.mt[ 'trial' ], ship.mt[ result.condition.getValue() ] );
 
 	resTable( res, result.tables[ 0 ] );
-
-	// Temperature to density
-	// wind resistance
-	// wave resistance
-	// water temperature salinity
-	// current correction
-	// speed-power
+	// const st = { sog: ship.sog, shaftPower: ship.power, stw: res.stw, pb: res.pb };
+	// resChart( ship.mt, st, ship.contractPower, result.chart );
 	runClassLib( ship, result ); // run class library(.dll)
+
+	result.condition.onChange( () => {
+
+		const st = { sog: ship.sog, shaftPower: ship.power, stw: ship.st.result.stw, pb: ship.st.result.pb };
+
+		resChart( ship.mt, st, ship.contractPower, result.chart, result.condition.getValue() );
+
+	} );
+
+	// let row;
+	// const table2 = new UITable();
+	// result.add( table2 );
+	// row = table2.insertRow();
+	// row.insertHeader().textContent = "Speed at target power";
+	// row.insertHeader().textContent = speedAtNCRLoaded.toFixed( 3 ) + ' (knots)';
+	// row = table2.insertRow();
+	// row.insertHeader().textContent = "Target power";
+	// row.insertHeader().textContent = ship.contractPower + ' (kW)';
 	
-	let row;
-	const table2 = new UITable();
-	result.add( table2 );
-	row = table2.insertRow();
-	row.insertHeader().textContent = "NCR";
-	row.insertHeader().textContent = ship.ncr[ 0 ] + ' (kW)';
-	row = table2.insertRow();
-	row.insertHeader().textContent = "Sea Margin";
-	row.insertHeader().textContent = ship.sm + ' (%)';
-	row = table2.insertRow();
-	row.insertHeader().textContent = "Speed at NCR with s.m.";
-	row.insertHeader().textContent = speedAtNCRLoaded.toFixed( 3 ) + ' (knots)';
-
-	
-
-	// Speed-power chart
-	const mt = ship.mt;
-    const chartData = result.chart.data;
-	const chartLayout = result.chart.layout;
-	chartData[ 0 ].x = mt.trial.vs;
-	chartData[ 0 ].y = mt.trial.pb;
-	chartData[ 1 ].x = mt.contract.vs;
-	chartData[ 1 ].y = mt.contract.pb;
-	chartData[ 2 ].x = mt.trial.vs;
-	chartData[ 2 ].y = mt.trial.pb.map( e => e + powerOffset );
-	chartData[ 3 ].x = mt.contract.vs;
-	chartData[ 3 ].y = mt.contract.pb.map( e => e + powerOffset );
-	chartData[ 4 ].x = ship.sog;
-	chartData[ 4 ].y = ship.power;
-	chartData[ 5 ].x = stw;
-	chartData[ 5 ].y = pb;
-	
-	let minX = 100;
-	chartData.map( data => minX = Math.min( minX, ...data.x ) );
-	let maxX = 0;
-	chartData.map( data => maxX = Math.max( maxX, ...data.x ) );
-	let minY = 10000;
-	chartData.map( data => minY = Math.min( minY, ...data.y ) );
-	let maxY = 0;
-	chartData.map( data => maxY = Math.max( maxY, ...data.y ) );
-
-	chartData[ 6 ].x = [ minX, Math.max( speedAtNCR, speedAtNCRLoaded ) ];
-	chartData[ 6 ].y = [ ship.contractPower, ship.contractPower ];
-	chartData[ 7 ].x = [ speedAtNCR, speedAtNCR ];
-	chartData[ 7 ].y = [ minY, ship.contractPower ];
-	chartData[ 8 ].x = [ speedAtNCRLoaded, speedAtNCRLoaded ];
-	chartData[ 8 ].y = [ minY, ship.contractPower ];
-
-	chartLayout.xaxis.autorange = false;
-	chartLayout.xaxis.range = [ minX, maxX ];
-	chartLayout.yaxis.autorange = false;
-	chartLayout.yaxis.range = [ minY, maxY ];
-	chartLayout.annotations = [
-        {
-            text: `Contract power: ${ Intl.NumberFormat().format( ship.contractPower ) }`,
-			// text: `NCR Power / ${1 + 0.01 * ship.sm} = ${ ( ship.ncr[ 0 ] / ( 1 + 0.01 * ship.sm ) ).toFixed( 0 ) }`,
-            xanchor: 'left',
-			yanchor: 'bottom',
-			showarrow: false,
-			font: {
-				size: 14
-			},
-			x: minX,
-            y: ship.contractPower,
-        },
-		{
-            x: speedAtNCR,
-            y: minY,
-            text: speedAtNCR.toFixed(2),
-            xanchor: 'right',
-			arrowcolor: 'white',
-			arrowwidth: 1 //px
-        },
-		{
-            x: speedAtNCRLoaded,
-            y: minY,
-            text: speedAtNCRLoaded.toFixed(2),
-            xanchor: 'right',
-			arrowcolor: 'white',
-			arrowwidth: 1 //px
-        }
-    ]
-
-    Plotly.update( result.chart.dom, chartData, result.chart.layout )
 
 }
 
 function checkValidity( ship ) { // Check every data read from table
 
-	ship.nLoadCond = 0;
-	ship.loadConds = [];
+	const conditions = [ 'trial' ].concat( ship.otherCondition );
 
-	[ 'trial', 'contract', 'eedi' ].map( condition => {
-
-		const obj = ship.mt[ condition ];
+	conditions.map( ( cond, i ) => {
 
 		[ 'vs', 'pb', 'rpm' ].map( key => {
 
-			const arr = obj[ key ];
+			const arr = ship.mt[ cond ][ key ];
 			// obj[ key ] = arr.filter( v => Boolean( v ) || v === 0 );
-			obj[ key ] = arr.filter( v => !Number.isNaN( v ) );
+			ship.mt[ cond ][ key ] = arr.filter( v => !Number.isNaN( v ) );
 
-		})
+		} );
 
-		if ( obj.vs.length != 0 ) {
-
-			ship.nLoadCond++;
-			ship.loadConds.push(condition);
-
-		}
-
-	});
+	} );
 
 	[ 'vs', 'cts' ].map( key => {
 
