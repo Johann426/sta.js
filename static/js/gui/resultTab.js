@@ -10,15 +10,45 @@ class resultTab extends UIDiv {
         super();
 
         const result = this;
+        result.tables = [];
+
         // Collapsible elements
         const speedPower = new UICollapsible( '• Speed-power curve' );
-        const analysis = new UICollapsible( '• Analysis of speed trial data' );
+        const analysis = new UICollapsible( '• Speed trial data analysis (developer use)' );
+        const istap = new UICollapsible( '• Speed trial data analysis (i-stap)' );
 
-        result.add( speedPower, analysis );
+        result.add( speedPower, analysis, istap );
 
-        Object.assign( result, { speedPower, analysis } );
+        Object.assign( result, { speedPower, analysis, istap } );
+
+        analysis.setHidden( true );
+
+        result.onKeyDown( ( event ) => {
+
+			switch ( event.key ) {
+
+				case 'h':
+                    analysis.setHidden( !analysis.isHidden() );
+					break;
+
+            }
+        } );
 
         let div;
+
+        div = new UIDiv().add( new UIText( '✔ Select loading condition: ' ).setPadding( '10px 10px 5px 10px' ) );
+        speedPower.content.add( div );
+        
+        const condition = new UISelect().setDisplay( 'inline' ).setOptions( {
+
+            trial: 'trial load condition',
+
+        } );
+        
+        div.add( condition );
+        condition.setValue( 'trial' );
+        speedPower.content.add( div );
+        result.condition = condition;
 
         //Chart
         div = new UIDiv();
@@ -37,14 +67,14 @@ class resultTab extends UIDiv {
             paper_bgcolor: 'rgba(0,0,0,0)',
             plot_bgcolor: 'rgba(0,0,0,0)',
             colorway: [
-                'rgb(11,132,165)', //blue
-                'rgb(202,71,47)', //red
-                'rgb(246,200,95)', //yellow
-                'rgb(157,216,102)', //green
-                'rgb(111, 78, 124)', //purple
-                'rgb(255,160,86)', // orange
                 'rgb(141,221,208)', //cyan
+                'rgb(111, 78, 124)', //purple
                 'rgb(228,120,194)', //pink
+                'rgb(255,160,86)', // orange
+                'rgb(11,132,165)', //blue
+                'rgb(246,200,95)', //yellow
+                'rgb(202,71,47)', //red
+                'rgb(157,216,102)', //green
                 'rgb(128,128,128)' //gray
             ], //Default: [#1f77b4, #ff7f0e, #2ca02c, #d62728, #9467bd, #8c564b, #e377c2, #7f7f7f, #bcbd22, #17becf]
             font: { //global font
@@ -94,61 +124,26 @@ class resultTab extends UIDiv {
         const chartData = [
             {
                 type: 'scatter',
-                name: 'Ballast(model)',
-                showlegend: true,
-                legendgroup: 'group',
-                line:{
-                    dash: 'dash',
-                    width: 2
-                },
-                x: [],
-                y: []
-            },
-            {
-                type: 'scatter',
-                name: 'Loaded(model)',
-                showlegend: true,
-                legendgroup: 'group2',
-                line:{
-                    dash: 'dashdot',
-                    width: 2
-                },
-                x: [],
-                y: []
-            },
-            {
-                type: 'scatter',
-                name: 'Ballast(sea trial)',
-                showlegend: true,
-                legendgroup: 'group',
-                line:{
-                    dash: 'solid',
-                    width: 3
-                },
-                x: [],
-                y: []
-            },
-            {
-                type: 'scatter',
-                name: 'Loaded(sea trial)',
-                showlegend: true,
-                legendgroup: 'group2',
-                line:{
-                    dash: 'solid',
-                    width: 2
-                },
-                x: [],
-                y: []
-            },
-            {
-                type: 'scatter',
                 name: 'Measured',
                 showlegend: true,
                 legendgroup: 'group',
                 mode: 'markers',
                 marker: {
+                    symbol: 'diamond-open',
+                    size: 8,
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Measured(double run averaged)',
+                showlegend: true,
+                legendgroup: 'group',
+                mode: 'markers',
+                marker: {
                     symbol: 'diamond',
-                    size: 8
+                    size: 10,
                 },
                 x: [],
                 y: []
@@ -160,8 +155,73 @@ class resultTab extends UIDiv {
                 legendgroup: 'group',
                 mode: 'markers',
                 marker: {
-                    symbol: 'triangle',
+                    symbol: 'circle-open',
                     size: 8,
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Corrected(double run averaged)',
+                showlegend: true,
+                legendgroup: 'group',
+                mode: 'markers',
+                marker: {
+                    symbol: 'circle',
+                    size: 10,
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Trial(model test)',
+                showlegend: true,
+                legendgroup: 'group2',
+                line:{
+                    dash: 'dash',
+                    shape: 'spline',
+                    width: 2
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Trial(sea trial)',
+                showlegend: true,
+                legendgroup: 'group2',
+                line:{
+                    dash: 'solid',
+                    shape: 'spline',
+                    width: 3
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Loaded(model test)',
+                showlegend: true,
+                legendgroup: 'group2',
+                line:{
+                    dash: 'dashdot',
+                    shape: 'spline',
+                    width: 2
+                },
+                x: [],
+                y: []
+            },
+            {
+                type: 'scatter',
+                name: 'Loaded(adjusted curve by trial result)',
+                showlegend: true,
+                legendgroup: 'group2',
+                line:{
+                    dash: 'solid',
+                    shape: 'spline',
+                    width: 2
                 },
                 x: [],
                 y: []
@@ -216,165 +276,134 @@ class resultTab extends UIDiv {
 
         Plotly.newPlot( div.dom, chartData, chartLayout, { displayModeBar: false } )
 
-        let row;
+        result.tables.push( resultTable(), resultTable() );
+        analysis.content.add( result.tables[ 0 ] );
+        istap.content.add( result.tables[ 1 ] );
 
-        const table = new UITable();
-        analysis.content.add( table );
-        result.table = table;
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Engine load (%)'
-        // ship.load.map( e => row.insertCell().textContent = e );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Run number'
-        // ship.hdg.map( ( e, i ) => row.insertHeader().textContent = i );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Heading (°)'
-        // ship.hdg.map( e => row.insertCell().textContent = e );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Speed over ground (knots)'
-        // ship.sog.map( e => row.insertCell().textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Shaft speed (rpm)'
-        // ship.rpm.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Shaft power (kW)'
-        // ship.power.map( e => row.insertCell().textContent = e.toFixed( 0 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wind velocity (m/s)'
-        // ship.wind_v.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wind direction (°)'
-        // ship.wind_d.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave height (m)'
-        // ship.wave.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave direction (°)'
-        // ship.wave.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave period (sec)'
-        // ship.wave.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell height (m)'
-        // ship.swell.height.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell direction (°)'
-        // ship.swell.angle.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell period (sec)'
-        // ship.swell.period.map( e => row.insertCell().textContent = e.toFixed( 1 ) );
-
-        /////////////////////////////////////////////////////////////////////////////////////////////
-        // Results
-        /////////////////////////////////////////////////////////////////////////////////////////////
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
-        // vwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
-        // dwr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
-        // vwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "True wind direction at anemometer height (°)";
-        // dwt.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
-        // vwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
-        // dwtAve.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
-        // vwtRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
-        // vwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Relative wind direction at reference height (°)";
-        // dwrRef.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Wind coefficient";
-        // caa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "RAA (kN)";
-        // raa.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave motion (kN) ';
-        // wave.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave reflection (kN) ';
-        // wave.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Wave total (kN) ';
-        // wave.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell motion (kN) ';
-        // swell.rawm.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell reflection (kN) ';
-        // swell.rawr.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'Swell total (kN) ';
-        // swell.total.map( e => row.insertCell( - 1 ).textContent = ( 0.001 * e ).toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'RAW (kN) ';
-        // raw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = 'RAS (kN) ';
-        // ras.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "ΔR (kN)";
-        // delr.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 2 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "PD (kW)";
-        // pid.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "Vs (knots)";
-        // stw.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 3 ) );
-
-        row = table.insertRow();
-        row.insertHeader().textContent = "PB (kW)";
-        // pb.map( e => row.insertCell( - 1 ).textContent = e.toFixed( 0 ) );
-    
     }
+    
+}
+
+function resultTable() {
+
+    const table = new UITable();
+
+    let row;
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Engine load (%)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Run number'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Heading (°)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Speed over ground (knots)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Shaft speed (rpm)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Shaft power (kW)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wind velocity (m/s)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wind direction (°)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave height (m)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave direction (°)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave period (sec)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell height (m)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell direction (°)'
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell period (sec)'
+
+    // Results
+    row = table.insertRow();
+    row.insertHeader().textContent = "Relative wind velocity at anemometer height (m/s)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "Relative wind direction at anemometer height (°)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "True wind velocity at anemometer height (m/s)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "True wind direction at anemometer height (°)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "True wind velocity at anemometer height, double run averaged (m/s)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "True wind direction at anemometer height, double run averaged (°)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "True wind velocity at reference height (m/s)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "Relative wind velocity at reference height (m/s)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "Relative wind direction at reference height (°)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "Wind coefficient";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "RAA (kN)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave motion (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave reflection (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Wave total (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell motion (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell reflection (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'Swell total (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'RAW (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = 'RAS (kN) ';
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "ΔR (kN)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "PD (kW)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "Vs (knots)";
+
+    row = table.insertRow();
+    row.insertHeader().textContent = "PB (kW)";
+
+    return table
+
 }
 
 export { resultTab };
