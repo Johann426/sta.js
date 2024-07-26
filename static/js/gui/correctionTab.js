@@ -10,7 +10,7 @@ class correctionTab extends UIDiv {
         super();
 
         const correction = this;
-        
+        console.log( correction );
         let div, table, row, options, img;
 
         div = new UIDiv().add( new UIText( '✔ Reference Guideline: ' ).setPadding( '10px 10px 5px 10px' ) );
@@ -112,8 +112,8 @@ class correctionTab extends UIDiv {
         for ( let i = 0; i <= 36; i ++ ) {
 
             row = table.insertRow();
-            row.insertCell().setPadding( '0px' ).textContent = ( i * 10 ).toString();
-            row.insertCell().setPadding( '0px' ).textContent = ''
+            row.insertCell().setPadding( '0px' ).setHeight( '16px' ).textContent = ( i * 10 ).toString();
+            row.insertCell().setPadding( '0px' ).setHeight( '16px' ).textContent = ''
 
         }
 
