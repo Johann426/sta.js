@@ -1,12 +1,3 @@
-
-
-# from ctypes import *
-# histap = CDLL('./dll/histap/HiSTAP_DLL.dll')
-# ifcoremd = CDLL('./dll/histap/libifcoremd.dll')
-# mmd = CDLL('./dll/histap/libmmd.dll')
-
-# print( histap )
-
 # The runtime must be configured before clr is imported, otherwise the default runtime will be initialized and used.
 from clr_loader import get_netfx #loading runtime .NET Framework (netfx)
 runtime = get_netfx()
@@ -54,7 +45,7 @@ def inputFromJSON( inp, data ): #istap input from json
     nTrial = len(data['hdg'])
     nEngineSetting = int( nTrial / 2 )
     nGeometryData = len(data[ 'nmriGeom' ][ 'x' ])
-    nLoadCondition = data['nLoadCond']
+    nLoadCondition = len( data['otherCondition'] )
     inp.SetSize( nTrial, nGeometryData, nLoadCondition, 0 )
     inp.projectName = data['shipName'] # do not assign before inp.SetSize()
     inp.nEngineSetting = nEngineSetting
@@ -207,7 +198,7 @@ def inputFromJSON( inp, data ): #istap input from json
     inp.mcr = 1000 * data['mcr'][0]
     inp.ncr = 1000 * data['ncr'][0]
     inp.nLoadCondition = nLoadCondition
-    inp.loadConditionName = data['loadConds']
+    inp.loadConditionName = data['otherCondition']
     inp.targetPower = 1000 * data['contractPower'] #data['ncr'][0] / ( 1 + 0.01 * data['sm'] )
     inp.noShift = False
     
@@ -218,8 +209,8 @@ def inputFromJSON( inp, data ): #istap input from json
         inp.trialModelTest.y[0,i] = data['mt']['trial']['pb'][i]
         inp.trialModelTest.y[1,i] = data['mt']['trial']['rpm'][i]
         
-    conds = [ 'trial', 'design', 'eedi' ]
-    # loadModelTest = [ Chart(key, 1, len(data['mt'][key]['vs'])) for key in conds ]
+    # conds = [ 'trial' ].extend( inp.loadConditionName )
+    conds = inp.loadConditionName
     loadModelTest = []
 
     for i in range( nLoadCondition ):
@@ -283,7 +274,8 @@ def inputFromJSON( inp, data ): #istap input from json
     #     inp.xiZeta.y[4,i] = xiw[i]
     #     inp.xiZeta.y[5,i] = zetaw[i][i]
 
-
+# use ctypes
+from ctypes import *
 
 # Flask app
 import webbrowser
@@ -299,7 +291,23 @@ def index():
 @app.route('/process', methods=['POST']) 
 def process(): 
     json = request.get_json() # retrieve the data sent from JavaScript
-    # process the data using Python code 
+    # process the data using Python code
+
+    # HiSTAP process for ISO15016:2002
+    class ShipInput:
+        x = 0
+    shipInput = [ ShipInput() ]
+    class ResultOutput:
+        x = 0
+    resultOutput = [ ResultOutput() ]
+
+    
+    # histap = CDLL('./dll/histap/HiSTAP_DLL.dll')
+    # ifcoremd = CDLL('./dll/histap/libifcoremd.dll')
+    # mmd = CDLL('./dll/histap/libmmd.dll')
+
+
+    # i-STAP
     clr.AddReference('./dll/istap/SeaTrialAnalysis')
     from SeaTrialAnalysis import SeaTrialAnalysis, InputData
     inputData = InputData()
@@ -441,36 +449,36 @@ def process():
     # speed-power
     clr.AddReference('./dll/istap/SpeedPowerEstimate')
     from SpeedPowerEstimate import SpeedPowerEstimate, SpeedPowerEstimateData
-    speedPowerEstimate = SpeedPowerEstimate();
-    speedPowerEstimate.data = SpeedPowerEstimateData();
-    speedPowerEstimate.data.SetSize(inputData.nTrial);
-    speedPowerEstimate.data.nTrial = inputData.nTrial;
-    speedPowerEstimate.data.nEngineSetting = inputData.nEngineSetting;
-    speedPowerEstimate.data.currentMethod = inputData.currentMethod;
-    speedPowerEstimate.data.directPowerMethod = inputData.directPowerMethod; #Enum.DirectPowerMethods.LoadVariation <= Direct power method (12.2.3, Annex J)
-    speedPowerEstimate.data.shallowMethod = inputData.shallowMethod;
-    speedPowerEstimate.data.h = inputData.h;
-    speedPowerEstimate.data.am = inputData.am;
-    speedPowerEstimate.data.propellarDiameter = inputData.propellarDiameter;
-    speedPowerEstimate.data.rhoWater = inputData.rhoWater;
-    speedPowerEstimate.data.rhoWater0 = inputData.rhoWater0;
-    speedPowerEstimate.data.etaXi = inputData.etaXi;
-    speedPowerEstimate.data.etaTW = inputData.etaTW;
-    speedPowerEstimate.data.xiZeta = inputData.xiZeta; #need to be revised
-    speedPowerEstimate.data.kTKQ = inputData.kTKQ;
-    speedPowerEstimate.data.b = inputData.breadth;
-    speedPowerEstimate.data.tm = inputData.draught;
+    speedPowerEstimate = SpeedPowerEstimate()
+    speedPowerEstimate.data = SpeedPowerEstimateData()
+    speedPowerEstimate.data.SetSize(inputData.nTrial)
+    speedPowerEstimate.data.nTrial = inputData.nTrial
+    speedPowerEstimate.data.nEngineSetting = inputData.nEngineSetting
+    speedPowerEstimate.data.currentMethod = inputData.currentMethod
+    speedPowerEstimate.data.directPowerMethod = inputData.directPowerMethod #Enum.DirectPowerMethods.LoadVariation <= Direct power method (12.2.3, Annex J)
+    speedPowerEstimate.data.shallowMethod = inputData.shallowMethod
+    speedPowerEstimate.data.h = inputData.h
+    speedPowerEstimate.data.am = inputData.am
+    speedPowerEstimate.data.propellarDiameter = inputData.propellarDiameter
+    speedPowerEstimate.data.rhoWater = inputData.rhoWater
+    speedPowerEstimate.data.rhoWater0 = inputData.rhoWater0
+    speedPowerEstimate.data.etaXi = inputData.etaXi
+    speedPowerEstimate.data.etaTW = inputData.etaTW
+    speedPowerEstimate.data.xiZeta = inputData.xiZeta #need to be revised
+    speedPowerEstimate.data.kTKQ = inputData.kTKQ
+    speedPowerEstimate.data.b = inputData.breadth
+    speedPowerEstimate.data.tm = inputData.draught
 
     for i in range(inputData.nTrial):
-        speedPowerEstimate.data.t[i] = Conversion.DateTimeToDays(inputData.t[i], inputData.duration[i], inputData.refTime);
-        speedPowerEstimate.data.engineSetting[i] = inputData.engineSetting[i];
-        speedPowerEstimate.data.vg[i] = inputData.vg[i];
-        speedPowerEstimate.data.deltaR[i] = windResistance.data.raa[i] + waveResistance.data.raw[i] + waterTempSalinity.data.ras[i];
-        speedPowerEstimate.data.pdms[i] = inputData.pms[i] * inputData.etas;
-        speedPowerEstimate.data.nms[i] = inputData.nm[i];
+        speedPowerEstimate.data.t[i] = Conversion.DateTimeToDays(inputData.t[i], inputData.duration[i], inputData.refTime)
+        speedPowerEstimate.data.engineSetting[i] = inputData.engineSetting[i]
+        speedPowerEstimate.data.vg[i] = inputData.vg[i]
+        speedPowerEstimate.data.deltaR[i] = windResistance.data.raa[i] + waveResistance.data.raw[i] + waterTempSalinity.data.ras[i]
+        speedPowerEstimate.data.pdms[i] = inputData.pms[i] * inputData.etas
+        speedPowerEstimate.data.nms[i] = inputData.nm[i]
 
 
-    try: speedPowerEstimate.CalculateSpeedPower();
+    try: speedPowerEstimate.CalculateSpeedPower()
     except Exception as err:
         for val in speedPowerEstimate.data.lvt1:
             print('vprimeg', val.vprimeg)
