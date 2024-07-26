@@ -1,4 +1,4 @@
-import { UIDiv, UIInput } from "../ui.js";
+import { UIDiv, UIInput, UIText } from "../ui.js";
 import { UICollapsible } from "../UICollapsible.js";
 import { UITable } from "../UITable.js";
 import { addButton } from "../ViewportSTA.js";
@@ -11,6 +11,7 @@ class modeltestTab extends UIDiv {
 
         const modeltest = this;
         modeltest.tables = [];
+        modeltest.conditions = [];
 
         const sp = new UICollapsible( '• Speed-power chart' );
         const coef = new UICollapsible( '• Other coefficients' );
@@ -20,7 +21,7 @@ class modeltestTab extends UIDiv {
         Object.assign( modeltest, { sp, coef } );
 
         // speed-power table(and chart)
-        const titles = [ 'Trial load condition', 'Contract load condition', 'EEDI load condition' ];
+        const titles = [ 'Trial load condition', 'Design load condition', 'EEDI load condition' ];
         titles.map( title => addTable( title, 16 ) );
 
         let div = new UIDiv().setPosition( 'relative' );
@@ -182,63 +183,84 @@ class modeltestTab extends UIDiv {
 
             const div0 = new UIDiv().setPadding( '10px 0px' );
             div0.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-            div0.add( new UIInput( title ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+            const cond = new UIInput( title ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' )
+            div0.add( cond );
             div0.add( table );
             div0.add( ...addButton( table ) );
             modeltest.tables.push( table );
+            modeltest.conditions.push( cond );
             sp.content.add( div0 );
 
         }
 
         // other coefficients from resistance, pow, and self-propulsion test
         let table, row;
+
+        // Res
         table = new UITable();
         row = table.insertRow();
-        const arr1 = [ 'Vs', 'CT0', 'wtm', 't', 'etar', 'etad' ];
+        const res = [ 'V<sub>S</sub> (kts)', 'C<sub>T0</sub>' ];
         
-        arr1.map( header => {
-
-            row.insertHeader().setWidth( '35px' ).textContent = header;
-            
-
-        } );
+        res.map( header => row.insertHeader().setWidth( '35px' ).innerHTML = header );
 
         for( let i = 0; i < 16; i ++ ) {
 
             const row = table.insertRow();
-            arr1.map( () => row.insertCell() );
+            res.map( () => row.insertCell() );
 
         }
 
         div = new UIDiv().setPosition( 'relative' );
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-        div.add( new UIInput( 'Res & s-p test' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+        div.add( new UIText( 'Resistance coef.' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
         div.add( table );
         div.add( ...addButton( table ) );
         modeltest.tables.push( table );
         coef.content.add( div );
 
+        // S-P
         table = new UITable();
         row = table.insertRow();
-        const arr2 = [ 'J', 'KT', 'KQ' ];
-        
-        arr2.map( header => {
+        const selfp = [ 'V<sub>S</sub> (kts)', 'wtm', 't', 'etar (η<sub>R</sub>)', 'etad (η<sub>D</sub>)', 'xi<sub>P</sub> (ξp)', 'xi<sub>n</sub> (ξn)', 'xi<sub>V</sub> (ξv)' ];
 
-            row.insertHeader().setWidth( '35px' ).textContent = header;
-            
+        selfp.map( header => row.insertHeader().setWidth( '35px' ).innerHTML = header );
+
+        for( let i = 0; i < 16; i ++ ) {
+
+            const row = table.insertRow();
+            selfp.map( () => row.insertCell() );
+
+        }
+
+        div = new UIDiv().setPosition( 'relative' );
+        div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
+        div.add( new UIText( 'Self-Propulsion factors' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
+        div.add( table );
+        div.add( ...addButton( table ) );
+        modeltest.tables.push( table );
+        coef.content.add( div );
+
+        // POW
+        table = new UITable();
+        row = table.insertRow();
+        const pow = [ 'J', 'K<sub>T</sub>', 'K<sub>Q</sub>' ];
+        
+        pow.map( header => {
+
+            row.insertHeader().setWidth( '35px' ).innerHTML = header;
 
         } );
 
         for( let i = 0; i < 20; i ++ ) {
 
             const row = table.insertRow();
-            arr2.map( () => row.insertCell() );
+            pow.map( () => row.insertCell() );
 
         }
 
         div = new UIDiv().setPosition( 'relative' );
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
-        div.add( new UIInput( 'Propeller open water' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ) );
+        div.add( new UIText( 'Propeller open water' ).setDisplay( 'block' ).setMargin( 'auto' ).setTextAlign( 'center' ).setPadding( '10px 0px 5px 0px' ) );
         div.add( table );
         div.add( ...addButton( table ) );
         modeltest.tables.push( table );
