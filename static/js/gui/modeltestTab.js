@@ -20,14 +20,21 @@ class modeltestTab extends UIDiv {
 
         Object.assign( modeltest, { sp, coef } );
 
+        let div;
+
         // speed-power table(and chart)
+        div = new UIDiv()
+        sp.content.add( div );
+        const addCond = new UIText( 'Add load condition (e.g. scantling, eedi, etc )' ).setClass( 'item' );
+        div.add( addCond );
+
         const titles = [ 'Trial load condition', 'Design load condition', 'EEDI load condition' ];
         titles.map( title => addTable( title, 16 ) );
 
-        let div = new UIDiv().setPosition( 'relative' );
+        div = new UIDiv().setPosition( 'relative' );
         div.setDisplay( 'inline-block' ).setVerticalAlign( 'top' );
         sp.content.add( div );
-        
+
         const chartLayout = {
             title: 'Speed-power curve',
             width: 420,
