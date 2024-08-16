@@ -71,73 +71,6 @@ class measuredTab extends UIDiv {
 
             Array( 2 ).fill().map( () => rows[ 0 ].insertHeader().textContent = rows[ 0 ].cells.length - 1 );
             
-            // [ 'load', 'time', 'hdg', 'sog', 'rpmPORT', 'rpmSTBD', 'rpm', 'powerPORT', 'powerSTBD', 'power', 'wind_v', 'wind_d' ].map( ( key, i ) => {
-
-            //     const row = rows[ i + 1 ];
-
-            //     Array( 2 ).fill().map( () => {
-
-            //         const cell = row.insertCell();
-            //         cell.rowCellTo( ship, key );
-            //         const value = measured.history.pop();
-                    
-            //         if ( value ) {
-
-            //             ship[ key ].push( value )
-            //             cell.textContent = value;
-
-            //         }
-
-            //     } );
-
-            // } );
-
-            // [ ship.wave, ship.swell ].map( ( obj, j ) => {
-
-            //     [ 'height', 'angle', 'period' ].map( ( key, i ) => {
-
-            //         const row = rows[ i + 13 + j * 3 ];
-
-            //         Array( 2 ).fill().map( () => {
-
-            //             const cell = row.insertCell();
-            //             cell.rowCellTo( obj, key );
-            //             const value = measured.history.pop();
-
-            //             if ( value ) {
-
-            //                 obj[ key ].push( value )
-            //                 cell.textContent = value;
-
-            //             }
-
-            //         } );
-
-            //     } );
-
-            // } );
-            
-            // [ 'drift', 'rudderPORT', 'rudderSTBD', 'rudder' ].map( ( key, i ) => {
-
-            //     const row = rows[ i + 19 ];
-
-            //     Array( 2 ).fill().map( () => {
-
-            //         const cell = row.insertCell();
-            //         cell.rowCellTo( ship, key );
-            //         const value = measured.history.pop();
-
-            //         if ( value ) {
-
-            //             ship[ key ].push( value )
-            //             cell.textContent = value;
-
-            //         }
-
-            //     } );
-
-            // } );
-
             [ 5, 6, 8, 9, 20, 21 ].map( index => { 
 
                 const row = table.rows[ index ];
@@ -170,54 +103,6 @@ class measuredTab extends UIDiv {
                 }
 
             }
-
-            // [ 'rudder', 'rudderSTBD', 'rudderPORT', 'drift' ].map( ( key, i ) => {
-
-            //     const row = rows[ n - 1 - i ];
-
-            //     Array( 2 ).fill().map( () => {
-                    
-            //         const nm1 = row.cells.length - 1;
-            //         measured.history.push( ship[ key ].splice( nm1 - 1, 1 ) ); //-1 considering header
-            //         row.removeCell( - 1 );
-                    
-            //     } );
-
-            // } );
-
-            // [ ship.swell, ship.wave ].map( ( obj, j ) => {
-
-            //     [ 'period', 'angle', 'height' ].map( ( key, i ) => {
-
-            //         const row = rows[ n - 5 - i - j * 3 ];
-
-            //         Array( 2 ).fill().map( () => {
-                    
-            //             const nm1 = row.cells.length - 1;
-            //             measured.history.push( obj[ key ].splice( nm1 - 1, 1 ) );
-            //             row.removeCell( - 1 );
-                    
-            //         } );
-
-            //     } );
-
-            // } );
-
-            // [ 'wind_d' , 'wind_v', 'power', 'powerSTBD', 'powerPORT', 'rpm', 'rpmSTBD', 'rpmPORT', 'sog', 'hdg', 'time', 'load' ].map( ( key, i ) => {
-
-            //     const row = rows[ n - 11 - i ];
-
-            //     Array( 2 ).fill().map( () => {
-                    
-            //         const nm1 = row.cells.length - 1;
-            //         measured.history.push( ship[ key ].splice( nm1 - 1, 1 ) );
-            //         row.removeCell( - 1 );
-                    
-            //     } );
-
-            // } );
-
-            // Array( 2 ).fill().map( () => rows[ 0 ].removeCell( - 1 ) );
 
         } );
 
