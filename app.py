@@ -1,6 +1,6 @@
 # The runtime must be configured before clr is imported, otherwise the default runtime will be initialized and used.
 from clr_loader import get_netfx #loading runtime .NET Framework (netfx)
-runtime = get_netfx()
+runtime = get_netfx();
 # print(runtime.info())
 
 from pythonnet import set_runtime
