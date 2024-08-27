@@ -45,7 +45,9 @@ class correctionTab extends UIDiv {
 
             const uiText = new UIText( txt ).setPadding( '10px 0px 5px 20px' );
             const checkBox = new UICheckbox().setValue( true );
-            correction.optionISO2002[ txt.replace( /\s(.*)/, '' ) ] = checkBox;
+            const key = txt.replace( /\s(.*)/, '' );
+            correction.optionISO2002[ key ] = checkBox;
+            checkBox.onChange( () => ship.st[ key + '2002'] = checkBox.getValue() );
             options2002.add( uiText, checkBox );
 
         } )
@@ -61,6 +63,7 @@ class correctionTab extends UIDiv {
             } );
         
         nkqFair.setValue( 'ls' )
+        nkqFair.onChange( () => ship.st['nkq'] = nkqFair.getValue() );
         options2002.add( nkqFair );
         correction.optionISO2002.nkqFair = nkqFair;
         options2002.setHidden( true );
