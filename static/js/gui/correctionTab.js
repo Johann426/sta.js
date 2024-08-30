@@ -40,13 +40,14 @@ class correctionTab extends UIDiv {
             
         } );
 
-        correction.optionISO2002 = new Object();
+        correction.iso2002 = new Object();
+
         [ 'steering', 'drift', 'shallow water', 'displacement', 'temperature and salinity' ].map( txt => {
 
             const uiText = new UIText( txt ).setPadding( '10px 0px 5px 20px' );
             const checkBox = new UICheckbox().setValue( true );
             const key = txt.replace( /\s(.*)/, '' );
-            correction.optionISO2002[ key ] = checkBox;
+            correction.iso2002[ key ] = checkBox;
             checkBox.onChange( () => ship.st[ key + '2002'] = checkBox.getValue() );
             options2002.add( uiText, checkBox );
 
@@ -65,7 +66,49 @@ class correctionTab extends UIDiv {
         nkqFair.setValue( 'ls' )
         nkqFair.onChange( () => ship.st['nkq'] = nkqFair.getValue() );
         options2002.add( nkqFair );
-        correction.optionISO2002.nkqFair = nkqFair;
+        correction.iso2002.nkqFair = nkqFair;
+
+        // h = 'Particulars for streering and drift correction'
+        let h;
+
+        h = 'Propeller'
+        h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
+        options2002.add( iso2002Input( [ 'Diameter (m) : ', 'Pitch (m) : ' ], h, 0 ) );
+
+        h = 'Rudder'
+        h = new UIText( h ).setWidth('100%').setPadding( '10px 0px 5px 10px' );
+        options2002.add( iso2002Input( [ 'Area wetted (m<sub>2</sub>) : ', 'Span (height, m) : ', 'Aspect ratio : ' ], h, 0 ) );
+
+        function iso2002Input( arr, head, tail ) { // array of text keys
+
+            const div = new UIDiv();
+
+            if( head ) div.add( head );
+
+            arr.map( txt => {
+
+                const uiText = new UIText().setWidth('16%').setTextAlign( 'center' ).setPadding( '10px 0px' )
+                const input = new UIInput('').setWidth('16%').setTextAlign( 'center' ).setPadding( '0px' );
+                div.add( uiText ).add( input );
+                uiText.setInnerHTML( txt )
+                const key = uiText.getValue().replace( /\s(.*)/, '' ).toLowerCase();
+                correction.iso2002[ key ] = input;
+                input.dom.addEventListener( 'blur', () => ship[ head.getValue().toLowerCase() + capitalize( key ) ] = parseFloat( input.getValue() ) ); // send input value to ship[ key ]
+
+            } )
+
+            if( tail ) div.add( tail );
+
+            return div;
+
+        }
+
+        function capitalize( string ) {
+
+            return string[ 0 ].toUpperCase() + string.slice( 1 );
+
+        }
+        
         options2002.setHidden( true );
 
         // Collapsible elements
@@ -243,8 +286,6 @@ class correctionTab extends UIDiv {
 
         } );
         
-        let h;
-
         wave.sta1 = [];
         img = new Image(317, 113);
         img.src = "./static/images/lbwl.jpg";
