@@ -34,7 +34,6 @@ class MenubarSTA extends UIDiv {
 
 			if ( confirm( 'Are you sure?' ) ) {
 
-				location.reload();
 
 			}
 
@@ -222,7 +221,6 @@ async function inpOpen( ship, viewport ) {
 
     if ( ext == 'inp' ) {
 
-        // const arr = txt.split( '\r\n' );
         const arr = txt.split( '\r\n' ).map( row => row.split('\t') )
 
         const data = {
@@ -421,31 +419,34 @@ async function inpOpen( ship, viewport ) {
         
         ship.shipName = data[ 'SHIP_NAME' ];
         ship.ownerName = data[ 'OWNER_NAME' ];
-        ship.l = data[ 'LBP' ];
-        ship.b = data[ 'BREADTH' ];
-        ship.tf = data[ 'DRAFT_FORE' ];
-        ship.ta = data[ 'DRAFT_AFT' ];
-        ship.disp = data[ 'DISPLACEMENT' ];
-        ship.dispm = data[ 'dispm' ];
-        ship.wetted = data[ 'WETTED_SURFACE' ];
-        ship.Za = data[ 'ANEMO_HEIGHT' ];
+        ship.l = parseFloat( data[ 'LBP' ] );
+        ship.b = parseFloat( data[ 'BREADTH' ] );
+        ship.tf = parseFloat( data[ 'DRAFT_FORE' ] );
+        ship.ta = parseFloat( data[ 'DRAFT_AFT' ] );
+        ship.disp = parseFloat( data[ 'DISPLACEMENT' ] );
+        ship.dispm = parseFloat( data[ 'dispm' ] );
+        ship.wetted = parseFloat( data[ 'WETTED_SURFACE' ] );
+        ship.Za = parseFloat( data[ 'ANEMO_HEIGHT' ] );
         ship.Zref = 10; //data[ '' ]
-        ship.Ax = data[ 'TRANS_PROJECT_AREA' ];
+        ship.Ax = parseFloat( data[ 'TRANS_PROJECT_AREA' ] );
         ship.Am = ( parseFloat( data[ 'CM' ] ) * parseFloat( data[ 'BREADTH' ] ) * 0.5 * ( parseFloat( data[ 'DRAFT_M_P'] ) + parseFloat( data[ 'DRAFT_M_S'] ) ) ).toFixed( 1 );
-        ship.lbwl = data[ 'L_BWL' ];
-        ship.le = data[ 'LE' ];
-        ship.lr = data[ 'LR' ];
-        ship.cb = data[ 'CB' ];
-        ship.cm = data[ 'CM' ];
-        ship.kyy = data[ 'RADIUS_GYRATION_Y' ];
-        ship.lcg = data[ 'XG' ];
-        ship.tcg = data[ 'YG' ];
-        ship.vcg = data[ 'ZG' ];
-        ship.kroll = data[ 'Kxx' ];
-        ship.kpitch = data[ 'Kyy' ];
-        ship.kyaw = data[ 'Kzz' ];
-        ship.bf = data[ 'Bf' ];
-        ship.cu = data[ 'Cu' ];
+        ship.lbwl = data[ 'L_BWL' ] == 'null' ? '' : parseFloat( data[ 'L_BWL' ] );
+        ship.le = data[ 'LE' ] == 'null' ? '' : parseFloat( data[ 'LE' ] );
+        ship.lr = data[ 'LR' ] == 'null' ? '' : parseFloat( data[ 'LR' ] );
+        ship.lcg = data[ 'XG' ] == 'null' ? '' : parseFloat( data[ 'XG' ] );
+        ship.tcg = data[ 'YG' ] == 'null' ? '' : parseFloat( data[ 'YG' ] );
+        ship.vcg = data[ 'ZG' ] == 'null' ? '' : parseFloat( data[ 'ZG' ] );
+        ship.kroll = data[ 'Kxx' ] == 'null' ? '' : parseFloat( data[ 'Kxx' ] );
+        ship.kpitch = data[ 'Kyy' ] == 'null' ? '' : parseFloat( data[ 'Kyy' ] );
+        ship.kyaw = data[ 'Kzz' ] == 'null' ? '' : parseFloat( data[ 'Kzz' ] );
+        ship.bf = data[ 'Bf' ] == 'null' ? '' : parseFloat( data[ 'Bf' ] );
+        ship.cu = data[ 'Cu' ] == 'null' ? '' : parseFloat( data[ 'Cu' ] );
+        ship.h = data[ 'WATER_DEPTH' ] == 'null' ? '' : parseFloat( data[ 'WATER_DEPTH' ] );
+
+        ship.cb = parseFloat( data[ 'CB' ] );
+        ship.cm = parseFloat( data[ 'CM' ] );
+        ship.kyy = parseFloat( data[ 'RADIUS_GYRATION_Y' ] );
+
         ship.nmriGeom = {
             x: data[ 'SX' ],
             bhalf: data[ 'SB' ],
@@ -454,13 +455,13 @@ async function inpOpen( ship, viewport ) {
         }
 
         ship.contractCondition = data[ 'CONTRACT_CONDITION' ];
-        ship.contractPower = data[ 'CONTRACT_POWER_SM' ];
-        ship.contractSpeed = data[ 'CONTRACT_SPEED' ];
+        ship.contractPower = parseFloat( data[ 'CONTRACT_POWER_SM' ] );
+        ship.contractSpeed =  parseFloat( data[ 'CONTRACT_SPEED' ] );
 
-        ship.noProp = data[ 'NO_PROP' ];
-        ship.mcr = [ data[ 'MCR_POWER_KW' ], data[ 'MCR_RPM' ] ];
-        ship.ncr = [ data[ 'NCR_POWER_KW' ], data[ 'NCR_RPM' ] ];
-        ship.eedi = [ data[ 'MCR_POWER_KW' ] * 0.75, data[ 'MCR_RPM' ] * 0.75 ** ( 1 / 3 ) ];
+        ship.noProp = parseFloat( data[ 'NO_PROP' ] );
+        ship.mcr = [ data[ 'MCR_POWER_KW' ], data[ 'MCR_RPM' ] ].map( e => parseFloat( e ) );
+        ship.ncr = [ data[ 'NCR_POWER_KW' ], data[ 'NCR_RPM' ] ].map( e => parseFloat( e ) );
+        // ship.eedi = [ data[ 'MCR_POWER_KW' ] * 0.75, data[ 'MCR_RPM' ] * 0.75 ** ( 1 / 3 ) ].map( e => parseFloat( e ) );
 
         ship.load = data[ 'ENG_LOAD' ];
         ship.time = data[ 'INNING_TIME' ].map( e => e.replace( '_', ' ' ) );
@@ -570,13 +571,17 @@ async function inpOpen( ship, viewport ) {
 
         }
 
-        ship.temp0 = data[ 'WATER_TEMP_SD' ]
-        ship.temps = data[ 'WATER_TEMP' ];
-        ship.tempa  = data[ 'AIR_TEMP' ][ 0 ];
-        ship.rho0 = data[ 'WATER_DEN_SD' ]
-        ship.rhos =  data[ 'WATER_DEN' ]
-        ship.rhoa = data[ 'AIR_DEN' ][ 0 ];
-        ship.h = data[ 'WATER_DEPTH' ];
+        ship.temp0 = parseFloat( data[ 'WATER_TEMP_SD' ] );
+        ship.temps = parseFloat( data[ 'WATER_TEMP' ] );
+        ship.tempa  = parseFloat( data[ 'AIR_TEMP' ][ 0 ] );
+        ship.rho0 = parseFloat( data[ 'WATER_DEN_SD' ] );
+        ship.rhos =  Math.round( parseFloat( data[ 'WATER_DEN' ] ) * 100 ) / 100;
+        ship.rhoa = parseFloat( data[ 'AIR_DEN' ][ 0 ] );
+        ship.propellerDiameter = parseFloat( data['PROP_DIA'] );
+        ship.propellerPitch = parseFloat( data['PITCH_07R'] );
+        ship.rudderArea = parseFloat( data['RUDDER_AREA'] );
+        ship.rudderSpan = parseFloat( data['RUDDER_SPAN'] );
+        ship.rudderAspect = parseFloat( data['ASPECT_RATIO'] );
 
         // correction guideline
         ship.st.guideline = 'iso2015';
@@ -595,25 +600,6 @@ async function inpOpen( ship, viewport ) {
                 break;
             case '3': //Fujiwara
                 ship.st.windMethod = 'formula'
-                break;
-            default:
-                ship.st.windMethod = 'windTunnelTest'
-
-        };
-        
-        switch( data[ 'METHOD_2002_DIFFRACTION' ] ) {
-
-            case '0':
-                ship.st.waveMethod2002 = 'none'
-                break;
-            case '1':
-                ship.st.waveMethod2002 = 'falt'
-                break
-            case '2':
-                ship.st.waveMethod2002 = 'kwon'
-                break;
-            case '2':
-                ship.st.waveMethod2002 = 'fuji'
                 break;
 
         };
@@ -641,6 +627,36 @@ async function inpOpen( ship, viewport ) {
 
         };
 
+        switch( data[ 'METHOD_2015_CURRENT' ] ) {
+
+            case '1':
+                ship.st.currentMethod = 'iterative';
+                break;
+            case '2':
+                ship.st.currentMethod = 'mom';
+                break
+
+        };
+
+        // data[ 'METHOD_2002_WAVE' ] <= 2:wave+swell
+        // data[ 'METHOD_2002_MOTION' ] <= 1:Maruo
+        switch( data[ 'METHOD_2002_DIFFRACTION' ] ) {
+
+            case '0':
+                ship.st.waveMethod2002 = 'none'
+                break;
+            case '1':
+                ship.st.waveMethod2002 = 'falt'
+                break
+            case '2':
+                ship.st.waveMethod2002 = 'kwon'
+                break;
+            case '2':
+                ship.st.waveMethod2002 = 'fuji'
+                break;
+
+        };
+
         switch( data[ 'METHOD_2002_CURRENT' ] ) {
 
             case '0':
@@ -655,13 +671,74 @@ async function inpOpen( ship, viewport ) {
 
         };
 
-        switch( data[ 'METHOD_2015_CURRENT' ] ) {
+        switch( data[ 'METHOD_2002_STEERING' ] ) {
 
-            case '1':
-                ship.st.currentMethod = 'iterative';
+            case '0':
+                ship.st.steering2002 = false;
                 break;
+            case '1':
+                ship.st.steering2002 = true;
+                break
+
+        };
+
+        switch( data[ 'METHOD_2002_DRIFTING' ] ) {
+
+            case '0':
+                ship.st.drift2002 = false;
+                break;
+            case '1':
+                ship.st.drift2002 = true;
+                break
+
+        };
+
+        switch( data[ 'METHOD_2002_SHALLOW' ] ) {
+
+            case '0':
+                ship.st.shallow2002 = false;
+                break;
+            case '1':
+                ship.st.shallow2002 = true;
+                break
+
+        };
+
+        switch( data[ 'METHOD_2002_DISPLACEMENT' ] ) {
+
+            case '0':
+                ship.st.displacement2002 = false;
+                break;
+            case '1':
+                ship.st.displacement2002 = true;
+                break
+
+        };
+
+        switch( data[ 'METHOD_2002_TEMP_DENSITY' ] ) {
+
+            case '0':
+                ship.st.temperature2002 = false;
+                break;
+            case '1':
+                ship.st.temperature2002 = true;
+                break
+            // case '2':
+            //     ship.st.temperature2002 = 'ittc2017';
+            //     break
+
+        };
+
+        switch( data[ 'METHOD_2002_NKQF' ] ) {
+
+            case '0':
+                ship.st.nkq = 'ls';
+                break;
+            case '1':
+                ship.st.nkq = 'mean';
+                break
             case '2':
-                ship.st.currentMethod = 'mom';
+                ship.st.nkq = 'same';
                 break
 
         };
@@ -673,9 +750,6 @@ async function inpOpen( ship, viewport ) {
 
         const { rudder, drift } = ship;
         toArryDataFloat( rudder, drift );
-
-        const { mcr, ncr, eedi } = ship;
-        toArryDataFloat( mcr, ncr, eedi );
 
         const { wind, mt } = ship;
         toArryDataFloat( wind.angle, wind.coef );
@@ -689,43 +763,6 @@ async function inpOpen( ship, viewport ) {
 
         const { arm } = ship;
         toArryDataFloat( arm.hdg, arm.fr, arm.lamda, arm.raw );
-
-        ship.noProp = parseFloat( ship.noProp );
-        ship.contractSpeed = parseFloat( ship.contractSpeed );
-        ship.contractPower = parseFloat( ship.contractPower );
-
-        ship.l = parseFloat( ship.l );
-        ship.b = parseFloat( ship.b );
-        ship.tf = parseFloat( ship.tf );
-        ship.ta = parseFloat( ship.ta );
-        ship.disp = parseFloat( ship.disp );
-        ship.dispm = parseFloat( ship.dispm );
-        ship.wetted = parseFloat( ship.wetted );
-        ship.rhos = parseFloat( ship.rhos );
-        ship.cb = parseFloat( ship.cb );
-        ship.cm = parseFloat( ship.cm );
-        ship.Za = parseFloat( ship.Za );
-        ship.Ax = parseFloat( ship.Ax );
-        ship.Am = parseFloat( ship.Am );
-        ship.rho0 = parseFloat( ship.rho0 );
-        ship.rhos = parseFloat( ship.rhos );
-        ship.rhoa = parseFloat( ship.rhoa );
-        ship.temp0 = parseFloat( ship.temp0 );
-        ship.temps = parseFloat( ship.temps );
-        ship.tempa = parseFloat( ship.tempa );
-        ship.kyy = parseFloat( ship.kyy );
-        ship.lbwl = ship.lbwl == 'null' ? '' : parseFloat( ship.lbwl );
-        ship.le = ship.le == 'null' ? '' : parseFloat( ship.le );
-        ship.lr = ship.lr == 'null' ? '' : parseFloat( ship.lr );
-        ship.lcg = ship.lcg == 'null' ? '' : parseFloat( ship.lcg );
-        ship.tcg = ship.tcg == 'null' ? '' : parseFloat( ship.tcg );
-        ship.vcg = ship.vcg == 'null' ? '' : parseFloat( ship.vcg );
-        ship.kroll = ship.kroll == 'null' ? '' : parseFloat( ship.kroll );
-        ship.kpitch = ship.kpitch == 'null' ? '' : parseFloat( ship.kpitch );
-        ship.kyaw = ship.kyaw == 'null' ? '' : parseFloat( ship.kyaw );
-        ship.bf = ship.bf == 'null' ? '' : parseFloat( ship.bf );
-        ship.cu = ship.cu == 'null' ? '' : parseFloat( ship.cu );
-        ship.h = ship.h == 'null' ? '' : parseFloat( ship.h );
 
         const { nmriGeom } = ship;
         toArryDataFloat( nmriGeom.x , nmriGeom.bhalf, nmriGeom.draft, nmriGeom.area );
@@ -940,11 +977,24 @@ function updateViewport( ship, viewport ) {
     // Correction tab
     const correction = viewport.correction;
     correction.guideline.setValue( ship.st.guideline );
+    correction.iso2002.steering.setValue( ship.st.steering2002 );
+    correction.iso2002.drift.setValue( ship.st.drift2002 );
+    correction.iso2002.shallow.setValue( ship.st.shallow2002 );
+    correction.iso2002.displacement.setValue( ship.st.displacement2002 );
+    correction.iso2002.temperature.setValue( ship.st.temperature2002 );
+    correction.iso2002.nkqFair.setValue( ship.st.nkq );
+    correction.iso2002.diameter.setValue( ship.propellerDiameter );
+    correction.iso2002.pitch.setValue( ship.propellerPitch );
+    correction.iso2002.area.setValue( ship.rudderArea );
+    correction.iso2002.span.setValue( ship.rudderSpan );
+    correction.iso2002.aspect.setValue( ship.rudderAspect );
     correction.wind.method.setValue( ship.st.windMethod );
     correction.wave.method.setValue( ship.st.waveMethod );
     correction.wave.method2002.setValue( ship.st.waveMethod2002 );
     correction.current.method.setValue( ship.st.currentMethod );
     correction.current.method2002.setValue( ship.st.currentMethod2002 );
+
+    
 
     triggerChange( correction.wave.method.dom );
 
