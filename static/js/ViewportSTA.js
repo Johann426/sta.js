@@ -140,6 +140,20 @@ class ViewportSTA extends UIDiv{
 		ship.st.waveMethod = wave.method.getValue();
 		ship.st.waveMethod2002 = wave.method2002.getValue();
 
+
+
+
+		// ship.st.steering2002
+		// ship.st.drift2002
+		// 'shallow water', 'displacement', 'temperature and salinity'
+
+
+
+
+
+
+
+
 		[ 'lbwl', 'le', 'lr', 'kyy', 'lcg', 'tcg', 'vcg', 'kroll', 'kpitch', 'kyaw', 'bf', 'cu' ].map( key => {
 			
 			const txt = wave[ key ].getValue();
@@ -192,6 +206,35 @@ function runClassLib( ship, result ) {
 
 	async function sendData( value ) {
 		
+		$.ajax({
+
+			url: '/process2002',
+			type: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify( value ),
+
+			success: function(response) {
+
+				console.log( response );
+
+				// ship.st.result = response;
+
+				// resTable( response, result.tables[ 1 ] );
+
+				// const st = { sog: ship.sog, shaftPower: ship.power, stw: ship.st.result.stw, pb: ship.st.result.pb };
+
+				// resChart( ship.mt, st, ship.contractPower, result.chart, result.condition.getValue() );
+
+			},
+
+			error: function(error) {
+
+				console.log(error);
+
+			}
+
+		});
+
 		$.ajax({
 
 			url: '/process',
