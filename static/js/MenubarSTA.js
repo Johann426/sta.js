@@ -313,6 +313,7 @@ async function inpOpen( ship, viewport ) {
 
             const key = row.shift();
             const val = row.pop();
+            // data[loaded key ] = val;
             data[ key ] = val;
             
         })
@@ -405,6 +406,17 @@ async function inpOpen( ship, viewport ) {
             }
 
         } )
+
+        part = data['<WATERLINE_HB>']
+        data.halfBreadth = new Object();
+        keys = part.shift();
+        keys.map( key => data.halfBreadth[ key ] = new Array() );
+
+        part.map( row => {
+
+            row.map( ( val, i ) => val ? data.halfBreadth[ keys[ i ] ].push( val ) : null );
+
+        } );
 
         part = data['<ARM>']
         data.arm = new Object();
@@ -560,9 +572,16 @@ async function inpOpen( ship, viewport ) {
 
             }
             
-        } )
+        } );
 
-        ship.arm ={
+        ship.halfBreadth = {
+
+            xs: data.halfBreadth[ 'X_STATION' ],
+            hb: data.halfBreadth[ 'H_BREADTH' ]
+
+        }
+
+        ship.arm = {
 
             hdg: data.arm[ 'HEADING' ],
             fr: data.arm[ 'FROUDE' ],
@@ -766,6 +785,9 @@ async function inpOpen( ship, viewport ) {
 
         const { nmriGeom } = ship;
         toArryDataFloat( nmriGeom.x , nmriGeom.bhalf, nmriGeom.draft, nmriGeom.area );
+
+        const { halfBreadth } = ship;
+        toArryDataFloat( halfBreadth.xs, halfBreadth.hb );
 
         function toArryDataFloat( ...args ) {
 
@@ -1016,7 +1038,7 @@ function updateViewport( ship, viewport ) {
 
     Plotly.update( viewport.correction.wind.chart.dom, chartData, viewport.correction.wind.chart.layout );
     
-    [ 'lbwl', 'le', 'lr', 'kyy' ].map( key => {
+    [ 'lbwl', 'kyy', 'lr', 'le' ].map( key => {
         
         viewport.correction.wave[ key ].setValue( ship[ key ] );
 
@@ -1045,6 +1067,10 @@ function updateViewport( ship, viewport ) {
 
     } );
 
+    viewport.correction.temperature.temp0.setValue( ship.temp0 );
+    viewport.correction.temperature.rho0.setValue( ship.rho0 );
+    viewport.correction.temperature.temps.setValue( ship.temps );
+    viewport.correction.temperature.rhos.setValue( ship.rhos );
     viewport.correction.displacement.dispm.setValue( ship.dispm );
     viewport.correction.shallowWater.Am.setValue( ship.Am );
     viewport.correction.shallowWater.h.setValue( ship.h );
